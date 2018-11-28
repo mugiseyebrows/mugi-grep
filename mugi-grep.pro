@@ -12,7 +12,6 @@ HEADERS += \
     filecache.h \
     utils/json.h \
     regexp.h \
-    regexp_.h \
     regexpinput.h \
     regexppath.h \
     rxcollector.h \
@@ -45,7 +44,6 @@ SOURCES += \
     filecache.cpp \
     main.cpp \
     regexp.cpp \
-    regexp_.cpp \
     regexppath.cpp \
     rxcollector.cpp \
     searchcache.cpp \
