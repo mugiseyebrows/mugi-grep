@@ -1,0 +1,42 @@
+{
+    "editors": [
+        {
+            "app": "C:\\qt5\\Tools\\QtCreator\\bin\\qtcreator.exe -client %file%:%line%",
+            "exts": "cpp|cc|h|cxx"
+        },
+        {
+            "app": "C:\\Program Files (x86)\\Geany\\bin\\geany.exe -client %file%:%line%",
+            "exts": "txt"
+        },
+        {
+            "app": "\"C:\\Program Files\\Microsoft VS Code\\Code.exe\" -r -g %file%",
+            "exts": "js"
+        }
+    ],
+    "exps": {
+        "exps": [
+            [
+                ""
+            ],
+            [
+                ""
+            ]
+        ],
+        "pathexps": [
+            [
+                ""
+            ],
+            [
+                "cpp|h",
+                "js"
+            ],
+            [
+                "moc_|ui_|qrc",
+                "node_modules"
+            ],
+            [
+                ""
+            ]
+        ]
+    }
+}

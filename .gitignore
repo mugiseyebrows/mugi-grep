@@ -1,0 +1,14 @@
+*~
+debug/
+release/
+Makefile*
+*.pro.*
+object_script*
+*.autosave
+ui_*
+mugi-grep/
+*.o
+moc_*
+ui_*
+mugi-grep
+.qmake.stash
