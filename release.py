@@ -10,6 +10,7 @@ conf = {
     
     'Packer': 'SimplePacker',
     'OutputDir': 'D:\\dev\\mugi-grep\\mugi-grep',
+    'Data': [{'Source':'D:\\dev\\mugi-grep\\settings.win32.json'}],
     
     'QtPlugins': ['qwindows','qwindowsvistastyle'],
     'QtPluginsSource': 'C:\\Qt5\\5.11.1\\mingw53_32\\plugins'

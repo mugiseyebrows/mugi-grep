@@ -12,3 +12,4 @@ moc_*
 ui_*
 mugi-grep
 .qmake.stash
+*.zip
