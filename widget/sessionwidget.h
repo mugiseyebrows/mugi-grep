@@ -113,7 +113,6 @@ protected slots:
 
     void onFound(int, QString, int, int, int, QString path);
 
-    void onSizeCalculated(int, int);
 
 private slots:
     void on_path_textChanged(const QString &arg1);

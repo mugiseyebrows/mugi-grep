@@ -79,8 +79,9 @@ SessionWidget::SessionWidget(QWidget *parent) :
         ui->results->removeTab(0);
     }
 
+    ui->status1->hide();
+    ui->status2->setTextElideMode(Qt::ElideMiddle);
     ui->status2->hide();
-
 }
 
 SessionWidget::~SessionWidget()
@@ -197,11 +198,14 @@ void SessionWidget::on_search_clicked() {
 
     emit search(mSearchId,path,filter,notBinary,search_,linesBefore,linesAfter);
 
-    ui->status->setText(QString("Building path list"));
+    ui->status1->setText(QString("Building path list"));
+    ui->status2->setText(QString());
 
     RXCollector::instance()->collect(filter);
     RXCollector::instance()->collect(search_);
     updateCollector();
+
+    ui->status1->setVisible(true);
 }
 
 void SessionWidget::on_selectPath_clicked() {
@@ -333,7 +337,12 @@ void SessionWidget::onFound(int id, QString res, int i, int t, int s, QString pa
         browser->append(res);
 
     if (i >= 0) {
-        ui->status->setText(QString("Processed %1 files out of %2 (%3 filtered out) last file: %4").arg(i).arg(t).arg(s).arg(path));
+        ui->status1->setText(QString("Processed %1 files out of %2 (%3 filtered out)").arg(i).arg(t).arg(s));
+
+        QString status2 = i == t ? QString() : QString("Last file: %1").arg(path);
+        ui->status2->setText(status2);
+        ui->status2->setVisible(!status2.isEmpty());
+
         ui->progressBar->setMaximum(t);
         ui->progressBar->setValue(i);
         ui->progressBar->setVisible( i != t );
@@ -354,7 +363,9 @@ void SessionWidget::onFound(int id, QString res, int i, int t, int s, QString pa
     if (mCancel) {
         ui->progressBar->setVisible(false);
         ui->cancel->setVisible(false);
-        ui->status->setText(QString("Search aborted"));
+        ui->status1->setText(QString("Search aborted"));
+        ui->status2->setText(QString());
+        ui->status2->hide();
     }
 }
 
@@ -384,10 +395,6 @@ void SessionWidget::on_results_currentChanged(int index) {
     ui->searchExp->setValue(b->exp());
     ui->linesBefore->setValue(b->linesBefore());
     ui->linesAfter->setValue(b->linesAfter());
-}
-
-void SessionWidget::onSizeCalculated(int size,int keySize) {
-    ui->status2->setText(QString("%1 %2").arg(size).arg(keySize));
 }
 
 void SessionWidget::on_path_textChanged(const QString &path)

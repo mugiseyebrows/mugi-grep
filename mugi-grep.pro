@@ -17,7 +17,6 @@ HEADERS += \
     rxcollector.h \
     searchcache.h \
     searchid.h \
-    session.h \
     settings.h \
     version.h \
     worker.h \
@@ -38,7 +37,8 @@ HEADERS += \
     widget/settingsdialog.h \
     utils/bl.h \
     utils/sl.h \
-    utils/jsonhelper.h
+    utils/jsonhelper.h \
+    widget/elidedlabel.h
 
 SOURCES += \
     filecache.cpp \
@@ -48,7 +48,6 @@ SOURCES += \
     rxcollector.cpp \
     searchcache.cpp \
     searchid.cpp \
-    session.cpp \
     settings.cpp \
     worker.cpp \
     model/editorsmodel.cpp \
@@ -68,7 +67,8 @@ SOURCES += \
     widget/settingsdialog.cpp \
     utils/bl.cpp \
     utils/sl.cpp \
-    utils/jsonhelper.cpp
+    utils/jsonhelper.cpp \
+    widget/elidedlabel.cpp
 
 FORMS += \
     widget/mainwindow.ui \
