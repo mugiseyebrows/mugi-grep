@@ -1,0 +1,47 @@
+{
+    "editors": [
+        {
+            "app": "qtcreator -client %file%:%line%",
+            "exts": "cpp|h"
+        },
+        {
+            "app": "geany -l %line% %file%",
+            "exts": "txt"
+        },
+        {
+            "app": "code -r -g %file%:%line%",
+            "exts": "json"
+        },
+        {
+            "app": "gedit %file%",
+            "exts": "py"
+        }
+    ],
+    "exps": {
+        "exps": [
+            [
+                
+            ],
+            [
+                
+            ]
+        ],
+        "pathexps": [
+            [
+                
+            ],
+            [
+                "cpp|h"
+            ],
+            [
+                "moc_|qrc_|ui_"
+            ],
+            [
+                ""
+            ]
+        ]
+    },
+    "sessions": [
+        
+    ]
+}
