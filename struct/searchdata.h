@@ -4,11 +4,11 @@
 #include "regexppath.h"
 #include "regexp.h"
 
-class SearchData {
-public:
+struct SearchData {
+
     SearchData();
     SearchData(QString path, RegExpPath filter, bool notBinary, RegExp search,
-               QStringList files, int linesBefore, int linesAfter);
+               QStringList files, int linesBefore, int linesAfter, int filesFiltered, int dirsFiltered);
 
     QString path;
     RegExpPath filter;
@@ -18,6 +18,8 @@ public:
     int complete;
     int linesBefore;
     int linesAfter;
+    int filesFiltered;
+    int dirsFiltered;
 };
 
 

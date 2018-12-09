@@ -2,7 +2,7 @@
 
 #include <QSet>
 #include <QTextCodec>
-
+#include <QDebug>
 
 
 QStringList searchLines(const QStringList& mLines, const QString& mPath, const QString& mRelativePath,
@@ -80,40 +80,6 @@ QStringList searchLines(const QByteArray& mLines, const QString& mPath, const QS
     return searchLines(lines,mPath,mRelativePath,exp,linesBefore,linesAfter);
 }
 
-#if 0
-QStringList fileLines(const QString& path, bool skipBinary, bool* binary) {
-
-    QFile file(path);
-    file.open(QIODevice::ReadOnly);
-
-    if (binary)
-        *binary = false;
-
-    if (skipBinary) {
-        QByteArray dataSample = file.read(2 * 1024);
-        if (dataSample.indexOf('\0') > -1) {
-            qDebug() << path << " is binary";
-            if (skipBinary) {
-                file.close();
-                if (binary)
-                    *binary = true;
-                return QStringList();
-            }
-        } else {
-            qDebug() << path << " is not binary";
-        }
-        file.seek(0);
-    }
-
-    QTextStream stream(&file);
-    stream.setCodec(QTextCodec::codecForName("UTF-8")); /* @todo select textcodec */
-
-    QStringList lines = stream.readAll().split(QRegExp("\\r?\\n"));
-    file.close();
-    return lines;
-}
-#endif
-
 QString ext(const QString& path) {
     if (path.indexOf(".")>-1)
         return path.split(".").last().toLower();
@@ -146,7 +112,10 @@ SearchCache::SearchCache() {
 
 }
 
-void SearchCache::add(int searchId, QString path, RegExpPath filter, bool notBinary, RegExp search, int linesBefore, int linesAfter) {
+void SearchCache::add(int searchId, QString path, RegExpPath filter,
+                      bool notBinary, RegExp search,
+                      int linesBefore, int linesAfter) {
+
     QMutexLocker locked(&mMutex);
     QStringList files;
 
@@ -166,17 +135,32 @@ void SearchCache::add(int searchId, QString path, RegExpPath filter, bool notBin
                    << "xlsx" << "xlt" << "xmcd" << "zip";
     }
 
+    int filesFiltered = 0;
+    int dirsFiltered = 0;
+
     while (it.hasNext()) {
         QString path = it.next();
-        if (path.contains("/.git/"))
+        if (path.contains("/.git/")) {
+            filesFiltered++;
             continue;
-        if (notBinary && binaryExts.contains(ext(path)))
+        }
+        if (notBinary && binaryExts.contains(ext(path))) {
+            filesFiltered++;
             continue;
+        }
         if (filter.match(path)) {
             files << path;
+        } else {
+            filesFiltered++;
         }
     }
-    mSearchData.insert(searchId,SearchData(path,filter,notBinary,search,files,linesBefore,linesAfter));
+    //qDebug() << files.size() << "not filtered" << filesFiltered << "filtered";
+
+    SearchData data = SearchData(path,filter,notBinary,search,files,
+                                 linesBefore,linesAfter,
+                                 filesFiltered,dirsFiltered);
+
+    mSearchData.insert(searchId,data);
 }
 
 void SearchCache::finish(int searchId) {
@@ -201,21 +185,6 @@ void SearchCache::search(int searchId, QString &data, int *complete, int *total,
 
     for (int i=sd.complete;i<sd.files.size();i++) {
         QString path = sd.files[i];
-        /*if (!mCache.contains(path)) {
-                mCache[path] = fileLines(path,sd.notBinary);
-                mLastModified[path] = QFileInfo(path).lastModified();
-                mFileSize[path] = QFileInfo(path).size();
-            } else {
-                QDateTime lastModified = QFileInfo(path).lastModified();
-                if (lastModified > mLastModified[path]) {
-                    mCache[path] = fileLines(path,sd.notBinary);
-                    mLastModified[path] = lastModified;
-                    mFileSize[path] = QFileInfo(path).size();
-                    //qDebug() << "changed" << path;
-                } else {
-                    //qDebug() << "not changed" << path;
-                }
-            }*/
 
         bool binary;
         bool readOk;
@@ -235,7 +204,7 @@ void SearchCache::search(int searchId, QString &data, int *complete, int *total,
             data = res.join("<br/>");
             *complete = sd.complete;
             *total = sd.files.size();
-            *filtered = 0;
+            *filtered = sd.filesFiltered;
             file = relPath_;
             return;
         }
@@ -243,7 +212,7 @@ void SearchCache::search(int searchId, QString &data, int *complete, int *total,
     data = res.join("<br/>");
     *complete = sd.complete;
     *total = sd.files.size();
-    *filtered = 0;
+    *filtered = sd.filesFiltered;
     file = QString();
 }
 

@@ -9,7 +9,15 @@ SearchBrowser::SearchBrowser(RegExp exp, RegExpPath filter, int linesBefore, int
     setOpenLinks(false);
 
     //@todo external stylesheet
+
+#ifdef Q_OS_LINUX
+    QFont font("Liberation Mono",11,QFont::Normal);
+#endif
+
+#ifdef Q_OS_WIN
     QFont font("Courier New",12,QFont::Normal);
+#endif
+
     setFont(font);
 }
 

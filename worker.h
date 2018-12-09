@@ -30,7 +30,6 @@ protected:
 signals:
     
     void found(int,QString,int,int,int,QString);
-    void sizeCalculated(int,int);
 
 public slots:
 

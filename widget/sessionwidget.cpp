@@ -68,8 +68,6 @@ SessionWidget::SessionWidget(QWidget *parent) :
 
     connect(this,SIGNAL(finishSearch(int)),mWorker,SLOT(onFinishSearch(int)));
 
-    connect(mWorker,SIGNAL(sizeCalculated(int,int)),this,SLOT(onSizeCalculated(int,int)));
-
     mThread->start();
 
     ui->progressBar->hide();
