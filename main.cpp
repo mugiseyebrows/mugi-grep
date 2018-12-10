@@ -5,7 +5,7 @@
 
 #include "regexp.h"
 #include "regexppath.h"
-
+#include "version.h"
 
 int main(int argc, char *argv[])
 {
@@ -15,6 +15,8 @@ int main(int argc, char *argv[])
     qRegisterMetaType<RegExpPath>();
 
     QApplication a(argc, argv);
+    a.setApplicationName(APP_NAME);
+    a.setApplicationVersion(APP_VERSION);
 
     //RegExpPath::test();
     //RegExp::test();

@@ -7,6 +7,7 @@
 #include <QVariantList>
 #include <QDebug>
 #include <QApplication>
+#include <QMessageBox>
 #include "utils/jsonhelper.h"
 
 /*static*/
@@ -21,7 +22,7 @@ Settings *Settings::instance()
 
 void Settings::load()
 {
-    QString path = this->path();
+    QString path = this->settingsPath();
     if (!QFile(path).exists()) {
 
         QDir dir(qApp->applicationDirPath());
@@ -59,18 +60,9 @@ void Settings::load()
     }
 }
 
-QString Settings::path() const
+QString Settings::settingsPath() const
 {
-    QString home = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    QDir d(home);
-    if (!d.exists()) {
-        d.cdUp();
-        if (!d.mkdir("mugi-grep")) {
-            qDebug() << "cannot create" << d.filePath("mugi-grep");
-        }
-        d.cd("mugi-grep");
-    }
-    return d.filePath("settings.json");
+    return QDir(mDir).filePath("settings.json");
 }
 
 QString Settings::error() const
@@ -112,7 +104,7 @@ void Settings::save()
     settings["sessions"] = mSessions;
     settings["exps"] = mExps;
 
-    QString path = this->path();
+    QString path = this->settingsPath();
     saveJson(path, settings);
 
     qDebug() << "saved to" << path;
@@ -138,8 +130,23 @@ QString Settings::editor(const QString &path) const
     return QString();
 }
 
+
+
 Settings::Settings()
 {
+    QString appData = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+
+    QString name = qApp->applicationName();
+    QDir d(appData);
+    if (!d.exists()) {
+        d.cdUp();
+        if (!d.mkdir(name)) {
+            QString error = QString("Can not create directory %1").arg(appData);
+            QMessageBox::critical(qApp->activeWindow(),"Error",error);
+        }
+        d.cd(name);
+    }
+    mDir = appData;
     load();
 }
 

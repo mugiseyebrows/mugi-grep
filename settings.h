@@ -18,12 +18,12 @@ public:
     void load();
     void save();
 
-    QString editor(const QString& path) const;
+    QString editor(const QString& settingsPath) const;
 
     void toModel(QAbstractItemModel* model);
     void fromModel(QAbstractItemModel* model);
 
-    QString path() const;
+    QString settingsPath() const;
 
     QString error() const;
 
@@ -42,6 +42,7 @@ protected:
 
     QJsonArray mSessions;
     QJsonObject mExps;
+    QString mDir;
 
     Settings();
 };

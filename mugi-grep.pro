@@ -38,7 +38,8 @@ HEADERS += \
     utils/bl.h \
     utils/sl.h \
     utils/jsonhelper.h \
-    widget/elidedlabel.h
+    widget/elidedlabel.h \
+    version.h
 
 SOURCES += \
     filecache.cpp \

@@ -28,6 +28,8 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->tabs->removeTab(0);
     }
 
+    setWindowTitle(QString("%1 %2").arg(qApp->applicationName()).arg(qApp->applicationVersion()));
+
     QJsonArray sessions = Settings::instance()->sessions();
 
     if (sessions.size() > 0) {
