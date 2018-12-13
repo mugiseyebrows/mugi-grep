@@ -8,7 +8,7 @@ It is like `find some/path -iname foo -exec grep bar {} \; | grep -v baz` but wi
 
 ## Windows
 
-1) Install [qt5](https://www.qt.io/)
+1) Install qt5 from [www.qt.io](https://www.qt.io/download) ([direct link](https://download.qt.io/official_releases/qt/5.12/5.12.0/qt-opensource-windows-x86-5.12.0.exe))
 2) Clone sources and build using qtcreator or cmd
 
 ```bash

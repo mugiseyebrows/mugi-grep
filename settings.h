@@ -18,7 +18,7 @@ public:
     void load();
     void save();
 
-    QString editor(const QString& settingsPath) const;
+    QString editor(const QString& path) const;
 
     void toModel(QAbstractItemModel* model);
     void fromModel(QAbstractItemModel* model);
