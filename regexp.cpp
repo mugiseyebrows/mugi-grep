@@ -42,8 +42,8 @@ void RegExp::deserealize(const QVariantMap &data)
 void RegExp::init(const QString& inc, const QString& exc, bool case_) {
     mInclude = inc;
     mExclude = exc;
-    mInclude_ = QRegExp(inc, case_ ? Qt::CaseSensitive : Qt::CaseInsensitive);
-    mExclude_ = QRegExp(exc, case_ ? Qt::CaseSensitive : Qt::CaseInsensitive);
+    mInclude_ = QRegularExpression(inc, case_ ? QRegularExpression::NoPatternOption : QRegularExpression::CaseInsensitiveOption);
+    mExclude_ = QRegularExpression(exc, case_ ? QRegularExpression::NoPatternOption : QRegularExpression::CaseInsensitiveOption);
 }
 
 QString RegExp::include() const
@@ -72,19 +72,24 @@ bool RegExp::match(const QString s, int* pos, int* len) const
     if (mInclude.isEmpty()) {
         inc = true;
     } else {
-        QRegExp e = mInclude_;
-        int p = s.indexOf(e);
-        if (p > -1) {
-            if (pos)
+        QRegularExpression e = mInclude_;
+
+        QRegularExpressionMatch m = e.match(s);
+
+        if (m.hasMatch()) {
+            int p = m.capturedStart();
+            if (pos) {
                 *pos = p;
-            if (len)
-                *len = e.matchedLength();
+            }
+            if (len) {
+                *len = m.capturedLength();
+            }
             inc = true;
         } else {
             inc = false;
         }
     }
-    return (inc) && (mExclude.isEmpty() || mExclude_.indexIn(s) < 0);
+    return (inc) && (mExclude.isEmpty() || !mExclude_.match(s).hasMatch());
 }
 
 

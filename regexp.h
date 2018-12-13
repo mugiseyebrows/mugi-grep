@@ -3,7 +3,7 @@
 
 #include <QString>
 #include <QMetaType>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QVariantMap>
 
 class RegExp {
@@ -32,8 +32,8 @@ protected:
 
     QString mInclude;
     QString mExclude;
-    QRegExp mInclude_;
-    QRegExp mExclude_;
+    QRegularExpression mInclude_;
+    QRegularExpression mExclude_;
     bool mCase;
 };
 

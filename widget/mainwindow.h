@@ -4,8 +4,7 @@
 #include <QMainWindow>
 #include <QVariant>
 #include <QMetaType>
-
-#include "utils/json.h"
+#include <QJsonObject>
 
 class SessionWidget;
 class QSignalMapper;

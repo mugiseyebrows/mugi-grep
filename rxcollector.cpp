@@ -3,8 +3,8 @@
 #include <QStringListModel>
 #include <QDebug>
 #include <QVariantList>
-
-#include "utils/json.h"
+#include <QJsonObject>
+#include <QJsonArray>
 
 RXCollector *RXCollector::mInstance = nullptr;
 
@@ -117,14 +117,9 @@ void RXCollector::deserialize(const QList<QStringListModel *> &models, const QJs
 
 void RXCollector::deserialize(const QJsonObject &j)
 {
-    if (JSON_HAS_ARRAY(j,"pathexps")) {
-        deserialize(mPathExps,j["pathexps"].toArray());
-    }
-    if (JSON_HAS_ARRAY(j,"exps")) {
-        deserialize(mExps,j["exps"].toArray());
-    }
+    deserialize(mPathExps,j.value("pathexps").toArray());
+    deserialize(mExps,j.value("exps").toArray());
 }
-
 
 RXCollector::RXCollector()
 {

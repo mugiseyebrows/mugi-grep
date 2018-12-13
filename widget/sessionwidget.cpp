@@ -21,7 +21,6 @@
 #include "searchid.h"
 #include "settings.h"
 #include <QMessageBox>
-#include "utils/json.h"
 
 #define RESULT_TAB_LIMIT 10
 

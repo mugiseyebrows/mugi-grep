@@ -3,7 +3,7 @@
 
 #include <QStringList>
 #include <QMetaType>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QVariantMap>
 
 class RegExpPath {
@@ -32,7 +32,7 @@ public:
 
 protected:
     QStringList mRegExps;
-    QList<QRegExp> mRegExps_;
+    QList<QRegularExpression> mRegExps_;
     bool mCase;
 };
 

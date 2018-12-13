@@ -7,10 +7,9 @@ QString exts; QRegExp exp; QString app
 #ifndef EDITOR_H
 #define EDITOR_H
 #include <QString>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QVariant>
-
-#include "utils/json.h"
+class QJsonObject;
 
 class Editor{
 public:
@@ -20,7 +19,7 @@ public:
     Editor(const QString& exts, const QString& app);
 /************************* GETTERS **************************/
     QString exts() const;
-    QRegExp exp() const;
+    QRegularExpression exp() const;
     QString app() const;
 /************************* SETTERS **************************/
     void setExts(const QString& value);
@@ -32,7 +31,7 @@ public:
     void toJson(QJsonObject &json);
 protected:
     QString mExts;
-    QRegExp mExp;
+    QRegularExpression mExp;
     QString mApp;
 };
 #endif //EDITOR_H

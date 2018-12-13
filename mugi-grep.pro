@@ -10,7 +10,6 @@ RC_FILE = mugi-grep.rc
 
 HEADERS += \
     filecache.h \
-    utils/json.h \
     regexp.h \
     regexpinput.h \
     regexppath.h \

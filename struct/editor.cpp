@@ -1,4 +1,6 @@
 #include "struct/editor.h"
+#include <QJsonObject>
+
 /*********************** CONSTRUCTORS ***********************/
 Editor::Editor() {
 }
@@ -15,7 +17,7 @@ Editor::Editor(const QString& exts, const QString& app) {
 QString Editor::exts() const {
     return mExts;
 }
-QRegExp Editor::exp() const {
+QRegularExpression Editor::exp() const {
     return mExp;
 }
 QString Editor::app() const {
@@ -24,7 +26,7 @@ QString Editor::app() const {
 /************************* SETTERS **************************/
 void Editor::setExts(const QString& value) {
     mExts = value;
-    mExp = QRegExp("^(" + mExts + ")$");
+    mExp = QRegularExpression("^(" + mExts + ")$");
 }
 
 void Editor::setApp(const QString& value) {
@@ -33,12 +35,8 @@ void Editor::setApp(const QString& value) {
 
 void Editor::fromJson(const QJsonObject &json)
 {
-    if (JSON_HAS_STRING(json,"exts")) {
-        setExts(json["exts"].toString());
-    }
-    if (JSON_HAS_STRING(json,"app")) {
-        setApp(json["app"].toString());
-    }
+    setExts(json.value("exts").toString());
+    setApp(json.value("app").toString());
 }
 
 void Editor::toJson(QJsonObject &json)

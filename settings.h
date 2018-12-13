@@ -5,8 +5,8 @@
 
 #include "struct/editor.h"
 #include <QList>
-
-#include "utils/json.h"
+#include <QJsonArray>
+#include <QJsonObject>
 
 class QAbstractItemModel;
 

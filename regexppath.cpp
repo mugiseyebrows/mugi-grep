@@ -15,11 +15,11 @@ void RegExpPath::init(const QStringList &regExps, bool case_)
     mRegExps = regExps;
     mCase = case_;
     for (int i=0;i<regExps.size();i++) {
-        Qt::CaseSensitivity case__ = case_ ? Qt::CaseSensitive : Qt::CaseInsensitive;
+        QRegularExpression::PatternOption case__ = case_ ? QRegularExpression::NoPatternOption : QRegularExpression::CaseInsensitiveOption;
         if (i % 2 == 1) {
-            mRegExps_ << QRegExp("^(" + regExps[i] + ")$", case__);
+            mRegExps_ << QRegularExpression("^(" + regExps[i] + ")$", case__);
         } else {
-            mRegExps_ << QRegExp(regExps[i], case__);
+            mRegExps_ << QRegularExpression(regExps[i], case__);
         }
     }
 }
@@ -53,10 +53,10 @@ bool RegExpPath::match(const QString &path) const
     int p = path.lastIndexOf(".");
     if (p > -1)
         ext = path.mid(p+1);
-    return (mRegExps[PathInclude].isEmpty() || mRegExps_[PathInclude].indexIn(path) > -1) &&
-            (mRegExps[ExtInclude].isEmpty() || mRegExps_[ExtInclude].indexIn(ext) > -1) &&
-            (mRegExps[PathExclude].isEmpty() || mRegExps_[PathExclude].indexIn(path) < 0) &&
-            (mRegExps[ExtExclude].isEmpty() || mRegExps_[ExtExclude].indexIn(ext) < 0);
+    return (mRegExps[PathInclude].isEmpty() || mRegExps_[PathInclude].match(path).hasMatch()) &&
+            (mRegExps[ExtInclude].isEmpty() || mRegExps_[ExtInclude].match(ext).hasMatch()) &&
+            (mRegExps[PathExclude].isEmpty() || !mRegExps_[PathExclude].match(path).hasMatch()) &&
+            (mRegExps[ExtExclude].isEmpty() || !mRegExps_[ExtExclude].match(ext).hasMatch());
 }
 
 QStringList RegExpPath::exps() const
