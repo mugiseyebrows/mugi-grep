@@ -76,3 +76,6 @@ FORMS += \
     widget/rxpathinput.ui \
     widget/sessionwidget.ui \
     widget/settingsdialog.ui
+
+target.path = /usr/local/bin
+INSTALLS += target
