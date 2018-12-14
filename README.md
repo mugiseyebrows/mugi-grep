@@ -3,14 +3,23 @@
 ## Problem
 
 Suppose you don't have search utility in your editor that satisfies all your needs. But you're clever so at first you're like
+
 `grep something *.cpp *.h`
+
 and then you
+
 `find . -iname '*.cpp' -or -iname '*.h' -exec grep -Hn something {} \;`
+
 and then you
+
 `find . \( -iname '*.cpp' -or -iname '*.h' \) -exec grep -Hn something {} \;`
+
 and then you
+
 `find . \( -iname '*.cpp' -or -iname '*.h' \) -exec grep -Hn something {} \; | grep -v butNotThat`
+
 and then you need to repeat pre-previous search, but keep current results so you tmux (and then you can't easily scroll) or ctrl-shift-t and then you lost in ten tabs
+
 and then you wish you could use results to click-junp to specific file on specific line in your editor of choice.
 
 ## Solution
@@ -47,4 +56,6 @@ cd mugi-grep
 qmake -qt=5
 make
 make clean
+sudo make install # installs to /usr/local/bin
+python desktop.py # copies icons, creates desktop file
 ```
