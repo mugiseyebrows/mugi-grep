@@ -38,7 +38,11 @@ HEADERS += \
     utils/sl.h \
     utils/jsonhelper.h \
     widget/elidedlabel.h \
-    version.h
+    version.h \
+    widget/selectfilesdialog.h \
+    html.h \
+    anchorclickhandler.h \
+    model/checkablestringlistmodel.h
 
 SOURCES += \
     filecache.cpp \
@@ -68,14 +72,19 @@ SOURCES += \
     utils/bl.cpp \
     utils/sl.cpp \
     utils/jsonhelper.cpp \
-    widget/elidedlabel.cpp
+    widget/elidedlabel.cpp \
+    widget/selectfilesdialog.cpp \
+    html.cpp \
+    anchorclickhandler.cpp \
+    model/checkablestringlistmodel.cpp
 
 FORMS += \
     widget/mainwindow.ui \
     widget/rxinput.ui \
     widget/rxpathinput.ui \
     widget/sessionwidget.ui \
-    widget/settingsdialog.ui
+    widget/settingsdialog.ui \
+    widget/selectfilesdialog.ui
 
 target.path = /usr/local/bin
 INSTALLS += target

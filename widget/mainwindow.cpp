@@ -17,10 +17,11 @@
 #include "settings.h"
 #include "rxcollector.h"
 #include <QJsonArray>
+#include "anchorclickhandler.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow), mMapper(new QSignalMapper(this))
+    ui(new Ui::MainWindow), mMapper(new QSignalMapper(this)), mClickHandler(new AnchorClickHandler())
 {
     ui->setupUi(this);
 
@@ -75,8 +76,8 @@ void MainWindow::closeEvent(QCloseEvent * e)
 void MainWindow::addSession(const QJsonObject &v) {
     SessionWidget* session = new SessionWidget(ui->tabs);
 
-    connect(session,SIGNAL(setEditor()),this,SLOT(onSetEditor()));
-    connect(this,SIGNAL(editorSet()),session,SLOT(onEditorSet()));
+    //connect(session,SIGNAL(setEditor()),this,SLOT(onSetEditor()));
+    //connect(this,SIGNAL(editorSet()),session,SLOT(onEditorSet()));
 
     // todo: tab name collisions
     QString title = "untitled";
@@ -218,20 +219,7 @@ void MainWindow::on_loadSessions_triggered() {
 
 void MainWindow::on_setEditors_triggered()
 {
-    onSetEditor();
-}
-
-void MainWindow::onSetEditor()
-{
-    SettingsDialog dialog(this);
-    if (dialog.exec() == QDialog::Accepted) {
-        dialog.apply();
-        QString error = Settings::instance()->error();
-        if (!error.isEmpty()) {
-            QMessageBox::critical(this,"error",error);
-        }
-    }
-    emit editorSet();
+    mClickHandler->onSetEditor();
 }
 
 void MainWindow::onReadStarted(QWidget* w) {

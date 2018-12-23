@@ -23,6 +23,11 @@ public:
 
     void enableTextChanged(bool active);
 
+    void setIncludePathValue(const QString& value);
+    void setIncludeExtValue(const QString& value);
+    void setExcludePathValue(const QString& value);
+    void setExpludeExtValue(const QString& value);
+
 protected slots:
     void onTextChanged();
 

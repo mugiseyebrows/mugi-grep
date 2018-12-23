@@ -21,34 +21,14 @@
 #include "searchid.h"
 #include "settings.h"
 #include <QMessageBox>
+#include "anchorclickhandler.h"
 
 #define RESULT_TAB_LIMIT 10
 
-QStringList spaceSplit(const QString& s_) {
-    QStringList res;
-    QString s = s_;
-    int p = s.indexOf(" ");
-    while(p > -1) {
-        QString m = s.mid(0,p);
-        //qDebug() << "m" << m;
-        if (m.startsWith('"') == m.endsWith('"')) {
-            if (m.startsWith('"')) {
-                res << m.mid(1,m.size()-2);
-            } else {
-                res << m;
-            }
-            s = s.mid(p+1);
-            p = -1;
-        }
-        p = s.indexOf(" ",p+1);
-    }
-    res << s;
-    return res;
-}
-
 SessionWidget::SessionWidget(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::SessionWidget)
+    ui(new Ui::SessionWidget),
+    mClickHandler(new AnchorClickHandler())
 {
     ui->setupUi(this);
 
@@ -186,7 +166,7 @@ void SessionWidget::on_search_clicked() {
     SearchBrowser* browser = new SearchBrowser(search_,filter,linesBefore,linesAfter,cacheFileList);
     mResults[mSearchId] = browser;
 
-    connect(browser,SIGNAL(anchorClicked(QUrl)),this,SLOT(onAnchorClicked(QUrl)));
+    mClickHandler->setBrowser(browser);
 
     QString title = ui->searchExp->value().include();
 
@@ -238,66 +218,6 @@ void SessionWidget::on_searchExp_returnPressed() {
 
 void SessionWidget::on_searchFilter_returnPressed() {
     on_search_clicked();
-}
-
-namespace {
-QString unquote(const QString& text) {
-    if (text.startsWith('"') && text.endsWith('"')) {
-        return text.mid(1,text.size()-2);
-    }
-    return text;
-}
-
-}
-
-void SessionWidget::onAnchorClicked(QUrl url) {
-
-    QUrlQuery q(url);
-
-    QString line = q.queryItemValue("line");
-
-    QString path = url.path();
-    if (path.startsWith("/"))
-        path = path.mid(1);
-
-    QString editor = Settings::instance()->editor(path);
-    if (editor.isEmpty()) {
-        QString question = "Editor not set for this file type, set editor?";
-        if (QMessageBox::question(this,"Editor not set",question, QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
-            mQueued = url;
-            emit setEditor();
-        }
-    } else {
-
-        QStringList editor_ = spaceSplit(editor);
-        QString opt;
-
-        QStringList args;
-        //args << path;
-
-        bool pathSpecified = false;
-
-        for(int i=1;i<editor_.size();i++) {
-            QString opt = editor_[i];
-            if (opt.indexOf("%file%") > -1) {
-                opt = opt.replace("%file%",path);
-                pathSpecified = true;
-            }
-            if (opt.indexOf("%line%") > -1) {
-                opt = opt.replace("%line%",line);
-            }
-            args << opt;
-        }
-        if (!pathSpecified)
-            args << path;
-
-        QString app = unquote(editor_[0]);
-
-        bool ok = QProcess::startDetached(app, args);
-        if (!ok) {
-            QMessageBox::critical(this,QString("Error"),QString("Failed to start %1").arg(editor_[0]));
-        }
-    }
 }
 
 void SessionWidget::on_cancel_clicked()
@@ -388,14 +308,6 @@ void SessionWidget::onCountMatchedFiles(int matched, int total)
     ui->fileCount->setText(QString("%1 / %2 files").arg(matched).arg(total));
 }
 
-void SessionWidget::onEditorSet()
-{
-    if (mQueued.isEmpty())
-        return;
-    onAnchorClicked(mQueued);
-    mQueued = QUrl();
-}
-
 void SessionWidget::on_results_currentChanged(int index) {
 
     //qDebug() << "on_results_currentChanged" << index;
@@ -446,4 +358,18 @@ void SessionWidget::onSearchFilterTextChanged() {
     emit countMatchedFiles(path,filter,notBinary);
 
     ui->fileCount->setText("? / ? files");
+}
+
+#include "widget/selectfilesdialog.h"
+
+void SessionWidget::on_selectFiles_clicked()
+{
+    QString path = ui->path->text();
+
+    SelectFilesDialog dialog(path, ui->searchFilter->value(), mWorker, mClickHandler, this);
+
+    if (dialog.exec() == QDialog::Accepted) {
+        ui->searchFilter->setValue(dialog.filter());
+    }
+
 }

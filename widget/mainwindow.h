@@ -8,6 +8,7 @@
 
 class SessionWidget;
 class QSignalMapper;
+class AnchorClickHandler;
 
 namespace Ui {
 class MainWindow;
@@ -35,6 +36,7 @@ public:
 protected:
     Ui::MainWindow *ui;
     QSignalMapper* mMapper;
+    AnchorClickHandler* mClickHandler;
 
 signals:
     void editorSet();
@@ -49,8 +51,6 @@ protected slots:
 
 
     void on_setEditors_triggered();
-
-    void onSetEditor();
 
     void onReadStarted(QWidget *);
 

@@ -18,6 +18,12 @@ void Worker::onCountMatchedFiles(QString path, RegExpPath filter, bool notBinary
     emit count(fileCount.first, fileCount.second);
 }
 
+void Worker::onGetAllFiles(QString path)
+{
+    QStringList files = mCache.getAllFiles(path,true);
+    emit allFiles(path,files);
+}
+
 void Worker::onSearchMore(int id)
 {
     //qDebug() << "Worker::onSearchMore";

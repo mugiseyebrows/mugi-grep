@@ -49,15 +49,28 @@ QVariantMap RegExpPath::serialize() const
 
 bool RegExpPath::match(const QString &path) const
 {
-    QString ext;
-    int p = path.lastIndexOf(".");
-    if (p > -1)
-        ext = path.mid(p+1);
+    QString ext = getExt(path);
+
     return (mRegExps[PathInclude].isEmpty() || mRegExps_[PathInclude].match(path).hasMatch()) &&
             (mRegExps[ExtInclude].isEmpty() || mRegExps_[ExtInclude].match(ext).hasMatch()) &&
             (mRegExps[PathExclude].isEmpty() || !mRegExps_[PathExclude].match(path).hasMatch()) &&
             (mRegExps[ExtExclude].isEmpty() || !mRegExps_[ExtExclude].match(ext).hasMatch());
 }
+
+QString RegExpPath::getExt(const QString& path) {
+    int p = path.lastIndexOf(".");
+    int q = path.lastIndexOf("/");
+    if (p > -1) {
+        if (q > -1) {
+            if (q > p) {
+                return QString();
+            }
+        }
+        return path.mid(p+1).toLower();
+    }
+    return QString();
+}
+
 
 QStringList RegExpPath::exps() const
 {

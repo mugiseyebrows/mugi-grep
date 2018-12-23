@@ -4,6 +4,7 @@
 #include <QTextCodec>
 #include <QDebug>
 
+#include "html.h"
 
 QStringList searchLines(const QStringList& mLines, const QString& mPath, const QString& mRelativePath,
                         const RegExp& exp, int linesBefore, int linesAfter) {
@@ -44,13 +45,13 @@ QStringList searchLines(const QStringList& mLines, const QString& mPath, const Q
             exp.match(mLines[i],&p,&matchedLength);
             QString href = "file:///" + QDir::toNativeSeparators(mPath) + "?line=" + QString::number(i+1);
             QStringList cols;
-            cols << anchor(mRelativePath, href, "violet") //span(mRelativePath, "violet")
-                 << span(":", "blue")
-                 << span(QString::number(i+1), "green")
-                 << span(":", "blue")
-                 << span(line.mid(0,p), "black")
-                 << span(line.mid(p, matchedLength), "red")
-                 << span(line.mid(p + matchedLength), "black");
+            cols << Html::anchor(mRelativePath, href, "violet") //span(mRelativePath, "violet")
+                 << Html::span(":", "blue")
+                 << Html::span(QString::number(i+1), "green")
+                 << Html::span(":", "blue")
+                 << Html::span(line.mid(0,p), "black")
+                 << Html::span(line.mid(p, matchedLength), "red")
+                 << Html::span(line.mid(p + matchedLength), "black");
             res << cols.join("");
 
         } else if (siblings.contains(i)) {
@@ -58,11 +59,11 @@ QStringList searchLines(const QStringList& mLines, const QString& mPath, const Q
             QString line = mLines[i];
             QString href = "file:///" + QDir::toNativeSeparators(mPath) + "?line=" + QString::number(i+1);
             QStringList cols;
-            cols << anchor(mRelativePath, href, "violet")
-                 << span("-", "blue")
-                 << span(QString::number(i+1), "green")
-                 << span("-", "blue")
-                 << span(line, "black");
+            cols << Html::anchor(mRelativePath, href, "violet")
+                 << Html::span("-", "blue")
+                 << Html::span(QString::number(i+1), "green")
+                 << Html::span("-", "blue")
+                 << Html::span(line, "black");
             res << cols.join("");
 
         }
@@ -86,18 +87,8 @@ QString ext(const QString& path) {
     return QString();
 }
 
-QString span(const QString &text_, const QString &color)
-{
-    QString text = text_;
-    text.replace("<","&lt;").replace(">","&gt;");
-    return QString("<span style=\"color:%1\">%2</span>").arg(color).arg(text);
-}
 
-QString anchor(const QString &text, const QString& path, const QString& color)
-{
-    return QString("<a href=\"%1\" style=\"color:%2; text-decoration: none\" >%3</a>").arg(path).arg(color).arg(text);
-}
-
+// todo: remove
 QString relPath(const QString& path, const QString& base) {
     if (path.startsWith(base)) {
         if (path[base.size()] == QChar('\\') && path.size() > base.size())
@@ -141,6 +132,9 @@ QStringList SearchCache::getAllFiles(QString path, bool cacheFileList) {
         if (cacheFileList) {
             mFileList[path_] = allFiles;
         }
+    }
+    if (!cacheFileList) {
+        mFileList.remove(path_);
     }
     return allFiles;
 }

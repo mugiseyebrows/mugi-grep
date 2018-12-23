@@ -12,10 +12,6 @@
 
 QString ext(const QString& path);
 
-QString span(const QString &text_, const QString &color);
-
-QString anchor(const QString &text, const QString& path, const QString& color);
-
 QStringList searchLines(const QStringList &mLines, const QString& mPath, const QString& mRelativePath,
                         const RegExp& exp, int linesBefore, int linesAfter);
 
@@ -41,7 +37,7 @@ public:
 
     QPair<int, int> countMatchedFiles(QString path, RegExpPath filter, bool notBinary);
     QStringList getAllFiles(QString path, bool cacheFileList);
-    QStringList filterFiles(const QStringList &allFiles, RegExpPath filter, bool notBinary, int *filesFiltered, int *dirsFiltered);
+    static QStringList filterFiles(const QStringList &allFiles, RegExpPath filter, bool notBinary, int *filesFiltered, int *dirsFiltered);
 protected:
 
     QMutex mMutex;

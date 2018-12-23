@@ -19,6 +19,7 @@ class File;
 class Worker;
 class SearchBrowser;
 class QTabWidget;
+class AnchorClickHandler;
 
 /*
 Q_DECLARE_METATYPE(RegExp)
@@ -39,8 +40,6 @@ public:
 
     void startRead();
 
-    //void setMode(RegExpBaseInput::Mode mode);
-
     void updateCollector();
 
     void serialize(QJsonObject &json) const;
@@ -54,45 +53,24 @@ protected:
     int mSearchId;
 
     QMap<int,SearchBrowser*> mResults;
-    //SearchBrowser* mSearchBrowser;
-
-    QUrl mQueued;
-
     SearchBrowser* currentResult() const;
 
     bool mCancel;
 
     QTabWidget* mParent;
 
+    AnchorClickHandler* mClickHandler;
+
 signals:
-
-#if 0
-    void cancel(int);
-    void read(QString,RegExpPath,bool);
-    void search(RegExp,RegExpPath,int,int);
-    void searchMore(int);
-
-#endif
 
     void setEditor();
     void search(int searchId, QString path, RegExpPath filter, bool notBinary, RegExp search, int linesBofore, int linesAfter,bool cacheFileList);
     void searchMore(int id);
     void finishSearch(int id);
-    //void calcSize();
     void countMatchedFiles(QString,RegExpPath,bool);
 
 protected slots:
 
-    //void onStarted(int type, int id);
-    //void onError(QString);
-    //void onWalked(int);
-    //void onRead(int,int,int);
-    //void onCanceled(int);
-    //void onFound(int id, QString, int, int, int);
-    void onEditorSet();
-
-    //void on_read_clicked();
-    //void on_path_returnPressed();
     void on_selectPath_clicked();
 
     void on_search_clicked();
@@ -101,14 +79,10 @@ protected slots:
     void on_linesAfter_returnPressed();
     void on_linesBefore_returnPressed();
 
-    void onAnchorClicked(QUrl url);
-
     void on_cancel_clicked();
 
     void on_saveText_clicked();
     void on_saveHtml_clicked();
-
-    //void on_readFilter_returnPressed();
 
     void on_results_currentChanged(int index);
 
@@ -119,6 +93,9 @@ protected slots:
 
     void onSearchFilterTextChanged();
     void onCountMatchedFiles(int, int);
+
+    void on_selectFiles_clicked();
+
 private:
     Ui::SessionWidget *ui;
 };

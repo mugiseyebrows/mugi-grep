@@ -30,6 +30,7 @@ public:
     void deserealize(const QVariantMap& data);
     void init(const QStringList& regExps, bool case_);
 
+    static QString getExt(const QString &path);
 protected:
     QStringList mRegExps;
     QList<QRegularExpression> mRegExps_;

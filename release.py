@@ -1,5 +1,12 @@
 from mugidelivery import Manager
 
+import os
+
+plugins = [p for p in [
+'C:\\Qt5\\5.11.1\\mingw53_32\\plugins',
+'D:\\qt\\Qt5.11.3\\5.11.3\\mingw53_32\\plugins'
+] if os.path.exists(p)]
+
 conf = {
     'AppName' : 'mugi-grep',
     'AppVersion' : '1.0.1',
@@ -16,7 +23,7 @@ conf = {
     ]}],
     
     'QtPlugins': ['qwindows','qwindowsvistastyle'],
-    'QtPluginsSource': 'C:\\Qt5\\5.11.1\\mingw53_32\\plugins'
+    'QtPluginsSource': plugins[0]
 }
 
 m = Manager(conf)

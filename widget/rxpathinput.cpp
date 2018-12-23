@@ -44,6 +44,26 @@ void RXPathInput::enableTextChanged(bool active)
     mEmitTextChanged = active;
 }
 
+void RXPathInput::setIncludePathValue(const QString &value)
+{
+    ui->nameInclude->lineEdit()->setText(value);
+}
+
+void RXPathInput::setIncludeExtValue(const QString &value)
+{
+    ui->extInclude->lineEdit()->setText(value);
+}
+
+void RXPathInput::setExcludePathValue(const QString &value)
+{
+    ui->nameExclude->lineEdit()->setText(value);
+}
+
+void RXPathInput::setExpludeExtValue(const QString &value)
+{
+    ui->extExclude->lineEdit()->setText(value);
+}
+
 void RXPathInput::onTextChanged()
 {
     if (!mEmitTextChanged) {

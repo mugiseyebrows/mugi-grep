@@ -33,12 +33,15 @@ signals:
 
     void count(int,int);
 
+    void allFiles(QString, QStringList);
+
 public slots:
 
     void onSearch(int searchId, QString path, RegExpPath filter, bool notBinary, RegExp search, int linesBofore, int linesAfter, bool cacheFileList);
     void onSearchMore(int);
     void onFinishSearch(int);
     void onCountMatchedFiles(QString path, RegExpPath filter, bool notBinary);
+    void onGetAllFiles(QString path);
 };
 
 #endif // WORKER2_H
