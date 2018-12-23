@@ -5,12 +5,16 @@
             "exts": "cpp|cc|h|cxx"
         },
         {
-            "app": "C:\\Program Files (x86)\\Geany\\bin\\geany.exe -l %line% %file%",
+            "app": "\"C:\\Program Files (x86)\\Geany\\bin\\geany.exe\" -l %line% %file%",
             "exts": "txt"
         },
         {
             "app": "\"C:\\Program Files\\Microsoft VS Code\\Code.exe\" -r -g %file%",
             "exts": "js"
+        },
+        {
+            "app": "\"C:\\Program Files (x86)\\Geany\\bin\\geany.exe\" -l %line% %file%",
+            "exts": ".*"
         }
     ],
     "exps": {

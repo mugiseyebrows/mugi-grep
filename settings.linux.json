@@ -15,6 +15,10 @@
         {
             "app": "gedit %file%",
             "exts": "py"
+        },
+        {
+            "app": "geany -l %line% %file%",
+            "exts": ".*"
         }
     ],
     "exps": {

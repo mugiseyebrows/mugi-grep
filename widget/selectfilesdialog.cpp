@@ -57,7 +57,7 @@ void SelectFilesDialog::showInBrowser(const QString& path, const QStringList &fi
     foreach(const QString file, files) {
         QString relPath = dir.relativeFilePath(file);
         QString href = "file:///" + QDir::toNativeSeparators(file);
-        res << Html::anchor(relPath,href,"blue");
+        res << Html::anchor(relPath,href,"violet");
     }
     ui->files->setText(res.join("<br/>"));
 }

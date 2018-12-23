@@ -1,1 +1,2 @@
 text browser context menu: show in explorer, copy path, copy name
+editors dialog: copy event filter

@@ -9,6 +9,7 @@
 #include <QApplication>
 #include <QMessageBox>
 #include "utils/jsonhelper.h"
+#include "regexppath.h"
 
 /*static*/
 Settings* Settings::mInstance = nullptr;
@@ -116,15 +117,11 @@ QString Settings::editor(const QString &path) const
     if (mEditors.isEmpty())
         return QString();
 
-    int p = path.lastIndexOf(".");
-    if (p < 0) {
-        return mEditors.last().app();
-    }
-    QString ext = path.mid(p+1);
+    QString ext = RegExpPath::getExt(path);
 
     Editor editor;
     foreach(editor,mEditors) {
-        if (ext.indexOf(editor.exp()) > -1)
+        if (editor.exp().match(ext).hasMatch())
             return editor.app();
     }
     return QString();
