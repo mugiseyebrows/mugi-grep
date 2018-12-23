@@ -10,7 +10,7 @@ class SearchBrowser : public QTextBrowser
 {
     Q_OBJECT
 public:
-    explicit SearchBrowser(RegExp exp, RegExpPath filter, int linesBefore, int linesAfter, QWidget *parent = nullptr);
+    explicit SearchBrowser(RegExp exp, RegExpPath filter, int linesBefore, int linesAfter, bool cacheFileList, QWidget *parent = nullptr);
     
     ~SearchBrowser();
 
@@ -18,12 +18,14 @@ public:
     RegExpPath filter() const;
     int linesBefore() const;
     int linesAfter() const;
+    bool cacheFileList() const;
 
 protected:
     RegExp mExp;
     RegExpPath mFilter;
     int mLinesBefore;
     int mLinesAfter;
+    bool mCacheFileList;
 
 signals:
     

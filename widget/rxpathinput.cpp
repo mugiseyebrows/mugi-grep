@@ -4,9 +4,11 @@
 #include "utils/sl.h"
 
 #include <QLineEdit>
+#include <QDebug>
 
 RXPathInput::RXPathInput(QWidget *parent) :
     QWidget(parent),
+    mEmitTextChanged(true),
     ui(new Ui::RXPathInput)
 {
     ui->setupUi(this);
@@ -17,8 +19,10 @@ RXPathInput::RXPathInput(QWidget *parent) :
             << ui->extExclude;
     QComboBox* input;
     foreach(input,mInputs) {
-        QObject::connect(input->lineEdit(),SIGNAL(returnPressed()),this,SIGNAL(returnPressed()));
+        connect(input->lineEdit(),SIGNAL(returnPressed()),this,SIGNAL(returnPressed()));
+        connect(input->lineEdit(),SIGNAL(textChanged(QString)),this,SLOT(onTextChanged()));
     }
+
 }
 
 RXPathInput::~RXPathInput()
@@ -33,5 +37,20 @@ RegExpPath RXPathInput::value() const {
 void RXPathInput::setValue(const RegExpPath &value) {
     setExps(value.exps());
     ui->matchCase->setChecked(value.case_());
+}
+
+void RXPathInput::enableTextChanged(bool active)
+{
+    mEmitTextChanged = active;
+}
+
+void RXPathInput::onTextChanged()
+{
+    if (!mEmitTextChanged) {
+        //qDebug() << "!mEmitTextChanged";
+        return;
+    }
+    //qDebug() << "emit textChanged()";
+    emit textChanged();
 }
 

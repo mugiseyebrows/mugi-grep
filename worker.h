@@ -31,14 +31,14 @@ signals:
     
     void found(int,QString,int,int,int,QString);
 
+    void count(int,int);
+
 public slots:
 
-    void onSearch(int searchId, QString path, RegExpPath filter, bool notBinary, RegExp search, int linesBofore, int linesAfter);
+    void onSearch(int searchId, QString path, RegExpPath filter, bool notBinary, RegExp search, int linesBofore, int linesAfter, bool cacheFileList);
     void onSearchMore(int);
     void onFinishSearch(int);
-
-    //void onCalcSize();
-
+    void onCountMatchedFiles(QString path, RegExpPath filter, bool notBinary);
 };
 
 #endif // WORKER2_H

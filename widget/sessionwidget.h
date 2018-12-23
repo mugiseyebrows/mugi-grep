@@ -75,10 +75,11 @@ signals:
 #endif
 
     void setEditor();
-    void search(int searchId, QString path, RegExpPath filter, bool notBinary, RegExp search, int linesBofore, int linesAfter);
+    void search(int searchId, QString path, RegExpPath filter, bool notBinary, RegExp search, int linesBofore, int linesAfter,bool cacheFileList);
     void searchMore(int id);
     void finishSearch(int id);
     //void calcSize();
+    void countMatchedFiles(QString,RegExpPath,bool);
 
 protected slots:
 
@@ -114,9 +115,10 @@ protected slots:
     void onFound(int, QString, int, int, int, QString path);
 
 
-private slots:
     void on_path_textChanged(const QString &arg1);
 
+    void onSearchFilterTextChanged();
+    void onCountMatchedFiles(int, int);
 private:
     Ui::SessionWidget *ui;
 };

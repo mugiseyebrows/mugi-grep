@@ -112,16 +112,40 @@ SearchCache::SearchCache() {
 
 }
 
-void SearchCache::add(int searchId, QString path, RegExpPath filter,
-                      bool notBinary, RegExp search,
-                      int linesBefore, int linesAfter) {
+QPair<int,int> SearchCache::countMatchedFiles(QString path, RegExpPath filter, bool notBinary) {
 
     QMutexLocker locked(&mMutex);
-    QStringList files;
 
-    // todo skip directory entirely if filter matches
+    qDebug() << filter << notBinary;
 
-    QDirIterator it(path, QDir::Files, QDirIterator::Subdirectories);
+    QStringList allFiles = getAllFiles(path, true);
+    int filesFiltered;
+    int dirsFiltered;
+    // todo optimize
+    QStringList files = filterFiles(allFiles,filter,notBinary,&filesFiltered,&dirsFiltered);
+    return QPair<int,int>(files.size(),allFiles.size());
+}
+
+QStringList SearchCache::getAllFiles(QString path, bool cacheFileList) {
+    // todo skip directory entirely if filter matches if not cacheFileList
+    QString path_ = QDir(path).absolutePath();
+    QStringList allFiles;
+    if (cacheFileList && mFileList.contains(path_)) {
+        allFiles = mFileList[path_];
+    } else {
+        QDirIterator it(path, QDir::Files, QDirIterator::Subdirectories);
+        while (it.hasNext()) {
+            QString path = it.next();
+            allFiles.append(path);
+        }
+        if (cacheFileList) {
+            mFileList[path_] = allFiles;
+        }
+    }
+    return allFiles;
+}
+
+QStringList SearchCache::filterFiles(const QStringList& allFiles, RegExpPath filter, bool notBinary, int* filesFiltered, int* dirsFiltered) {
 
     static QStringList binaryExts;
 
@@ -135,26 +159,44 @@ void SearchCache::add(int searchId, QString path, RegExpPath filter,
                    << "xlsx" << "xlt" << "xmcd" << "zip";
     }
 
-    int filesFiltered = 0;
-    int dirsFiltered = 0;
+    int filesFiltered_ = 0;
+    int dirsFiltered_ = 0;
 
-    while (it.hasNext()) {
-        QString path = it.next();
+    QStringList files;
+
+    foreach(const QString& path, allFiles) {
         if (path.contains("/.git/")) {
-            filesFiltered++;
+            filesFiltered_++;
             continue;
         }
         if (notBinary && binaryExts.contains(ext(path))) {
-            filesFiltered++;
+            filesFiltered_++;
             continue;
         }
         if (filter.match(path)) {
             files << path;
         } else {
-            filesFiltered++;
+            filesFiltered_++;
         }
     }
-    //qDebug() << files.size() << "not filtered" << filesFiltered << "filtered";
+
+    *filesFiltered = filesFiltered_;
+    *dirsFiltered = dirsFiltered_;
+
+    return files;
+}
+
+void SearchCache::add(int searchId, QString path, RegExpPath filter,
+                      bool notBinary, RegExp search,
+                      int linesBefore, int linesAfter, bool cacheFileList) {
+
+    QMutexLocker locked(&mMutex);
+
+
+    QStringList allFiles = getAllFiles(path,cacheFileList);
+    int filesFiltered;
+    int dirsFiltered;
+    QStringList files = filterFiles(allFiles,filter,notBinary,&filesFiltered,&dirsFiltered);
 
     SearchData data = SearchData(path,filter,notBinary,search,files,
                                  linesBefore,linesAfter,

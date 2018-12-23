@@ -59,13 +59,19 @@ SessionWidget::SessionWidget(QWidget *parent) :
 
     mWorker->moveToThread(mThread);
 
-    connect(this,SIGNAL(search(int,QString,RegExpPath,bool,RegExp,int,int)),
-            mWorker,SLOT(onSearch(int,QString,RegExpPath,bool,RegExp,int,int)));
+    connect(this,SIGNAL(search(int,QString,RegExpPath,bool,RegExp,int,int,bool)),
+            mWorker,SLOT(onSearch(int,QString,RegExpPath,bool,RegExp,int,int,bool)));
     connect(mWorker,SIGNAL(found(int,QString,int,int,int,QString)),
             this,SLOT(onFound(int,QString,int,int,int,QString)));
+
+    connect(this,SIGNAL(countMatchedFiles(QString,RegExpPath,bool)),mWorker,SLOT(onCountMatchedFiles(QString,RegExpPath,bool)));
+    connect(mWorker,SIGNAL(count(int,int)),this,SLOT(onCountMatchedFiles(int,int)));
+
     connect(this,SIGNAL(searchMore(int)),mWorker,SLOT(onSearchMore(int)));
 
     connect(this,SIGNAL(finishSearch(int)),mWorker,SLOT(onFinishSearch(int)));
+
+    connect(ui->searchFilter,SIGNAL(textChanged()),this,SLOT(onSearchFilterTextChanged()));
 
     mThread->start();
 
@@ -79,6 +85,8 @@ SessionWidget::SessionWidget(QWidget *parent) :
     ui->status1->hide();
     ui->status2->setTextElideMode(Qt::ElideMiddle);
     ui->status2->hide();
+
+    ui->fileCount->setText(QString());
 }
 
 SessionWidget::~SessionWidget()
@@ -152,8 +160,6 @@ void SessionWidget::on_linesBefore_returnPressed() {
     on_search_clicked();
 }
 
-
-
 void SessionWidget::on_search_clicked() {
 
     if (mResults.size() >= RESULT_TAB_LIMIT) {
@@ -171,14 +177,17 @@ void SessionWidget::on_search_clicked() {
     bool notBinary = ui->notBinary->isChecked();
     int linesBefore = ui->linesBefore->value();
     int linesAfter = ui->linesAfter->value();
+    bool cacheFileList = ui->cacheFileList->isChecked();
 
     // add tab
 
     mSearchId = SearchId::instance()->next();
-    SearchBrowser* browser = new SearchBrowser(ui->searchExp->value(),ui->searchFilter->value(),ui->linesBefore->value(),ui->linesAfter->value());
+
+    SearchBrowser* browser = new SearchBrowser(search_,filter,linesBefore,linesAfter,cacheFileList);
     mResults[mSearchId] = browser;
 
     connect(browser,SIGNAL(anchorClicked(QUrl)),this,SLOT(onAnchorClicked(QUrl)));
+
     QString title = ui->searchExp->value().include();
 
     //qDebug() << "title" << title << ui->searchExp->value().exps();
@@ -188,19 +197,27 @@ void SessionWidget::on_search_clicked() {
         title = title.mid(0,maxTitleChars-1) + "…";
     }
 
+    ui->searchFilter->enableTextChanged(false);
+    
     ui->results->insertTab(0,browser,title);
     ui->results->setCurrentIndex(0);
 
+    ui->searchFilter->enableTextChanged(true);
+    
     //qDebug() << "mResults[mSearchId] = browser" << mSearchId << browser;
 
-    emit search(mSearchId,path,filter,notBinary,search_,linesBefore,linesAfter);
+    emit search(mSearchId,path,filter,notBinary,search_,linesBefore,linesAfter,cacheFileList);
 
     ui->status1->setText(QString("Building path list"));
     ui->status2->setText(QString());
 
+    ui->searchFilter->enableTextChanged(false);
+
     RXCollector::instance()->collect(filter);
     RXCollector::instance()->collect(search_);
     updateCollector();
+
+    ui->searchFilter->enableTextChanged(true);
 
     ui->status1->setVisible(true);
 }
@@ -366,6 +383,11 @@ void SessionWidget::onFound(int id, QString res, int i, int t, int s, QString pa
     }
 }
 
+void SessionWidget::onCountMatchedFiles(int matched, int total)
+{
+    ui->fileCount->setText(QString("%1 / %2 files").arg(matched).arg(total));
+}
+
 void SessionWidget::onEditorSet()
 {
     if (mQueued.isEmpty())
@@ -375,6 +397,8 @@ void SessionWidget::onEditorSet()
 }
 
 void SessionWidget::on_results_currentChanged(int index) {
+
+    //qDebug() << "on_results_currentChanged" << index;
 
     QWidget* w = ui->results->widget(index);
     SearchBrowser* b = qobject_cast<SearchBrowser*>(w);
@@ -388,10 +412,16 @@ void SessionWidget::on_results_currentChanged(int index) {
         return;
     }
 
+    ui->searchFilter->enableTextChanged(false);
+
     ui->searchFilter->setValue(b->filter());
     ui->searchExp->setValue(b->exp());
     ui->linesBefore->setValue(b->linesBefore());
     ui->linesAfter->setValue(b->linesAfter());
+    ui->cacheFileList->setChecked(b->cacheFileList());
+
+    ui->searchFilter->enableTextChanged(true);
+
 }
 
 void SessionWidget::on_path_textChanged(const QString &path)
@@ -401,4 +431,19 @@ void SessionWidget::on_path_textChanged(const QString &path)
         return;
     }
     mParent->setTabText(mParent->indexOf(this),QFileInfo(path).fileName());
+}
+
+void SessionWidget::onSearchFilterTextChanged() {
+
+    qDebug() << "onSearchFilterTextChanged";
+
+    if (!ui->cacheFileList->isChecked()) {
+        return;
+    }
+    QString path = ui->path->text();
+    RegExpPath filter = ui->searchFilter->value();
+    bool notBinary = ui->notBinary->isChecked();
+    emit countMatchedFiles(path,filter,notBinary);
+
+    ui->fileCount->setText("? / ? files");
 }

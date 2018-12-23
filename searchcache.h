@@ -31,7 +31,7 @@ public:
     SearchCache();
 
     void add(int searchId, QString path, RegExpPath filter, bool notBinary, RegExp search,
-            int linesBefore, int linesAfter);
+            int linesBefore, int linesAfter, bool cacheFileList);
 
     void finish(int searchId);
 
@@ -39,13 +39,15 @@ public:
 
     //QMap<QString,int> fileSize() const;
 
+    QPair<int, int> countMatchedFiles(QString path, RegExpPath filter, bool notBinary);
+    QStringList getAllFiles(QString path, bool cacheFileList);
+    QStringList filterFiles(const QStringList &allFiles, RegExpPath filter, bool notBinary, int *filesFiltered, int *dirsFiltered);
 protected:
 
     QMutex mMutex;
     QMap<int,SearchData> mSearchData;
+    QMap<QString, QStringList> mFileList;
 
-    QMap<QString,QDateTime> mLastModified;
-    //QMap<QString,int> mFileSize;
 };
 
 #endif // SEARCHCACHE_H

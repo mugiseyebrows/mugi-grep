@@ -6,11 +6,16 @@ Worker::Worker(QObject *parent) :
 }
 
 
-void Worker::onSearch(int searchId,QString path, RegExpPath filter, bool notBinary,
-                       RegExp search, int linesBefore, int linesAfter)
+void Worker::onSearch(int searchId, QString path, RegExpPath filter, bool notBinary,
+                       RegExp search, int linesBefore, int linesAfter, bool cacheFileList)
 {
-    mCache.add(searchId,path,filter,notBinary,search,linesBefore,linesAfter);
+    mCache.add(searchId,path,filter,notBinary,search,linesBefore,linesAfter,cacheFileList);
     emit found(searchId,QString(),-1,0,0,QString());
+}
+
+void Worker::onCountMatchedFiles(QString path, RegExpPath filter, bool notBinary) {
+    QPair<int,int> fileCount = mCache.countMatchedFiles(path,filter,notBinary);
+    emit count(fileCount.first, fileCount.second);
 }
 
 void Worker::onSearchMore(int id)

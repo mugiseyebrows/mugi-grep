@@ -3,8 +3,8 @@
 #include <QFont>
 #include <QDebug>
 
-SearchBrowser::SearchBrowser(RegExp exp, RegExpPath filter, int linesBefore, int linesAfter, QWidget *parent) :
-    QTextBrowser(parent), mExp(exp), mFilter(filter), mLinesBefore(linesBefore), mLinesAfter(linesAfter)
+SearchBrowser::SearchBrowser(RegExp exp, RegExpPath filter, int linesBefore, int linesAfter, bool cacheFileList, QWidget *parent) :
+    QTextBrowser(parent), mExp(exp), mFilter(filter), mLinesBefore(linesBefore), mLinesAfter(linesAfter), mCacheFileList(cacheFileList)
 {
     setOpenLinks(false);
 
@@ -44,4 +44,9 @@ int SearchBrowser::linesBefore() const
 int SearchBrowser::linesAfter() const
 {
     return mLinesAfter;
+}
+
+bool SearchBrowser::cacheFileList() const
+{
+    return mCacheFileList;
 }

@@ -96,4 +96,8 @@ void RegExpPath::test()
 }
 
 
-
+QDebug operator <<(QDebug debug, const RegExpPath &path)
+{
+    debug.space() << "RegExpPath(" << path.exps() << path.case_() << ")";
+    return debug.space();
+}
