@@ -88,3 +88,6 @@ FORMS += \
 
 target.path = /usr/local/bin
 INSTALLS += target
+
+DISTFILES += \
+    todo.txt

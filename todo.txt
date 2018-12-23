@@ -1,0 +1,1 @@
+text browser context menu: show in explorer, copy path, copy name

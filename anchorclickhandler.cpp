@@ -6,6 +6,7 @@
 #include "widget/settingsdialog.h"
 #include <QTextBrowser>
 #include <QApplication>
+#include <QUrlQuery>
 
 AnchorClickHandler::AnchorClickHandler(QObject *parent) : QObject(parent)
 {
@@ -37,7 +38,6 @@ void AnchorClickHandler::onSetEditor()
     mQueued = QUrl();
 }
 
-#include <QUrlQuery>
 
 namespace  {
 
@@ -81,9 +81,14 @@ void AnchorClickHandler::onAnchorClicked(QUrl url) {
 
     QString line = q.queryItemValue("line");
 
+    if (line.isEmpty()) {
+        line = "1";
+    }
+
     QString path = url.path();
-    if (path.startsWith("/"))
+    if (path.startsWith("/")) {
         path = path.mid(1);
+    }
 
     QString editor = Settings::instance()->editor(path);
     if (editor.isEmpty()) {
@@ -95,7 +100,6 @@ void AnchorClickHandler::onAnchorClicked(QUrl url) {
     } else {
 
         QStringList editor_ = spaceSplit(editor);
-        QString opt;
 
         QStringList args;
         //args << path;
