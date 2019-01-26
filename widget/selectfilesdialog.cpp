@@ -33,7 +33,7 @@ SelectFilesDialog::SelectFilesDialog(const QString& path, RegExpPath filter,
     connect(worker,SIGNAL(allFiles(QString,QStringList)),this,SLOT(onAllFiles(QString,QStringList)));
     emit getAllFiles(path);
 
-    clickHandler->setBrowser(ui->files);
+    clickHandler->connectBrowser(ui->files);
 
     RXCollector::instance()->load(ui->filter);
 

@@ -166,7 +166,7 @@ void SessionWidget::on_search_clicked() {
     SearchBrowser* browser = new SearchBrowser(search_,filter,linesBefore,linesAfter,cacheFileList);
     mResults[mSearchId] = browser;
 
-    mClickHandler->setBrowser(browser);
+    mClickHandler->connectBrowser(browser);
 
     QString title = ui->searchExp->value().include();
 

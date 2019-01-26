@@ -7,39 +7,26 @@
 #include <QTextBrowser>
 #include <QApplication>
 #include <QUrlQuery>
-
-AnchorClickHandler::AnchorClickHandler(QObject *parent) : QObject(parent)
-{
-
-}
-
-void AnchorClickHandler::setBrowser(QTextBrowser *browser)
-{
-   connect(browser,SIGNAL(anchorClicked(QUrl)),this,SLOT(onAnchorClicked(QUrl)));
-   connect(this,SIGNAL(setEditor()),this,SLOT(onSetEditor()));
-
-}
-
-void AnchorClickHandler::onSetEditor()
-{
-    QWidget* widget = qApp->activeWindow();
-
-    SettingsDialog dialog(widget);
-    if (dialog.exec() == QDialog::Accepted) {
-        dialog.apply();
-        QString error = Settings::instance()->error();
-        if (!error.isEmpty()) {
-            QMessageBox::critical(widget,"error",error);
-        }
-    }
-    if (mQueued.isEmpty())
-        return;
-    onAnchorClicked(mQueued);
-    mQueued = QUrl();
-}
-
+#include <QDebug>
 
 namespace  {
+
+QString urlPath(const QUrl& url) {
+    QString path = url.path();
+    if (path.startsWith("/")) {
+        path = path.mid(1);
+    }
+    return path;
+}
+
+QString urlLine(const QUrl& url, const QString& defaultValue) {
+    QUrlQuery q(url);
+    QString line = q.queryItemValue("line");
+    if (line.isEmpty()) {
+        line = defaultValue;
+    }
+    return line;
+}
 
 QStringList spaceSplit(const QString& s_) {
     QStringList res;
@@ -70,61 +57,75 @@ QString unquote(const QString& text) {
     return text;
 }
 
+QPair<QString,QStringList> toAppArgs(const QString& editor, const QString& path, const QString& line) {
+    QStringList editor_ = spaceSplit(editor);
+    QStringList args;
+    bool pathSpecified = false;
+    for(int i=1;i<editor_.size();i++) {
+        QString opt = editor_[i];
+        if (opt.indexOf("%file%") > -1) {
+            opt = opt.replace("%file%",path);
+            pathSpecified = true;
+        }
+        if (opt.indexOf("%line%") > -1) {
+            opt = opt.replace("%line%",line);
+        }
+        args << opt;
+    }
+    if (!pathSpecified) {
+        args << path;
+    }
+    QString app = unquote(editor_[0]);
+    return QPair<QString,QStringList>(app,args);
+}
+
+} // namespace
+
+AnchorClickHandler::AnchorClickHandler(QObject *parent) : QObject(parent)
+{
+
+}
+
+void AnchorClickHandler::connectBrowser(QTextBrowser *browser)
+{
+   connect(browser,SIGNAL(anchorClicked(QUrl)),this,SLOT(onAnchorClicked(QUrl)));
+}
+
+void AnchorClickHandler::onSetEditor()
+{
+    QWidget* widget = qApp->activeWindow();
+
+    SettingsDialog dialog(widget);
+    if (dialog.exec() == QDialog::Accepted) {
+        dialog.apply();
+        QString error = Settings::instance()->error();
+        if (!error.isEmpty()) {
+            QMessageBox::critical(widget,"error",error);
+        }
+    }
 }
 
 void AnchorClickHandler::onAnchorClicked(QUrl url) {
 
+    //qDebug() << "onAnchorClicked" << url;
 
-    QWidget* widget = qApp->activeWindow();
-
-    QUrlQuery q(url);
-
-    QString line = q.queryItemValue("line");
-
-    if (line.isEmpty()) {
-        line = "1";
-    }
-
-    QString path = url.path();
-    if (path.startsWith("/")) {
-        path = path.mid(1);
-    }
+    QString path = urlPath(url);
+    QString line = urlLine(url,"1");
 
     QString editor = Settings::instance()->editor(path);
     if (editor.isEmpty()) {
-        QString question = "Editor not set for this file type, set editor?";
-        if (QMessageBox::question(widget,"Editor not set",question, QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
-            mQueued = url;
-            emit setEditor();
+        onSetEditor();
+        editor = Settings::instance()->editor(path);
+        if (!editor.isEmpty()) {
+            onAnchorClicked(url);
+            return;
         }
     } else {
-
-        QStringList editor_ = spaceSplit(editor);
-
-        QStringList args;
-        //args << path;
-
-        bool pathSpecified = false;
-
-        for(int i=1;i<editor_.size();i++) {
-            QString opt = editor_[i];
-            if (opt.indexOf("%file%") > -1) {
-                opt = opt.replace("%file%",path);
-                pathSpecified = true;
-            }
-            if (opt.indexOf("%line%") > -1) {
-                opt = opt.replace("%line%",line);
-            }
-            args << opt;
-        }
-        if (!pathSpecified)
-            args << path;
-
-        QString app = unquote(editor_[0]);
-
-        bool ok = QProcess::startDetached(app, args);
+        QPair<QString,QStringList> appArgs = toAppArgs(editor,path,line);
+        bool ok = QProcess::startDetached(appArgs.first, appArgs.second);
         if (!ok) {
-            QMessageBox::critical(widget,QString("Error"),QString("Failed to start %1").arg(editor_[0]));
+            QWidget* widget = qApp->activeWindow();
+            QMessageBox::critical(widget,QString("Error"),QString("Failed to start %1").arg(appArgs.first));
         }
     }
 }

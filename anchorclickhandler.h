@@ -12,14 +12,14 @@ class AnchorClickHandler : public QObject
 public:
     explicit AnchorClickHandler(QObject *parent = nullptr);
 
-    void setBrowser(QTextBrowser* browser);
+    void connectBrowser(QTextBrowser* browser);
 
 protected:
-    QUrl mQueued;
+    //QUrl mQueued;
 
 signals:
-    void setEditor();
-    void editorSet();
+    //void setEditor();
+    //void editorSet();
 public slots:
     void onAnchorClicked(QUrl);
 
