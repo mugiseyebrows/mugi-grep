@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QUrl>
+#include <QPoint>
 
 class QTextBrowser;
 
@@ -21,9 +22,11 @@ signals:
     //void setEditor();
     //void editorSet();
 public slots:
-    void onAnchorClicked(QUrl);
 
     void onSetEditor();
+protected slots:
+    void onAnchorClicked(QUrl);
+    void onCustomContextMenuRequested(QPoint point);
 };
 
 #endif // ANCHORCLICKHANDLER_H

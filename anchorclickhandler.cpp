@@ -89,6 +89,8 @@ AnchorClickHandler::AnchorClickHandler(QObject *parent) : QObject(parent)
 void AnchorClickHandler::connectBrowser(QTextBrowser *browser)
 {
    connect(browser,SIGNAL(anchorClicked(QUrl)),this,SLOT(onAnchorClicked(QUrl)));
+   browser->setContextMenuPolicy(Qt::CustomContextMenu);
+   connect(browser,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(onCustomContextMenuRequested(QPoint)));
 }
 
 void AnchorClickHandler::onSetEditor()
@@ -129,3 +131,35 @@ void AnchorClickHandler::onAnchorClicked(QUrl url) {
         }
     }
 }
+
+
+#include "utils/fileutils.h"
+#include <QAction>
+#include <QMenu>
+
+void AnchorClickHandler::onCustomContextMenuRequested(QPoint point) {
+
+    QTextBrowser* browser = qobject_cast<QTextBrowser*>(sender());
+    if (!browser) {
+        qDebug() << "AnchorClickHandler::onCustomContextMenuRequested error: sender is not a QTextBrowser*";
+        return;
+    }
+
+    QMenu* menu = browser->createStandardContextMenu(point);
+
+    QString anchor = browser->anchorAt(point);
+
+    QAction* show = new QAction("Show In File &Browser");
+    show->setEnabled(!anchor.isEmpty());
+    menu->insertAction(menu->actions().value(1),show);
+
+    QAction* result = menu->exec(browser->mapToGlobal(point));
+
+    if (result == show) {
+        QString path = urlPath(QUrl(anchor));
+        FileUtils::showInGraphicalShell(qApp->activeWindow(),path);
+    }
+
+    delete show;
+}
+

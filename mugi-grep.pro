@@ -42,7 +42,9 @@ HEADERS += \
     widget/selectfilesdialog.h \
     html.h \
     anchorclickhandler.h \
-    model/checkablestringlistmodel.h
+    model/checkablestringlistmodel.h \
+    utils/fileutils.h
+
 
 SOURCES += \
     filecache.cpp \
@@ -76,7 +78,8 @@ SOURCES += \
     widget/selectfilesdialog.cpp \
     html.cpp \
     anchorclickhandler.cpp \
-    model/checkablestringlistmodel.cpp
+    model/checkablestringlistmodel.cpp \
+    utils/fileutils.cpp
 
 FORMS += \
     widget/mainwindow.ui \
