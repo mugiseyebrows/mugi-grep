@@ -8,6 +8,10 @@
 #include <QApplication>
 #include <QUrlQuery>
 #include <QDebug>
+#include "utils/fileutils.h"
+#include <QAction>
+#include <QMenu>
+#include <QScrollBar>
 
 namespace  {
 
@@ -133,9 +137,6 @@ void AnchorClickHandler::onAnchorClicked(QUrl url) {
 }
 
 
-#include "utils/fileutils.h"
-#include <QAction>
-#include <QMenu>
 
 void AnchorClickHandler::onCustomContextMenuRequested(QPoint point) {
 
@@ -145,7 +146,11 @@ void AnchorClickHandler::onCustomContextMenuRequested(QPoint point) {
         return;
     }
 
-    QMenu* menu = browser->createStandardContextMenu(point);
+    QPoint coordinateOffset(browser->horizontalScrollBar()->value(),
+           browser->verticalScrollBar()->value());
+    QMatrix matrix;
+    matrix.translate(coordinateOffset.x(), coordinateOffset.y());
+    QMenu* menu = browser->createStandardContextMenu(matrix.map(point));
 
     QString anchor = browser->anchorAt(point);
 
