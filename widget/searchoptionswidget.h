@@ -22,12 +22,17 @@ public:
     QString path() const;
     void setPath(const QString& path);
 
-protected:
+    void setBrowserValues();
 
+    void collect();
+
+    void emitTabTitle();
+protected:
 
 signals:
     void search();
     void clone();
+    void tabTitle(QString, bool);
 protected slots:
     void onFilterTextChanged();
     void onExpTextChanged();

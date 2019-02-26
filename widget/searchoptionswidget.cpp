@@ -2,6 +2,10 @@
 #include "ui_searchoptionswidget.h"
 
 #include "searchbrowser.h"
+#include "rxcollector.h"
+#include <QDebug>
+#include <QFileDialog>
+#include <QDir>
 
 SearchOptionsWidget::SearchOptionsWidget(QWidget *parent) :
     QWidget(parent),
@@ -24,10 +28,10 @@ SearchOptionsWidget::~SearchOptionsWidget()
     delete ui;
 }
 
-#include "rxcollector.h"
-
 void SearchOptionsWidget::setBrowser(SearchBrowser *browser, bool setValues)
 {
+    qDebug() << "setBrowser" << browser << setValues;
+
     mBrowser = browser;
     mActive = false;
 
@@ -58,16 +62,40 @@ void SearchOptionsWidget::setPath(const QString &path)
     ui->path->setText(path);
 }
 
+void SearchOptionsWidget::setBrowserValues()
+{
+    mBrowser->setFilter(ui->filter->value());
+    mBrowser->setExp(ui->exp->value());
+    mBrowser->setLinesBefore(ui->linesBefore->value());
+    mBrowser->setLinesAfter(ui->linesAfter->value());
+    mBrowser->setCacheFileList(ui->cacheFileList->isChecked());
+}
+
+void SearchOptionsWidget::collect()
+{
+    RXCollector* collector = RXCollector::instance();
+    mActive = false;
+    collector->collect(ui->exp->value());
+    collector->collect(ui->filter->value());
+    collector->load(ui->exp);
+    collector->load(ui->filter);
+    mActive = true;
+}
+
 void SearchOptionsWidget::setActive(bool active)
 {
     mActive = active;
 }
 
+
 void SearchOptionsWidget::on_selectPath_clicked()
 {
-    if (!mActive) {
+
+    QString path = QFileDialog::getExistingDirectory(this, QString(), ui->path->text());
+    if (path.isEmpty()) {
         return;
     }
+    ui->path->setText(QDir::toNativeSeparators(path));
 }
 
 void SearchOptionsWidget::on_search_clicked()
@@ -79,7 +107,7 @@ void SearchOptionsWidget::onFilterTextChanged() {
     if (!mActive || !mBrowser) {
         return;
     }
-    if (mBrowser->executed()) {
+    if (mBrowser->isExecuted()) {
         emit clone();
         return;
     }
@@ -90,18 +118,23 @@ void SearchOptionsWidget::onExpTextChanged() {
     if (!mActive || !mBrowser) {
         return;
     }
-    if (mBrowser->executed()) {
+    if (mBrowser->isExecuted()) {
         emit clone();
         return;
     }
     mBrowser->setExp(ui->exp->value());
+    emitTabTitle();
+}
+
+void SearchOptionsWidget::emitTabTitle() {
+    emit tabTitle(ui->exp->value().include(), mBrowser->isExecuted());
 }
 
 void SearchOptionsWidget::onLinesAfterValueChanged() {
     if (!mActive || !mBrowser) {
         return;
     }
-    if (mBrowser->executed()) {
+    if (mBrowser->isExecuted()) {
         emit clone();
         return;
     }
@@ -112,7 +145,7 @@ void SearchOptionsWidget::onLinesBeforeValueChanged() {
     if (!mActive || !mBrowser) {
         return;
     }
-    if (mBrowser->executed()) {
+    if (mBrowser->isExecuted()) {
         emit clone();
         return;
     }
@@ -123,7 +156,7 @@ void SearchOptionsWidget::onCacheFileListClicked(bool value) {
     if (!mActive || !mBrowser) {
         return;
     }
-    if (mBrowser->executed()) {
+    if (mBrowser->isExecuted()) {
         emit clone();
         return;
     }

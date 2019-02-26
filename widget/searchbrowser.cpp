@@ -65,7 +65,7 @@ void SearchBrowser::setSearchId(int searchId) {
     mSearchId = searchId;
 }
 
-bool SearchBrowser::executed() const {
+bool SearchBrowser::isExecuted() const {
     return mSearchId > -1;
 }
 

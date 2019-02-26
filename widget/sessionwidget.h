@@ -68,6 +68,8 @@ protected:
     SearchBrowser *createTab(const QString &name, SearchBrowser *browser = 0, bool append = true, bool select = true);
 
     bool mListenResultCurrentChanged;
+
+    bool mSetValues;
 signals:
 
     void setEditor();
@@ -104,6 +106,9 @@ protected slots:
     //void on_selectFiles_clicked();
 
     //void onSearchExpTextChanged();
+    void onClone();
+    void onSearch();
+    void onTabTitle(QString title, bool isExecuted);
 private:
     Ui::SessionWidget *ui;
 };

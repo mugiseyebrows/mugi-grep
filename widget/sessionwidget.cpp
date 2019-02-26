@@ -30,7 +30,8 @@ SessionWidget::SessionWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::SessionWidget),
     mClickHandler(new AnchorClickHandler()),
-    mListenResultCurrentChanged(true)
+    mListenResultCurrentChanged(true),
+    mSetValues(true)
 {
     ui->setupUi(this);
 
@@ -57,6 +58,10 @@ SessionWidget::SessionWidget(QWidget *parent) :
 
     connect(ui->options,SIGNAL(clone()),this,SLOT(onClone()));
 
+    connect(ui->options,SIGNAL(search()),this,SLOT(onSearch()));
+
+    connect(ui->options,SIGNAL(tabTitle(QString,bool)),this,SLOT(onTabTitle(QString,bool)));
+
     //connect(ui->searchFilter,SIGNAL(textChanged()),this,SLOT(onSearchFilterTextChanged()));
     //connect(ui->searchExp,SIGNAL(textChanged()),this,SLOT(onSearchExpTextChanged()));
 
@@ -77,7 +82,7 @@ SessionWidget::SessionWidget(QWidget *parent) :
 
     SearchBrowser* browser_ = new SearchBrowser();
     mClickHandler->connectBrowser(browser_);
-    ui->results->addTab(browser_,"one");
+    ui->results->addTab(browser_,QString());
 }
 
 SessionWidget::~SessionWidget()
@@ -92,12 +97,37 @@ SessionWidget::~SessionWidget()
     delete ui;
 }
 
+void SessionWidget::onClone() {
+    SearchBrowser* browser = currentTab();
+    SearchBrowser* browser_ = new SearchBrowser();
+    browser->copy(browser_);
+    mClickHandler->connectBrowser(browser_);
+    ui->results->addTab(browser_,browser->exp().include());
+    mSetValues = false;
+    ui->results->setCurrentWidget(browser_);
+    ui->options->setBrowserValues();
+    ui->options->emitTabTitle();
+}
+
+void SessionWidget::onSearch() {
+    SearchBrowser* browser = currentTab();
+    int searchId = SearchId::instance()->next();
+    browser->setSearchId(searchId);
+    ui->options->collect();
+    ui->options->emitTabTitle();
+}
+
+void SessionWidget::onTabTitle(QString title, bool isExecuted) {
+    if (!isExecuted) {
+        title = title + "*";
+    }
+    ui->results->setTabText(ui->results->currentIndex(),title);
+}
 
 void SessionWidget::cancelAll()
 {
 
 }
-
 
 QString SessionWidget::readPath() const
 {
@@ -106,7 +136,7 @@ QString SessionWidget::readPath() const
 
 void SessionWidget::serialize(QJsonObject& json) const
 {
-    //json["path"] = ui->path->text();
+    json["path"] = ui->options->path();
 }
 
 void SessionWidget::deserialize(const QJsonObject &v)
@@ -390,7 +420,9 @@ void SessionWidget::on_results_currentChanged(int index) {
         return;
     }
 
-    ui->options->setBrowser(browser,true);
+    ui->options->setBrowser(browser,mSetValues);
+
+    mSetValues = true;
 
     /*ui->searchFilter->enableTextChanged(false);
 
@@ -490,8 +522,3 @@ void SessionWidget::on_selectFiles_clicked()
 
 }
 #endif
-
-
-void SessionWidget::onClone() {
-    SearchBrowser* browser_ = new SearchBrowser
-}

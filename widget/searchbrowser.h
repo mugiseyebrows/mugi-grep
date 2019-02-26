@@ -22,7 +22,7 @@ public:
     void setCacheFileList(bool cacheFileList);
     int searchId() const;
     void setSearchId(int searchId);
-    bool executed() const;
+    bool isExecuted() const;
     void copy(SearchBrowser* dest);
 
 protected:
