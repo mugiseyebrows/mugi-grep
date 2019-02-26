@@ -6,20 +6,23 @@
 
 RegExpPath::RegExpPath()
 {
+    init(QStringList(),false);
 }
-
-
 
 void RegExpPath::init(const QStringList &regExps, bool case_)
 {
-    mRegExps = regExps;
+    QStringList regExps_ = regExps;
+    while(regExps_.size() < 4) {
+        regExps_ << QString();
+    }
+    mRegExps = regExps_;
     mCase = case_;
-    for (int i=0;i<regExps.size();i++) {
-        QRegularExpression::PatternOption case__ = case_ ? QRegularExpression::NoPatternOption : QRegularExpression::CaseInsensitiveOption;
+    for (int i=0;i<mRegExps.size();i++) {
+        QRegularExpression::PatternOption opt = mCase ? QRegularExpression::NoPatternOption : QRegularExpression::CaseInsensitiveOption;
         if (i % 2 == 1) {
-            mRegExps_ << QRegularExpression("^(" + regExps[i] + ")$", case__);
+            mRegExps_ << QRegularExpression("^(" + mRegExps[i] + ")$", opt);
         } else {
-            mRegExps_ << QRegularExpression(regExps[i], case__);
+            mRegExps_ << QRegularExpression(mRegExps[i], opt);
         }
     }
 }

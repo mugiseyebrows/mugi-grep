@@ -26,7 +26,10 @@ protected:
 
 signals:
     void returnPressed();
+    void textChanged();
 
+protected slots:
+    void onTextChanged();
 };
 
 #endif // RXINPUT_H

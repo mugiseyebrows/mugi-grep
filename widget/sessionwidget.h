@@ -37,22 +37,26 @@ public:
 
     QString readPath() const;
 
-
     void startRead();
 
     void updateCollector();
 
     void serialize(QJsonObject &json) const;
     void deserialize(const QJsonObject &v);
+    SearchBrowser* find(int searchId);
+    SearchBrowser *tab(int index);
+    void countMatchedFiles();
+    SearchBrowser *currentTab();
+
 protected:
 
     Worker* mWorker;
     QThread* mThread;
 
     static void save(const QString& path, const QString& text);
-    int mSearchId;
+    //int mSearchId;
 
-    QMap<int,SearchBrowser*> mResults;
+    //QMap<int,SearchBrowser*> mResults;
     SearchBrowser* currentResult() const;
 
     bool mCancel;
@@ -61,6 +65,9 @@ protected:
 
     AnchorClickHandler* mClickHandler;
 
+    SearchBrowser *createTab(const QString &name, SearchBrowser *browser = 0, bool append = true, bool select = true);
+
+    bool mListenResultCurrentChanged;
 signals:
 
     void setEditor();
@@ -71,13 +78,14 @@ signals:
 
 protected slots:
 
+#if 0
     void on_selectPath_clicked();
-
     void on_search_clicked();
     void on_searchExp_returnPressed();
     void on_searchFilter_returnPressed();
     void on_linesAfter_returnPressed();
     void on_linesBefore_returnPressed();
+#endif
 
     void on_cancel_clicked();
 
@@ -88,14 +96,14 @@ protected slots:
 
     void onFound(int, QString, int, int, int, QString path);
 
+    //void on_path_textChanged(const QString &arg1);
 
-    void on_path_textChanged(const QString &arg1);
-
-    void onSearchFilterTextChanged();
+    //void onSearchFilterTextChanged();
     void onCountMatchedFiles(int, int);
 
-    void on_selectFiles_clicked();
+    //void on_selectFiles_clicked();
 
+    //void onSearchExpTextChanged();
 private:
     Ui::SessionWidget *ui;
 };

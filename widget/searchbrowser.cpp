@@ -1,52 +1,78 @@
-#include "widget/searchbrowser.h"
-
-#include <QFont>
+#include "searchbrowser.h"
 #include <QDebug>
 
-SearchBrowser::SearchBrowser(RegExp exp, RegExpPath filter, int linesBefore, int linesAfter, bool cacheFileList, QWidget *parent) :
-    QTextBrowser(parent), mExp(exp), mFilter(filter), mLinesBefore(linesBefore), mLinesAfter(linesAfter), mCacheFileList(cacheFileList)
-{
+SearchBrowser::SearchBrowser(QWidget* parent) :
+    QTextBrowser(parent), mSearchId(-1), mCacheFileList(false), mLinesBefore(0), mLinesAfter(0) {
     setOpenLinks(false);
-
-    //@todo external stylesheet
-
+//@todo external stylesheet
 #ifdef Q_OS_LINUX
-    QFont font("Liberation Mono",11,QFont::Normal);
+    QFont font("Liberation Mono", 11, QFont::Normal);
 #endif
-
 #ifdef Q_OS_WIN
-    QFont font("Courier New",12,QFont::Normal);
+    QFont font("Courier New", 12, QFont::Normal);
 #endif
-
     setFont(font);
 }
 
-SearchBrowser::~SearchBrowser()
-{
+SearchBrowser::~SearchBrowser() {
     qDebug() << "~SearchBrowser()";
 }
-
-RegExp SearchBrowser::exp() const
-{
+RegExp SearchBrowser::exp() const {
     return mExp;
 }
 
-RegExpPath SearchBrowser::filter() const
-{
+void SearchBrowser::setExp(const RegExp& exp) {
+    mExp = exp;
+}
+
+RegExpPath SearchBrowser::filter() const {
     return mFilter;
 }
 
-int SearchBrowser::linesBefore() const
-{
+void SearchBrowser::setFilter(const RegExpPath& filter) {
+    mFilter = filter;
+}
+
+int SearchBrowser::linesBefore() const {
     return mLinesBefore;
 }
 
-int SearchBrowser::linesAfter() const
-{
+void SearchBrowser::setLinesBefore(int linesBefore) {
+    mLinesBefore = linesBefore;
+}
+
+int SearchBrowser::linesAfter() const {
     return mLinesAfter;
 }
 
-bool SearchBrowser::cacheFileList() const
-{
+void SearchBrowser::setLinesAfter(int linesAfter) {
+    mLinesAfter = linesAfter;
+}
+
+bool SearchBrowser::cacheFileList() const {
     return mCacheFileList;
+}
+
+void SearchBrowser::setCacheFileList(bool cacheFileList) {
+    mCacheFileList = cacheFileList;
+}
+
+int SearchBrowser::searchId() const {
+    return mSearchId;
+}
+
+void SearchBrowser::setSearchId(int searchId) {
+    mSearchId = searchId;
+}
+
+bool SearchBrowser::executed() const {
+    return mSearchId > -1;
+}
+
+void SearchBrowser::copy(SearchBrowser* dest) {
+    dest->setExp(mExp);
+    dest->setFilter(mFilter);
+    dest->setLinesBefore(mLinesBefore);
+    dest->setLinesAfter(mLinesAfter);
+    dest->setCacheFileList(mCacheFileList);
 }

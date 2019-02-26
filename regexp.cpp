@@ -8,6 +8,7 @@
 
 RegExp::RegExp()
 {
+    init(QString(),QString(),false);
 }
 
 RegExp::RegExp(const QString &inc, const QString &exc, bool case_)
@@ -44,6 +45,7 @@ void RegExp::init(const QString& inc, const QString& exc, bool case_) {
     mExclude = exc;
     mInclude_ = QRegularExpression(inc, case_ ? QRegularExpression::NoPatternOption : QRegularExpression::CaseInsensitiveOption);
     mExclude_ = QRegularExpression(exc, case_ ? QRegularExpression::NoPatternOption : QRegularExpression::CaseInsensitiveOption);
+    mCase = case_;
 }
 
 QString RegExp::include() const

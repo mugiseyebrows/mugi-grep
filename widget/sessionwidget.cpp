@@ -22,13 +22,15 @@
 #include "settings.h"
 #include <QMessageBox>
 #include "anchorclickhandler.h"
+#include "widget/selectfilesdialog.h"
 
 #define RESULT_TAB_LIMIT 10
 
 SessionWidget::SessionWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::SessionWidget),
-    mClickHandler(new AnchorClickHandler())
+    mClickHandler(new AnchorClickHandler()),
+    mListenResultCurrentChanged(true)
 {
     ui->setupUi(this);
 
@@ -44,6 +46,8 @@ SessionWidget::SessionWidget(QWidget *parent) :
     connect(mWorker,SIGNAL(found(int,QString,int,int,int,QString)),
             this,SLOT(onFound(int,QString,int,int,int,QString)));
 
+    //connect(ui->options,SIGNAL())
+
     connect(this,SIGNAL(countMatchedFiles(QString,RegExpPath,bool)),mWorker,SLOT(onCountMatchedFiles(QString,RegExpPath,bool)));
     connect(mWorker,SIGNAL(count(int,int)),this,SLOT(onCountMatchedFiles(int,int)));
 
@@ -51,7 +55,10 @@ SessionWidget::SessionWidget(QWidget *parent) :
 
     connect(this,SIGNAL(finishSearch(int)),mWorker,SLOT(onFinishSearch(int)));
 
-    connect(ui->searchFilter,SIGNAL(textChanged()),this,SLOT(onSearchFilterTextChanged()));
+    connect(ui->options,SIGNAL(clone()),this,SLOT(onClone()));
+
+    //connect(ui->searchFilter,SIGNAL(textChanged()),this,SLOT(onSearchFilterTextChanged()));
+    //connect(ui->searchExp,SIGNAL(textChanged()),this,SLOT(onSearchExpTextChanged()));
 
     mThread->start();
 
@@ -66,7 +73,11 @@ SessionWidget::SessionWidget(QWidget *parent) :
     ui->status2->setTextElideMode(Qt::ElideMiddle);
     ui->status2->hide();
 
-    ui->fileCount->setText(QString());
+    //ui->fileCount->setText(QString());
+
+    SearchBrowser* browser_ = new SearchBrowser();
+    mClickHandler->connectBrowser(browser_);
+    ui->results->addTab(browser_,"one");
 }
 
 SessionWidget::~SessionWidget()
@@ -90,17 +101,17 @@ void SessionWidget::cancelAll()
 
 QString SessionWidget::readPath() const
 {
-    return ui->path->text();
+    //return ui->path->text();
 }
 
 void SessionWidget::serialize(QJsonObject& json) const
 {
-    json["path"] = ui->path->text();
+    //json["path"] = ui->path->text();
 }
 
 void SessionWidget::deserialize(const QJsonObject &v)
 {
-    ui->path->setText(v.value("path").toString());
+    ui->options->setPath(v.value("path").toString());
 }
 
 void SessionWidget::startRead()
@@ -110,8 +121,8 @@ void SessionWidget::startRead()
 
 void SessionWidget::updateCollector()
 {
-    RXCollector::instance()->load(ui->searchFilter);
-    RXCollector::instance()->load(ui->searchExp);
+    //RXCollector::instance()->load(ui->searchFilter);
+    //RXCollector::instance()->load(ui->searchExp);
     //qDebug() << "SessionWidget::updateCollector()";
 }
 
@@ -131,7 +142,7 @@ SearchBrowser *SessionWidget::currentResult() const
     QWidget* w = ui->results->widget(ui->results->currentIndex());
     return qobject_cast<SearchBrowser*>(w);
 }
-
+#if 0
 void SessionWidget::on_linesAfter_returnPressed() {
     on_search_clicked();
 }
@@ -140,8 +151,43 @@ void SessionWidget::on_linesBefore_returnPressed() {
     on_search_clicked();
 }
 
+
 void SessionWidget::on_search_clicked() {
 
+    SearchBrowser* browser = currentTab();
+    if (!browser) {
+        qDebug() << "!browser";
+        return;
+    }
+    if (browser->executed()) {
+        return;
+    }
+
+    int searchId = SearchId::instance()->next();
+    browser->setSearchId(searchId);
+
+    QString path = ui->options->path();
+    RegExpPath filter = browser->filter();
+    RegExp search_ = browser->exp();
+    int linesBefore = browser->linesBefore();
+    int linesAfter = browser->linesAfter();
+    bool cacheFileList = browser->cacheFileList();
+    bool notBinary = true;
+
+    mCancel = false;
+
+#if 0
+    emit search(searchId,path,filter,notBinary,search_,linesBefore,linesAfter,cacheFileList);
+
+    ui->status1->setText(QString("Building path list"));
+    ui->status2->setText(QString());
+
+    ui->status1->setVisible(true);
+    ui->cancel->setVisible(true);
+#endif
+
+
+#if 0
     if (mResults.size() >= RESULT_TAB_LIMIT) {
         int index = ui->results->count() - 1;
         ui->results->widget(index)->deleteLater();
@@ -163,8 +209,8 @@ void SessionWidget::on_search_clicked() {
 
     mSearchId = SearchId::instance()->next();
 
-    SearchBrowser* browser = new SearchBrowser(search_,filter,linesBefore,linesAfter,cacheFileList);
-    mResults[mSearchId] = browser;
+    SearchBrowser* browser = new SearchBrowser();
+    //mResults[mSearchId] = browser;
 
     mClickHandler->connectBrowser(browser);
 
@@ -200,25 +246,35 @@ void SessionWidget::on_search_clicked() {
     ui->searchFilter->enableTextChanged(true);
 
     ui->status1->setVisible(true);
+
+
+#endif
+
 }
 
 void SessionWidget::on_selectPath_clicked() {
 
+
     QString path = QFileDialog::getExistingDirectory(this, QString(), ui->path->text());
-    if (path.isEmpty())
+    if (path.isEmpty()) {
         return;
+    }
 
     ui->path->setText(QDir::toNativeSeparators(path));
+
     //on_read_clicked();
 }
-
+#endif
+#if 0
 void SessionWidget::on_searchExp_returnPressed() {
     on_search_clicked();
 }
 
+
 void SessionWidget::on_searchFilter_returnPressed() {
     on_search_clicked();
 }
+#endif
 
 void SessionWidget::on_cancel_clicked()
 {
@@ -249,26 +305,32 @@ void SessionWidget::on_saveHtml_clicked()
     save(path,currentResult()->toHtml());
 }
 
-void SessionWidget::onFound(int id, QString res, int i, int t, int s, QString path)
+SearchBrowser* SessionWidget::find(int searchId) {
+    int count = ui->results->count();
+    for(int i=0;i<count;i++) {
+        SearchBrowser* browser = tab(i);
+        if (browser->searchId() == searchId) {
+            return browser;
+        }
+    }
+    return 0;
+}
+
+void SessionWidget::onFound(int searchId, QString res, int i, int t, int s, QString path)
 {
-    SearchBrowser* browser;
 
-    browser = mResults.value(id);
+    qDebug() << searchId << res.size() << "chars" << i << t << s << path;
 
-    //qDebug() << "onFound" << id;
-
-    /*if (id != mSearchId) {
-        qDebug() << "MainWindow::onFound id != mSearchId";
-        return;
-    }*/
+    SearchBrowser* browser = find(searchId);
 
     if (!browser) {
         qDebug() << "onFound error no browser";
         return;
     }
 
-    if (!res.isEmpty())
+    if (!res.isEmpty()) {
         browser->append(res);
+    }
 
     if (i >= 0) {
         ui->status1->setText(QString("Processed %1 files out of %2 (%3 filtered out)").arg(i).arg(t).arg(s));
@@ -287,11 +349,9 @@ void SessionWidget::onFound(int id, QString res, int i, int t, int s, QString pa
     //emit searchMore(id);
 
     if (i < t && !mCancel) {
-        //qDebug() << "i < t" << i << t;
-        emit searchMore(id);
+        emit searchMore(searchId);
     } else {
-        //emit calcSize();
-        emit finishSearch(id);
+        emit finishSearch(searchId);
     }
 
     if (mCancel) {
@@ -305,26 +365,34 @@ void SessionWidget::onFound(int id, QString res, int i, int t, int s, QString pa
 
 void SessionWidget::onCountMatchedFiles(int matched, int total)
 {
-    ui->fileCount->setText(QString("%1 / %2 files").arg(matched).arg(total));
+    //ui->fileCount->setText(QString("%1 / %2 files").arg(matched).arg(total));
+}
+
+SearchBrowser* SessionWidget::currentTab() {
+    return tab(ui->results->currentIndex());
+}
+
+SearchBrowser* SessionWidget::tab(int index) {
+    return qobject_cast<SearchBrowser*>(ui->results->widget(index));
 }
 
 void SessionWidget::on_results_currentChanged(int index) {
 
-    //qDebug() << "on_results_currentChanged" << index;
+    if (!mListenResultCurrentChanged) {
+        return;
+    }
 
-    QWidget* w = ui->results->widget(index);
-    SearchBrowser* b = qobject_cast<SearchBrowser*>(w);
-    if (!b) {
+    qDebug() << "on_results_currentChanged" << index;
+
+    SearchBrowser* browser = tab(index);
+    if (!browser) {
         qDebug() << "not a browser at index" << index;
         return;
     }
 
-    if (!mResults.values().contains(b)) {
-        qDebug() << "not in mResults" << b;
-        return;
-    }
+    ui->options->setBrowser(browser,true);
 
-    ui->searchFilter->enableTextChanged(false);
+    /*ui->searchFilter->enableTextChanged(false);
 
     ui->searchFilter->setValue(b->filter());
     ui->searchExp->setValue(b->exp());
@@ -332,10 +400,11 @@ void SessionWidget::on_results_currentChanged(int index) {
     ui->linesAfter->setValue(b->linesAfter());
     ui->cacheFileList->setChecked(b->cacheFileList());
 
-    ui->searchFilter->enableTextChanged(true);
+    ui->searchFilter->enableTextChanged(true);*/
 
 }
 
+#if 0
 void SessionWidget::on_path_textChanged(const QString &path)
 {
     if (!mParent) {
@@ -344,11 +413,11 @@ void SessionWidget::on_path_textChanged(const QString &path)
     }
     mParent->setTabText(mParent->indexOf(this),QFileInfo(path).fileName());
 }
+#endif
 
-void SessionWidget::onSearchFilterTextChanged() {
-
+void SessionWidget::countMatchedFiles() {
+#if 0
     qDebug() << "onSearchFilterTextChanged";
-
     if (!ui->cacheFileList->isChecked()) {
         return;
     }
@@ -356,14 +425,60 @@ void SessionWidget::onSearchFilterTextChanged() {
     RegExpPath filter = ui->searchFilter->value();
     bool notBinary = ui->notBinary->isChecked();
     emit countMatchedFiles(path,filter,notBinary);
-
     ui->fileCount->setText("? / ? files");
+#endif
 }
 
-#include "widget/selectfilesdialog.h"
+#if 0
+SearchBrowser* SessionWidget::createTab(const QString& name, SearchBrowser* browser, bool append, bool select) {
+
+    if (select) {
+        mListenResultCurrentChanged = false;
+    }
+    SearchBrowser* browser_ = new SearchBrowser();
+    if (browser) {
+        browser->copy(browser_);
+    }
+    mClickHandler->connectBrowser(browser_);
+    if (append) {
+        ui->results->addTab(browser_,name);
+    }
+    if (select) {
+        ui->results->setCurrentWidget(browser_);
+        mListenResultCurrentChanged = true;
+    }
+    return browser_;
+
+
+}
+
+void SessionWidget::onSearchFilterTextChanged() {
+
+    countMatchedFiles();
+    SearchBrowser* browser = currentTab();
+    if (browser->executed()) {
+        SearchBrowser* browser_ = createTab(QString::number(ui->results->count()+1), browser);
+        browser_->setFilter(ui->searchFilter->value());
+        return;
+    }
+    browser->setFilter(ui->searchFilter->value());
+}
+
+void SessionWidget::onSearchExpTextChanged() {
+
+    SearchBrowser* browser = currentTab();
+    if (browser->executed()) {
+        SearchBrowser* browser_ = createTab(QString::number(ui->results->count()+1), browser);
+        browser_->setExp(ui->searchExp->value());
+        return;
+    }
+    browser->setExp(ui->searchExp->value());
+
+}
 
 void SessionWidget::on_selectFiles_clicked()
 {
+
     QString path = ui->path->text();
 
     SelectFilesDialog dialog(path, ui->searchFilter->value(), mWorker, mClickHandler, this);
@@ -372,4 +487,11 @@ void SessionWidget::on_selectFiles_clicked()
         ui->searchFilter->setValue(dialog.filter());
     }
 
+
+}
+#endif
+
+
+void SessionWidget::onClone() {
+    SearchBrowser* browser_ = new SearchBrowser
 }

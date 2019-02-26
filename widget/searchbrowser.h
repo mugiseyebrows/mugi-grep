@@ -1,24 +1,29 @@
 #ifndef SEARCHBROWSER_H
 #define SEARCHBROWSER_H
-
-#include <QTextBrowser>
-
 #include "regexp.h"
 #include "regexppath.h"
+#include <QTextBrowser>
 
-class SearchBrowser : public QTextBrowser
-{
+class QDebug;
+class SearchBrowser : public QTextBrowser {
     Q_OBJECT
 public:
-    explicit SearchBrowser(RegExp exp, RegExpPath filter, int linesBefore, int linesAfter, bool cacheFileList, QWidget *parent = nullptr);
-    
+    SearchBrowser(QWidget* parent = 0);
     ~SearchBrowser();
-
     RegExp exp() const;
+    void setExp(const RegExp& exp);
     RegExpPath filter() const;
+    void setFilter(const RegExpPath& filter);
     int linesBefore() const;
+    void setLinesBefore(int linesBefore);
     int linesAfter() const;
+    void setLinesAfter(int linesAfter);
     bool cacheFileList() const;
+    void setCacheFileList(bool cacheFileList);
+    int searchId() const;
+    void setSearchId(int searchId);
+    bool executed() const;
+    void copy(SearchBrowser* dest);
 
 protected:
     RegExp mExp;
@@ -26,11 +31,6 @@ protected:
     int mLinesBefore;
     int mLinesAfter;
     bool mCacheFileList;
-
-signals:
-    
-public slots:
-    
+    int mSearchId;
 };
-
 #endif // SEARCHBROWSER_H
