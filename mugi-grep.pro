@@ -44,7 +44,8 @@ HEADERS += \
     anchorclickhandler.h \
     model/checkablestringlistmodel.h \
     utils/fileutils.h \
-    widget/searchoptionswidget.h
+    widget/searchoptionswidget.h \
+    widget/searchprogresswidget.h
 
 
 SOURCES += \
@@ -81,7 +82,8 @@ SOURCES += \
     anchorclickhandler.cpp \
     model/checkablestringlistmodel.cpp \
     utils/fileutils.cpp \
-    widget/searchoptionswidget.cpp
+    widget/searchoptionswidget.cpp \
+    widget/searchprogresswidget.cpp
 
 FORMS += \
     widget/mainwindow.ui \
@@ -90,7 +92,8 @@ FORMS += \
     widget/sessionwidget.ui \
     widget/settingsdialog.ui \
     widget/selectfilesdialog.ui \
-    widget/searchoptionswidget.ui
+    widget/searchoptionswidget.ui \
+    widget/searchprogresswidget.ui
 
 target.path = /usr/local/bin
 INSTALLS += target

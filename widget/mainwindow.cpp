@@ -57,8 +57,9 @@ void MainWindow::closeEvent(QCloseEvent * e)
     for(int i=0;i<ui->tabs->count();i++) {
         QWidget* w = ui->tabs->widget(i);
         SessionWidget* sw = qobject_cast<SessionWidget*>(w);
-        if (sw)
-            sw->cancelAll();
+        if (sw) {
+            sw->onCanceled();
+        }
     }
 
     QJsonArray sessions;
@@ -102,8 +103,9 @@ void MainWindow::removeSession() {
     int currentIndex = ui->tabs->currentIndex();
     QWidget* w = ui->tabs->widget(currentIndex);
     SessionWidget* sw = qobject_cast<SessionWidget*>(w);
-    if (sw)
-        sw->cancelAll();
+    if (sw) {
+        sw->onCanceled();
+    }
     ui->tabs->removeTab(currentIndex);
 
 }
@@ -133,9 +135,9 @@ void MainWindow::serializeExps(QJsonObject& json) const {
 
 void MainWindow::deserealizeSessions(const QJsonArray& vl)
 {
-    while(ui->tabs->count()>0)
+    while(ui->tabs->count()>0) {
         removeSession();
-    QVariant e;
+    }
     for(const QJsonValue& v : vl) {
         addSession(v.toObject());
     }
@@ -163,7 +165,7 @@ void MainWindow::on_removeSession_triggered()
     if (!sw)
         return;
 
-    sw->cancelAll();
+    sw->onCanceled();
     ui->tabs->removeTab(currentIndex);
 
 }
@@ -231,7 +233,7 @@ void MainWindow::onReadStarted(QWidget* w) {
         return;
     }
 
-    QString name = QFileInfo(sw->readPath()).baseName();
+    QString name = QFileInfo(sw->path()).baseName();
     int index = ui->tabs->indexOf(w);
     if (index < 0) {
         qDebug() << "onReadStarted index < 0";

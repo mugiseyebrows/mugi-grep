@@ -35,9 +35,7 @@ public:
 
     void cancelAll();
 
-    QString readPath() const;
-
-    void startRead();
+    QString path() const;
 
     void updateCollector();
 
@@ -47,27 +45,25 @@ public:
     SearchBrowser *tab(int index);
     void countMatchedFiles();
     SearchBrowser *currentTab();
-
+    int oldestTabIndex();
 protected:
 
     Worker* mWorker;
     QThread* mThread;
 
     static void save(const QString& path, const QString& text);
-    //int mSearchId;
 
-    //QMap<int,SearchBrowser*> mResults;
     SearchBrowser* currentResult() const;
 
     bool mCancel;
 
-    QTabWidget* mParent;
+    QTabWidget* mTabWidget;
 
     AnchorClickHandler* mClickHandler;
 
     SearchBrowser *createTab(const QString &name, SearchBrowser *browser = 0, bool append = true, bool select = true);
 
-    bool mListenResultCurrentChanged;
+    //bool mListenResultCurrentChanged;
 
     bool mSetValues;
 signals:
@@ -76,39 +72,21 @@ signals:
     void search(int searchId, QString path, RegExpPath filter, bool notBinary, RegExp search, int linesBofore, int linesAfter,bool cacheFileList);
     void searchMore(int id);
     void finishSearch(int id);
-    void countMatchedFiles(QString,RegExpPath,bool);
+
+public slots:
+    void onCanceled();
 
 protected slots:
 
-#if 0
-    void on_selectPath_clicked();
-    void on_search_clicked();
-    void on_searchExp_returnPressed();
-    void on_searchFilter_returnPressed();
-    void on_linesAfter_returnPressed();
-    void on_linesBefore_returnPressed();
-#endif
-
-    void on_cancel_clicked();
-
     void on_saveText_clicked();
     void on_saveHtml_clicked();
-
     void on_results_currentChanged(int index);
-
     void onFound(int, QString, int, int, int, QString path);
-
-    //void on_path_textChanged(const QString &arg1);
-
-    //void onSearchFilterTextChanged();
-    void onCountMatchedFiles(int, int);
-
-    //void on_selectFiles_clicked();
-
-    //void onSearchExpTextChanged();
     void onClone();
     void onSearch();
     void onTabTitle(QString title, bool isExecuted);
+    void onPathChanged(QString path);
+
 private:
     Ui::SessionWidget *ui;
 };
