@@ -120,18 +120,19 @@ void SessionWidget::onSearch() {
     ui->progress->started();
 }
 
-int SessionWidget::oldestTabIndex() {
+int SessionWidget::oldestTabIndex() { // todo test me
     int count = ui->results->count();
-    int searchId = -1;
-    int index = -1;
-    for(int i=0;i<count;i++) {
+    if (count < 1) {
+        return -1;
+    }
+    QDateTime dateTime = tab(0)->changed();
+    int index = 0;
+    for(int i=1;i<count;i++) {
         SearchBrowser* browser = tab(i);
-        int searchId_ = browser->searchId();
-        if (searchId_ > -1) {
-            if (searchId == -1 || searchId_ < searchId) {
-                searchId = searchId_;
-                index = i;
-            }
+        QDateTime dateTime_ = browser->changed();
+        if (dateTime > dateTime_) {
+            dateTime = dateTime_;
+            index = i;
         }
     }
     return index;
@@ -175,34 +176,31 @@ void SessionWidget::save(const QString &path, const QString &text)
     file.close();
 }
 
-SearchBrowser *SessionWidget::currentResult() const
-{
-    QWidget* w = ui->results->widget(ui->results->currentIndex());
-    return qobject_cast<SearchBrowser*>(w);
-}
-
 void SessionWidget::onCanceled() {
     mCancel = true;
 }
 
 void SessionWidget::on_saveText_clicked()
 {
-    if (!currentResult())
-        return;
-    QString path = QFileDialog::getSaveFileName(this,QString(),QString(),"Text (*.txt)");
-    if (path.isEmpty())
-        return;
-    save(path,currentResult()->toPlainText());
+    save(true);
 }
 
 void SessionWidget::on_saveHtml_clicked()
 {
-    if (!currentResult())
+    save(false);
+}
+
+void SessionWidget::save(bool plain) {
+    SearchBrowser* browser = currentTab();
+    if (!browser) {
         return;
-    QString path = QFileDialog::getSaveFileName(this,QString(),QString(),"Html (*.html)");
-    if (path.isEmpty())
+    }
+    QString filter = plain ? "Text (*.txt)" : "Html (*.html)";
+    QString path = QFileDialog::getSaveFileName(this,QString(),QString(),filter);
+    if (path.isEmpty()) {
         return;
-    save(path,currentResult()->toHtml());
+    }
+    save(path,plain ? browser->toPlainText() : browser->toHtml());
 }
 
 SearchBrowser* SessionWidget::find(int searchId) {

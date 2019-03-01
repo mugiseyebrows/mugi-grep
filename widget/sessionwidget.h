@@ -53,8 +53,6 @@ protected:
 
     static void save(const QString& path, const QString& text);
 
-    SearchBrowser* currentResult() const;
-
     bool mCancel;
 
     QTabWidget* mTabWidget;
@@ -63,15 +61,13 @@ protected:
 
     SearchBrowser *createTab(const QString &name, SearchBrowser *browser = 0, bool append = true, bool select = true);
 
-    //bool mListenResultCurrentChanged;
-
     bool mSetValues;
+    void save(bool plain);
 signals:
 
-    void setEditor();
     void search(int searchId, QString path, RegExpPath filter, bool notBinary, RegExp search, int linesBofore, int linesAfter,bool cacheFileList);
-    void searchMore(int id);
-    void finishSearch(int id);
+    void searchMore(int searchId);
+    void finishSearch(int searchId);
 
 public slots:
     void onCanceled();

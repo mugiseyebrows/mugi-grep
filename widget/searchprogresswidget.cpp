@@ -39,7 +39,6 @@ void SearchProgressWidget::started() {
     ui->status1->setText(QString("Building path list"));
     ui->status2->setText(QString());
     ui->status1->setVisible(true);
-    ui->cancel->setVisible(true);
 }
 
 void SearchProgressWidget::aborted() {

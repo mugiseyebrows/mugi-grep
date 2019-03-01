@@ -10,11 +10,13 @@
 #include "anchorclickhandler.h"
 #include "selectfilesdialog.h"
 
+
 SearchOptionsWidget::SearchOptionsWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::SearchOptionsWidget)
 {
     ui->setupUi(this);
+
 }
 
 SearchOptionsWidget::~SearchOptionsWidget()
@@ -41,7 +43,8 @@ void SearchOptionsWidget::setBrowser(SearchBrowser *browser, bool setValues)
         ui->cacheFileList->setChecked(browser->cacheFileList());
         ui->notBinary->setChecked(browser->notBinary());
 
-        //ui->path->setText(path);
+        ui->filter->hide();
+        ui->filter->show(); // force layout to recalculate
     }
 
     mActive = true;
