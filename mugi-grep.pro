@@ -9,7 +9,6 @@ TEMPLATE = app
 RC_FILE = mugi-grep.rc
 
 HEADERS += \
-    filecache.h \
     regexp.h \
     regexpinput.h \
     regexppath.h \
@@ -45,11 +44,12 @@ HEADERS += \
     model/checkablestringlistmodel.h \
     utils/fileutils.h \
     widget/searchoptionswidget.h \
-    widget/searchprogresswidget.h
+    widget/searchprogresswidget.h \
+    filereader.h \
+    utils/isbinext.h
 
 
 SOURCES += \
-    filecache.cpp \
     main.cpp \
     regexp.cpp \
     regexppath.cpp \
@@ -83,7 +83,9 @@ SOURCES += \
     model/checkablestringlistmodel.cpp \
     utils/fileutils.cpp \
     widget/searchoptionswidget.cpp \
-    widget/searchprogresswidget.cpp
+    widget/searchprogresswidget.cpp \
+    filereader.cpp \
+    utils/isbinext.cpp
 
 FORMS += \
     widget/mainwindow.ui \

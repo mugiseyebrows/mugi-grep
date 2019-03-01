@@ -1,8 +1,9 @@
 #include "searchbrowser.h"
 #include <QDebug>
 
-SearchBrowser::SearchBrowser(QWidget* parent) :
-    QTextBrowser(parent), mSearchId(-1), mCacheFileList(false), mLinesBefore(0), mLinesAfter(0) {
+SearchBrowser::SearchBrowser(QWidget* parent)
+    : QTextBrowser(parent), mSearchId(-1), mCacheFileList(false), mLinesBefore(0), mLinesAfter(0),
+      mNotBinary(false) {
     setOpenLinks(false);
 //@todo external stylesheet
 #ifdef Q_OS_LINUX
@@ -65,6 +66,14 @@ void SearchBrowser::setSearchId(int searchId) {
     mSearchId = searchId;
 }
 
+bool SearchBrowser::notBinary() const {
+    return mNotBinary;
+}
+
+void SearchBrowser::setNotBinary(bool notBinary) {
+    mNotBinary = notBinary;
+}
+
 bool SearchBrowser::isExecuted() const {
     return mSearchId > -1;
 }
@@ -75,4 +84,5 @@ void SearchBrowser::copy(SearchBrowser* dest) {
     dest->setLinesBefore(mLinesBefore);
     dest->setLinesAfter(mLinesAfter);
     dest->setCacheFileList(mCacheFileList);
+    dest->setNotBinary(mNotBinary);
 }

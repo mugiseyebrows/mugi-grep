@@ -48,6 +48,7 @@ protected slots:
     void onLinesBeforeValueChanged();
     void onCacheFileListClicked(bool);
     void onCountMatchedFiles(int matched, int total);
+    void onNotBinaryClicked(bool value);
 protected:
     Ui::SearchOptionsWidget *ui;
     bool mActive;

@@ -113,14 +113,11 @@ void SessionWidget::onSearch() {
     browser->setSearchId(searchId);
     ui->options->collect();
     ui->options->emitTabTitle();
-    bool notBinary = true;
-    emit search(searchId,ui->options->path(),browser->filter(),notBinary,browser->exp(),
+
+    emit search(searchId,ui->options->path(),browser->filter(),browser->notBinary(),browser->exp(),
                 browser->linesBefore(),browser->linesAfter(),browser->cacheFileList());
 
-    ui->progress->searchStarted();
-
-
-
+    ui->progress->started();
 }
 
 int SessionWidget::oldestTabIndex() {

@@ -15,7 +15,6 @@
 
 #include "struct/searchdata.h"
 
-#include "filecache.h"
 #include "searchcache.h"
 class Worker : public QObject
 {

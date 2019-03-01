@@ -29,7 +29,7 @@ public:
     void setExpludeExtValue(const QString& value);
 
 protected slots:
-    void onTextChanged();
+    //void onTextChanged();
 
 protected:
     bool mEmitTextChanged;
@@ -38,6 +38,7 @@ protected:
 signals:
     void returnPressed();
     void textChanged();
+    void caseClicked(bool);
 };
 
 #endif // RXPATHINPUT_H

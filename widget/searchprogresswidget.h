@@ -15,7 +15,7 @@ public:
     explicit SearchProgressWidget(QWidget *parent = 0);
     ~SearchProgressWidget();
 
-    void searchStarted();
+    void started();
     void init();
     void progress(int i, int t, int s, QString path);
     void aborted();

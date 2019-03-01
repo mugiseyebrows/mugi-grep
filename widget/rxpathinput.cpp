@@ -20,9 +20,9 @@ RXPathInput::RXPathInput(QWidget *parent) :
     QComboBox* input;
     foreach(input,mInputs) {
         connect(input->lineEdit(),SIGNAL(returnPressed()),this,SIGNAL(returnPressed()));
-        connect(input->lineEdit(),SIGNAL(textChanged(QString)),this,SLOT(onTextChanged()));
+        connect(input->lineEdit(),SIGNAL(textChanged(QString)),this,SIGNAL(textChanged()));
     }
-
+    connect(ui->matchCase,SIGNAL(clicked(bool)),this,SIGNAL(caseClicked(bool)));
 }
 
 RXPathInput::~RXPathInput()
@@ -64,6 +64,7 @@ void RXPathInput::setExpludeExtValue(const QString &value)
     ui->extExclude->lineEdit()->setText(value);
 }
 
+#if 0
 void RXPathInput::onTextChanged()
 {
     if (!mEmitTextChanged) {
@@ -73,4 +74,4 @@ void RXPathInput::onTextChanged()
     //qDebug() << "emit textChanged()";
     emit textChanged();
 }
-
+#endif

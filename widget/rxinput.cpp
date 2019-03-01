@@ -12,8 +12,9 @@ RXInput::RXInput(QWidget *parent) :
     QComboBox* input;
     foreach(input,mInputs) {
         QObject::connect(input->lineEdit(),SIGNAL(returnPressed()),this,SIGNAL(returnPressed()));
-        connect(input->lineEdit(),SIGNAL(textChanged(QString)),this,SLOT(onTextChanged()));
+        connect(input->lineEdit(),SIGNAL(textChanged(QString)),this,SIGNAL(textChanged()));
     }
+    connect(ui->matchCase,SIGNAL(clicked(bool)),this,SIGNAL(caseClicked(bool)));
 }
 
 RXInput::~RXInput()
@@ -28,11 +29,6 @@ RegExp RXInput::value() const {
 void RXInput::setValue(const RegExp &value) {
     setExps(value.exps());
     ui->matchCase->setChecked(value.case_());
-}
-
-void RXInput::onTextChanged()
-{
-    emit textChanged();
 }
 
 

@@ -38,5 +38,6 @@ void Worker::onSearchMore(int id)
 
 void Worker::onFinishSearch(int id)
 {
+    qDebug() << "onFinishSearch" << id;
     mCache.finish(id);
 }

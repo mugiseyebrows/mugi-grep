@@ -5,6 +5,8 @@
 #include <QDebug>
 
 #include "html.h"
+#include "filereader.h"
+#include "utils/isbinext.h"
 
 QStringList searchLines(const QStringList& mLines, const QString& mPath, const QString& mRelativePath,
                         const RegExp& exp, int linesBefore, int linesAfter) {
@@ -16,8 +18,9 @@ QStringList searchLines(const QStringList& mLines, const QString& mPath, const Q
 
     // pass 1
     for(int i=0;i<mLines.size();i++) {
-        if (exp.match(mLines[i]))
+        if (exp.match(mLines[i])) {
             matched << i;
+        }
     }
 
     int match;
@@ -72,13 +75,38 @@ QStringList searchLines(const QStringList& mLines, const QString& mPath, const Q
     return res;
 }
 
-QStringList searchLines(const QByteArray& mLines, const QString& mPath, const QString& mRelativePath,
+QStringList searchBinary(const QStringList& lines, const QString& path, const QString& relativePath,
+                        const RegExp& exp) {
+    QStringList res;
+    foreach(const QString& line, lines) {
+        if (exp.match(line)) {
+            QString href = "file:///" + QDir::toNativeSeparators(path); // todo binary offset?
+            QStringList cols;
+            cols << Html::span("Binary file ", "black")
+                 << Html::anchor(relativePath, href, "violet")
+                 << Html::span(" matches", "black");
+            res << cols.join("");
+            break;
+        }
+    }
+    return res;
+}
+
+QStringList searchLines(const QByteArray& bytes, const QString& path, const QString& relativePath,
                         const RegExp& exp, int linesBefore, int linesAfter, int* lineCount) {
 
     QTextCodec* codec = QTextCodec::codecForName("UTF-8");
-    QStringList lines = codec->toUnicode(mLines).split("\n");
+    QStringList lines = codec->toUnicode(bytes).split("\n");
     *lineCount = lines.size();
-    return searchLines(lines,mPath,mRelativePath,exp,linesBefore,linesAfter);
+    return searchLines(lines,path,relativePath,exp,linesBefore,linesAfter);
+}
+
+QStringList searchBinary(const QByteArray& bytes, const QString& path, const QString& relativePath,
+                         const RegExp& exp) {
+
+    QTextCodec* codec = QTextCodec::codecForName("UTF-8"); // todo guess or chose encoding
+    QStringList lines = codec->toUnicode(bytes).split("\n");
+    return searchBinary(lines,path,relativePath,exp);
 }
 
 QString ext(const QString& path) {
@@ -139,19 +167,9 @@ QStringList SearchCache::getAllFiles(QString path, bool cacheFileList) {
     return allFiles;
 }
 
+
+
 QStringList SearchCache::filterFiles(const QStringList& allFiles, RegExpPath filter, bool notBinary, int* filesFiltered, int* dirsFiltered) {
-
-    static QStringList binaryExts;
-
-    if (binaryExts.isEmpty()) {
-        binaryExts << "7z" << "a" << "avi" << "bin" << "bmp" << "cab" << "cdr" << "chw" << "db"
-                   << "djvu" << "dll" << "doc" << "docx" << "dot" << "dwg" << "exe" << "flv"
-                   << "gif" << "gz" << "ico" << "iso" << "jar" << "jpeg" << "jpg" << "mdb"
-                   << "mp3" << "mp4" << "msi" << "o" << "obj" << "ods" << "odt" << "pdb" << "pdf"
-                   << "png" << "ppt" << "pyc" << "rar" << "rtf" << "sqlite" << "swf" << "sys"
-                   << "tgz" << "tiff" << "ttf" << "wav" << "wmv" << "xla" << "xls" << "xlsm"
-                   << "xlsx" << "xlt" << "xmcd" << "zip";
-    }
 
     int filesFiltered_ = 0;
     int dirsFiltered_ = 0;
@@ -159,11 +177,11 @@ QStringList SearchCache::filterFiles(const QStringList& allFiles, RegExpPath fil
     QStringList files;
 
     foreach(const QString& path, allFiles) {
-        if (path.contains("/.git/")) {
+        if (path.contains("/.git/")) { // todo skip settings
             filesFiltered_++;
             continue;
         }
-        if (notBinary && binaryExts.contains(ext(path))) {
+        if (notBinary && isBinExt(path)) {
             filesFiltered_++;
             continue;
         }
@@ -224,14 +242,33 @@ void SearchCache::search(int searchId, QString &data, int *complete, int *total,
 
         bool binary;
         bool readOk;
+        bool tooBig;
 
-        QByteArray fileData = FileCache::instance()->file(path,sd.notBinary,&binary,&readOk);
-
+        //QByteArray fileData = FileCache::instance()->file(path,sd.notBinary,&binary,&readOk);
+        QByteArray fileData = FileReader::read(path,sd.notBinary,&binary,&readOk,&tooBig);
         QString relPath_ = relPath(path,sd.path);
+
+        bool ok = true;
+
+        if (!readOk) {
+            qDebug() << "!readOk" << path;
+            ok = false;
+        }
+
+        if (tooBig) { // todo implement line by line search in big files
+            ok = false;
+        }
 
         int fileLineCount = 0;
 
-        res << searchLines(fileData, path, relPath_, sd.search, sd.linesBefore, sd.linesAfter, &fileLineCount);
+        if (ok) {
+            if (binary) {
+                res << searchBinary(fileData, path, relPath_, sd.search);
+            } else {
+                res << searchLines(fileData, path, relPath_, sd.search, sd.linesBefore, sd.linesAfter, &fileLineCount);
+            }
+        }
+
         lineCount += fileLineCount;
         fileCount += 1;
         sd.complete = i + 1;

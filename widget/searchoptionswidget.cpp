@@ -39,6 +39,7 @@ void SearchOptionsWidget::setBrowser(SearchBrowser *browser, bool setValues)
         ui->linesBefore->setValue(browser->linesBefore());
         ui->linesAfter->setValue(browser->linesAfter());
         ui->cacheFileList->setChecked(browser->cacheFileList());
+        ui->notBinary->setChecked(browser->notBinary());
 
         //ui->path->setText(path);
     }
@@ -55,6 +56,9 @@ void SearchOptionsWidget::init(Worker *worker, AnchorClickHandler* clickHandler)
     connect(ui->linesAfter,SIGNAL(valueChanged(int)),this,SLOT(onLinesAfterValueChanged()));
     connect(ui->linesBefore,SIGNAL(valueChanged(int)),this,SLOT(onLinesBeforeValueChanged()));
     connect(ui->cacheFileList,SIGNAL(clicked(bool)),this,SLOT(onCacheFileListClicked(bool)));
+    connect(ui->notBinary,SIGNAL(clicked(bool)),this,SLOT(onNotBinaryClicked(bool)));
+    connect(ui->filter,SIGNAL(caseClicked(bool)),this,SLOT(onFilterTextChanged()));
+    connect(ui->exp,SIGNAL(caseClicked(bool)),this,SLOT(onExpTextChanged()));
 
     mWorker = worker;
     mClickHandler = clickHandler;
@@ -83,6 +87,7 @@ void SearchOptionsWidget::setBrowserValues()
     mBrowser->setLinesBefore(ui->linesBefore->value());
     mBrowser->setLinesAfter(ui->linesAfter->value());
     mBrowser->setCacheFileList(ui->cacheFileList->isChecked());
+    mBrowser->setNotBinary(ui->notBinary->isChecked());
 }
 
 void SearchOptionsWidget::collect()
@@ -132,6 +137,7 @@ void SearchOptionsWidget::on_search_clicked()
 }
 
 void SearchOptionsWidget::countMatchedFiles() {
+    // todo cache
     if (!ui->cacheFileList->isChecked()) {
         ui->fileCount->setText(QString());
         return;
@@ -220,9 +226,20 @@ void SearchOptionsWidget::onCountMatchedFiles(int matched, int total)
     ui->fileCount->setText(QString("%1 / %2 files").arg(matched).arg(total));
 }
 
-
-
 void SearchOptionsWidget::on_path_textChanged(const QString &path)
 {
     emit pathChanged(path);
 }
+
+void SearchOptionsWidget::onNotBinaryClicked(bool value) {
+    if (!mActive || !mBrowser) {
+        return;
+    }
+    if (mBrowser->isExecuted()) {
+        emit clone();
+        return;
+    }
+    mBrowser->setNotBinary(value);
+}
+
+

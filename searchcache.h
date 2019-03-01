@@ -4,7 +4,6 @@
 #include "regexp.h"
 #include "regexppath.h"
 #include "struct/searchdata.h"
-#include "filecache.h"
 
 #include <QDirIterator>
 #include <QMutex>

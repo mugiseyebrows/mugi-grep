@@ -22,6 +22,8 @@ public:
     void setCacheFileList(bool cacheFileList);
     int searchId() const;
     void setSearchId(int searchId);
+    bool notBinary() const;
+    void setNotBinary(bool notBinary);
     bool isExecuted() const;
     void copy(SearchBrowser* dest);
 
@@ -32,5 +34,6 @@ protected:
     int mLinesAfter;
     bool mCacheFileList;
     int mSearchId;
+    bool mNotBinary;
 };
 #endif // SEARCHBROWSER_H

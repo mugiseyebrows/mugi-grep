@@ -27,9 +27,8 @@ protected:
 signals:
     void returnPressed();
     void textChanged();
+    void caseClicked(bool);
 
-protected slots:
-    void onTextChanged();
 };
 
 #endif // RXINPUT_H

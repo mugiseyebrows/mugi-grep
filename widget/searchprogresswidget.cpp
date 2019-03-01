@@ -35,7 +35,7 @@ void SearchProgressWidget::progress(int i, int t, int s, QString path) {
     ui->cancel->setVisible( i != t );
 }
 
-void SearchProgressWidget::searchStarted() {
+void SearchProgressWidget::started() {
     ui->status1->setText(QString("Building path list"));
     ui->status2->setText(QString());
     ui->status1->setVisible(true);
