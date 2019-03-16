@@ -5,6 +5,7 @@
 
 #include <QLineEdit>
 #include <QDebug>
+#include <QScreen>
 
 RXPathInput::RXPathInput(QWidget *parent) :
     QWidget(parent),
@@ -12,6 +13,9 @@ RXPathInput::RXPathInput(QWidget *parent) :
     ui(new Ui::RXPathInput)
 {
     ui->setupUi(this);
+
+    QRect rect = qApp->primaryScreen()->geometry();
+    int maximumWidth = rect.width() / 4;
 
     mInputs << ui->nameInclude
             << ui->extInclude
@@ -21,6 +25,7 @@ RXPathInput::RXPathInput(QWidget *parent) :
     foreach(input,mInputs) {
         connect(input->lineEdit(),SIGNAL(returnPressed()),this,SIGNAL(returnPressed()));
         connect(input->lineEdit(),SIGNAL(textChanged(QString)),this,SIGNAL(textChanged()));
+        input->setMaximumWidth(maximumWidth);
     }
     connect(ui->matchCase,SIGNAL(clicked(bool)),this,SIGNAL(caseClicked(bool)));
 }

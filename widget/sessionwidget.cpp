@@ -105,12 +105,10 @@ void SessionWidget::onClone() {
 void SessionWidget::onSearch() {
 
     SearchBrowser* browser = currentTab();
-    if (browser->isExecuted()) {
-        return;
-    }
     mCancel = false;
     int searchId = SearchId::instance()->next();
     browser->setSearchId(searchId);
+    browser->setText(QString());
     ui->options->collect();
     ui->options->emitTabTitle();
 
@@ -142,6 +140,8 @@ void SessionWidget::onTabTitle(QString title, bool isExecuted) {
     if (!isExecuted) {
         title = title + "*";
     }
+    QFontMetrics fm(font());
+    title = fm.elidedText(title,Qt::ElideMiddle,200);
     ui->results->setTabText(ui->results->currentIndex(),title);
 }
 

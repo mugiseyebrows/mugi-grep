@@ -1,6 +1,9 @@
 #include "widget/rxinput.h"
 #include "ui_rxinput.h"
 #include <QLineEdit>
+#include <QDesktopWidget>
+#include <QScreen>
+#include <QDebug>
 
 RXInput::RXInput(QWidget *parent) :
     QWidget(parent),
@@ -8,11 +11,15 @@ RXInput::RXInput(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    QRect rect = qApp->primaryScreen()->geometry();
+    int maximumWidth = rect.width() / 2;
+
     mInputs << ui->include << ui->exclude;
     QComboBox* input;
     foreach(input,mInputs) {
         QObject::connect(input->lineEdit(),SIGNAL(returnPressed()),this,SIGNAL(returnPressed()));
         connect(input->lineEdit(),SIGNAL(textChanged(QString)),this,SIGNAL(textChanged()));
+        input->setMaximumWidth(maximumWidth);
     }
     connect(ui->matchCase,SIGNAL(clicked(bool)),this,SIGNAL(caseClicked(bool)));
 }
