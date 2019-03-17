@@ -37,6 +37,8 @@ protected:
     bool mCase;
 };
 
+QDebug operator <<(QDebug& debug, const RegExp& exp);
+
 Q_DECLARE_METATYPE(RegExp)
 
 #endif // REGEXP_H

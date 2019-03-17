@@ -69,6 +69,27 @@ void RXPathInput::setExpludeExtValue(const QString &value)
     ui->extExclude->lineEdit()->setText(value);
 }
 
+
+#if 0
+void RXPathInput::saveFocus()
+{
+    QList<bool> focus;
+    foreach(QComboBox* combobox, mInputs) {
+        focus << combobox->hasFocus();
+    }
+    mFocus = focus;
+}
+
+void RXPathInput::restoreFocus()
+{
+    auto it = std::find(mFocus.begin(),mFocus.end(),true);
+    if (it != mFocus.end()) {
+        int index = it - mFocus.begin();
+        mInputs[index]->setFocus();
+    }
+}
+#endif
+
 #if 0
 void RXPathInput::onTextChanged()
 {

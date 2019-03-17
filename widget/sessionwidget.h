@@ -68,6 +68,7 @@ signals:
     void search(int searchId, QString path, RegExpPath filter, bool notBinary, RegExp search, int linesBofore, int linesAfter,bool cacheFileList);
     void searchMore(int searchId);
     void finishSearch(int searchId);
+    void collected();
 
 public slots:
     void onCanceled();

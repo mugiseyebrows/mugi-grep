@@ -127,6 +127,11 @@ void RegExp::test()
     RegExp e("b","",false);
     e.match(paths[0],&p,&l);
     Q_ASSERT(p == 4 && l == 1);
+}
 
-
+QDebug operator <<(QDebug &debug, const RegExp &exp)
+{
+    QString exp_ = QString("RegExp(\"%1\", \"%2\", %3)").arg(exp.include()).arg(exp.exclude()).arg(exp.case_() ? "true" : "false");
+    debug.nospace() << exp_.toStdString().c_str();
+    return debug;
 }

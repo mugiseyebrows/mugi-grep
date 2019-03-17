@@ -35,7 +35,6 @@ RegExp SearchBrowser::exp() const {
 void SearchBrowser::setExp(const RegExp& exp) {
     mExp = exp;
     mChanged = QDateTime::currentDateTime();
-    qDebug() << "exp changed";
 }
 
 RegExpPath SearchBrowser::filter() const {
@@ -45,7 +44,6 @@ RegExpPath SearchBrowser::filter() const {
 void SearchBrowser::setFilter(const RegExpPath& filter) {
     mFilter = filter;
     mChanged = QDateTime::currentDateTime();
-    qDebug() << "filter changed";
 }
 
 int SearchBrowser::linesBefore() const {
@@ -55,7 +53,6 @@ int SearchBrowser::linesBefore() const {
 void SearchBrowser::setLinesBefore(int linesBefore) {
     mLinesBefore = linesBefore;
     mChanged = QDateTime::currentDateTime();
-    qDebug() << "linesBefore changed";
 }
 
 int SearchBrowser::linesAfter() const {
@@ -65,7 +62,6 @@ int SearchBrowser::linesAfter() const {
 void SearchBrowser::setLinesAfter(int linesAfter) {
     mLinesAfter = linesAfter;
     mChanged = QDateTime::currentDateTime();
-    qDebug() << "linesAfter changed";
 }
 
 bool SearchBrowser::cacheFileList() const {
@@ -75,7 +71,6 @@ bool SearchBrowser::cacheFileList() const {
 void SearchBrowser::setCacheFileList(bool cacheFileList) {
     mCacheFileList = cacheFileList;
     mChanged = QDateTime::currentDateTime();
-    qDebug() << "cacheFileList changed";
 }
 
 bool SearchBrowser::notBinary() const {
@@ -85,7 +80,6 @@ bool SearchBrowser::notBinary() const {
 void SearchBrowser::setNotBinary(bool notBinary) {
     mNotBinary = notBinary;
     mChanged = QDateTime::currentDateTime();
-    qDebug() << "notBinary changed";
 }
 
 QDateTime SearchBrowser::changed() const {

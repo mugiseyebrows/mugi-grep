@@ -55,10 +55,9 @@ void MainWindow::closeEvent(QCloseEvent * e)
 {
 
     for(int i=0;i<ui->tabs->count();i++) {
-        QWidget* w = ui->tabs->widget(i);
-        SessionWidget* sw = qobject_cast<SessionWidget*>(w);
-        if (sw) {
-            sw->onCanceled();
+        SessionWidget* session = tab(i);
+        if (session) {
+            session->onCanceled();
         }
     }
 
@@ -86,28 +85,27 @@ void MainWindow::addSession(const QJsonObject &v) {
     if (!path.isEmpty()) {
         title = QFileInfo(path).baseName();
     }
-
     ui->tabs->addTab(session,title);
     mMapper->setMapping(session,session);
-
-    if (!v.isEmpty())
+    if (!v.isEmpty()) {
         session->deserialize(v);
-
+    }
+    connect(session,SIGNAL(collected()),this,SLOT(onCollected()));
 }
 
 void MainWindow::removeSession() {
 
-    if (ui->tabs->count() == 0)
+    if (ui->tabs->count() == 0) {
         return;
+    }
 
     int currentIndex = ui->tabs->currentIndex();
-    QWidget* w = ui->tabs->widget(currentIndex);
-    SessionWidget* sw = qobject_cast<SessionWidget*>(w);
-    if (sw) {
-        sw->onCanceled();
+    SessionWidget* session = tab(currentIndex);
+    if (session) {
+        session->onCanceled();
     }
     ui->tabs->removeTab(currentIndex);
-
+    session->deleteLater();
 }
 
 SessionWidget *MainWindow::tab(int index)
@@ -155,22 +153,18 @@ void MainWindow::on_addSession_triggered()
 
 void MainWindow::on_removeSession_triggered()
 {
-    if (ui->tabs->count() == 0)
+    if (ui->tabs->count() == 0) {
         return;
-
-    int currentIndex = ui->tabs->currentIndex();
-
-    QWidget* w = ui->tabs->widget(currentIndex);
-    SessionWidget* sw = qobject_cast<SessionWidget*>(w);
-    if (!sw)
+    }
+    int index = ui->tabs->currentIndex();
+    SessionWidget* session = tab(index);
+    if (!session) {
         return;
-
-    sw->onCanceled();
-    ui->tabs->removeTab(currentIndex);
-
+    }
+    session->onCanceled();
+    ui->tabs->removeTab(index);
+    session->deleteLater();
 }
-
-
 
 void MainWindow::on_saveSessions_triggered() {
 
@@ -245,12 +239,25 @@ void MainWindow::onReadStarted(QWidget* w) {
 
 void MainWindow::on_tabs_currentChanged(int index)
 {
-    SessionWidget* widget = qobject_cast<SessionWidget*>(ui->tabs->widget(index));
+    SessionWidget* widget = tab(index);
     if (!widget) {
         qDebug() << "not SessionWidget at index" << index << ui->tabs->widget(index);
         return;
     }
     widget->updateCollector();
+}
+
+void MainWindow::onCollected() {
+    qDebug() << "onCollected";
+    for(int index=0;index<ui->tabs->count();index++) {
+        SessionWidget* session = tab(index);
+        if (!session) {
+            qDebug() << "not SessionWidget at index" << index << ui->tabs->widget(index);
+            return;
+        }
+        session->updateCollector();
+    }
+    RXCollector::instance()->clean();
 }
 
 void MainWindow::on_removeAllSessions_triggered()

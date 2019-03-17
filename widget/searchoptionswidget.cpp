@@ -26,16 +26,12 @@ SearchOptionsWidget::~SearchOptionsWidget()
 
 void SearchOptionsWidget::setBrowser(SearchBrowser *browser, bool setValues)
 {
-    qDebug() << "setBrowser" << browser << setValues;
 
     mBrowser = browser;
-    mActive = false;
 
     if (setValues) {
-
-        RXCollector::instance()->load(ui->filter);
-        RXCollector::instance()->load(ui->exp);
-
+        updateCollector();
+        mActive = false;
         ui->filter->setValue(browser->filter());
         ui->exp->setValue(browser->exp());
         ui->linesBefore->setValue(browser->linesBefore());
@@ -62,6 +58,8 @@ void SearchOptionsWidget::init(Worker *worker, AnchorClickHandler* clickHandler)
     connect(ui->notBinary,SIGNAL(clicked(bool)),this,SLOT(onNotBinaryClicked(bool)));
     connect(ui->filter,SIGNAL(caseClicked(bool)),this,SLOT(onFilterTextChanged()));
     connect(ui->exp,SIGNAL(caseClicked(bool)),this,SLOT(onExpTextChanged()));
+    connect(ui->linesBefore,SIGNAL(returnPressed()),this,SIGNAL(search()));
+    connect(ui->linesAfter,SIGNAL(returnPressed()),this,SIGNAL(search()));
 
     mWorker = worker;
     mClickHandler = clickHandler;
@@ -99,24 +97,15 @@ void SearchOptionsWidget::collect()
     mActive = false;
     collector->collect(ui->exp->value());
     collector->collect(ui->filter->value());
-    collector->load(ui->exp);
-    collector->load(ui->filter);
-    mActive = true;
+    //updateCollector();
 }
 
 void SearchOptionsWidget::updateCollector() {
-    RXCollector* collector = RXCollector::instance();
+    
     mActive = false;
-
-    RegExp exp = ui->exp->value();
-    RegExpPath filter = ui->filter->value();
-
+    RXCollector* collector = RXCollector::instance();
     collector->load(ui->exp);
     collector->load(ui->filter);
-
-    ui->exp->setValue(exp);
-    ui->filter->setValue(filter);
-
     mActive = true;
 }
 

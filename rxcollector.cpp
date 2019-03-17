@@ -18,52 +18,75 @@ RXCollector *RXCollector::instance()
     return mInstance;
 }
 
+namespace {
+
+QObjectList toObjectList(const QList<QStringListModel*>& models) {
+    QObjectList result;
+    foreach(QStringListModel* model, models) {
+        result << model;
+    }
+    return result;
+}
+
+}
+
 void RXCollector::collect(const RegExpPath &exp)
 {
-    prependModels(mPathExps, exp.exps());
+    mTrash.append(toObjectList(mPathExps));
+    mPathExps = prependModels(mPathExps, exp.exps());
+    //qDebug() << mTrash.size() << "models in trash";
 }
 
 void RXCollector::collect(const RegExp &exp)
 {
-    prependModels(mExps, exp.exps());
+    mTrash.append(toObjectList(mExps));
+    mExps = prependModels(mExps, exp.exps());
+    //qDebug() << mTrash.size() << "models in trash";
 }
 
-void RXCollector::prependModels(const QList<QStringListModel *> &models, const QStringList &exps) {
+QList<QStringListModel *> RXCollector::prependModels(const QList<QStringListModel *> &models, const QStringList &exps) {
 
-    qDebug() << "RXCollector::prependModels";
+    //qDebug() << "prependModels" << models.size();
+    QList<QStringListModel *> models_;
     for(int i=0;i<models.size();i++) {
-        QStringListModel* m = qobject_cast<QStringListModel*>(models[i]);
+        QStringListModel* model = qobject_cast<QStringListModel*>(models[i]);
         QString s = exps.value(i);
-
-        QStringList items = m->stringList();
-        int index = items.indexOf(s);
-        if (index > -1) {
-            items.removeAt(index);
+        QStringList items = model->stringList();
+        QStringList items_;
+        items_.append(s);
+        std::copy_if(items.begin(),items.end(),std::back_inserter(items_),
+                     [&](const QString& item){return item != s;});
+        if (items_.size() > COLLECTION_SIZE) {
+            items_.removeLast();
         }
-
-        items.prepend(s);
-        m->setStringList(items);
-        if (m->rowCount() > COLLECTION_SIZE) {
-            m->removeRow(m->rowCount()-1);
-        }
+        //qDebug() << s << items << items_;
+        QStringListModel *model_ = new QStringListModel();
+        model_->setStringList(items_);
+        models_ << model_;
     }
+    return models_;
 }
 
 void RXCollector::load(RXPathInput *input)
 {
     for(int i=0;i<mPathExps.size();i++) {
-        input->input(i)->setModel(mPathExps[i]);
-        input->input(i)->setCurrentIndex(0);
+        QComboBox* combo = input->input(i);
+        QStringListModel* model = mPathExps[i];
+        QString text = combo->currentText();
+        combo->setModel(model);
+        combo->setCurrentText(text);
     }
 }
 
 void RXCollector::load(RXInput *input) {
     for(int i=0;i<mExps.size();i++) {
-        input->input(i)->setModel(mExps[i]);
-        input->input(i)->setCurrentIndex(0);
+        QComboBox* combo = input->input(i);
+        QStringListModel* model = mExps[i];
+        QString text = combo->currentText();
+        combo->setModel(model);
+        combo->setCurrentText(text);
     }
 }
-
 
 void arrayOfArraysOfString(const QVariantList& src, QJsonArray& dst) {
     for(QVariant v: src) {
@@ -119,6 +142,15 @@ void RXCollector::deserialize(const QJsonObject &j)
 {
     deserialize(mPathExps,j.value("pathexps").toArray());
     deserialize(mExps,j.value("exps").toArray());
+}
+
+void RXCollector::clean()
+{
+    //qDebug() << "clean" << mTrash.size() << "models in trash";
+    foreach (QObject* object, mTrash) {
+        object->deleteLater();
+    }
+    mTrash.clear();
 }
 
 RXCollector::RXCollector()

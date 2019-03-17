@@ -52,7 +52,6 @@ SessionWidget::SessionWidget(QWidget *parent) :
     connect(ui->options,SIGNAL(search()),this,SLOT(onSearch()));
     connect(ui->options,SIGNAL(tabTitle(QString,bool)),this,SLOT(onTabTitle(QString,bool)));
     connect(ui->options,SIGNAL(pathChanged(QString)),this,SLOT(onPathChanged(QString)));
-
     connect(ui->progress,SIGNAL(canceled()),this,SLOT(onCanceled()));
 
     mThread->start();
@@ -106,10 +105,13 @@ void SessionWidget::onSearch() {
 
     SearchBrowser* browser = currentTab();
     mCancel = false;
-    int searchId = SearchId::instance()->next();
-    browser->setSearchId(searchId);
-    browser->setText(QString());
+
     ui->options->collect();
+    emit collected();
+
+    int searchId = SearchId::instance()->next();
+    browser->setText(QString());
+    browser->setSearchId(searchId);
     ui->options->emitTabTitle();
 
     emit search(searchId,ui->options->path(),browser->filter(),browser->notBinary(),browser->exp(),
@@ -217,12 +219,12 @@ SearchBrowser* SessionWidget::find(int searchId) {
 void SessionWidget::onFound(int searchId, QString res, int i, int t, int s, QString path)
 {
 
-    qDebug() << searchId << res.size() << "chars" << i << t << s << path;
+    //qDebug() << searchId << res.size() << "chars" << i << t << s << path;
 
     SearchBrowser* browser = find(searchId);
 
     if (!browser) {
-        qDebug() << "onFound error no browser";
+        //qDebug() << "onFound error no browser";
         return;
     }
 
@@ -256,15 +258,16 @@ void SessionWidget::on_results_currentChanged(int index) {
     /*if (!mListenResultCurrentChanged) {
         return;
     }*/
-    qDebug() << "on_results_currentChanged" << index;
+    //qDebug() << "on_results_currentChanged" << index << this;
     SearchBrowser* browser = tab(index);
     if (!browser) {
-        qDebug() << "not a browser at index" << index;
+        //qDebug() << "not a browser at index" << index;
         return;
     }
     ui->options->setBrowser(browser,mSetValues);
     ui->options->countMatchedFiles();
     mSetValues = true;
+
 }
 
 void SessionWidget::onPathChanged(QString path)

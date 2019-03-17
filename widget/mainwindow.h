@@ -49,12 +49,11 @@ protected slots:
     void on_saveSessions_triggered();
     void on_loadSessions_triggered();
 
-
     void on_setEditors_triggered();
 
     void onReadStarted(QWidget *);
 
-
+    void onCollected();
 private slots:
     void on_tabs_currentChanged(int index);
 

@@ -21,17 +21,20 @@ public:
 
     void serialize(QJsonObject& json);
 
-    void prependModels(const QList<QStringListModel *> &models, const QStringList &exps);
+    QList<QStringListModel *> prependModels(const QList<QStringListModel *> &models, const QStringList &exps);
+
     void load(RXInput *input);
     void deserialize(const QList<QStringListModel *> &models, const QJsonArray &exps);
     QVariantList modelsLists(const QList<QStringListModel *> &models);
     void deserialize(const QJsonObject &j);
+    void clean();
 protected:
     RXCollector();
     static RXCollector* mInstance;
 
     QList<QStringListModel*> mPathExps;
     QList<QStringListModel*> mExps;
+    QObjectList mTrash;
 };
 
 #endif // RXCOLLECTOR_H

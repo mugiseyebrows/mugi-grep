@@ -27,12 +27,17 @@ public:
     void setIncludeExtValue(const QString& value);
     void setExcludePathValue(const QString& value);
     void setExpludeExtValue(const QString& value);
+#if 0
+    void saveFocus();
+    void restoreFocus();
+#endif
 
 protected slots:
     //void onTextChanged();
 
 protected:
     bool mEmitTextChanged;
+    QList<bool> mFocus;
 
     Ui::RXPathInput *ui;
 signals:

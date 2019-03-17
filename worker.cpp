@@ -5,7 +5,6 @@ Worker::Worker(QObject *parent) :
 {
 }
 
-
 void Worker::onSearch(int searchId, QString path, RegExpPath filter, bool notBinary,
                        RegExp search, int linesBefore, int linesAfter, bool cacheFileList)
 {
@@ -38,6 +37,6 @@ void Worker::onSearchMore(int id)
 
 void Worker::onFinishSearch(int id)
 {
-    qDebug() << "onFinishSearch" << id;
+    //qDebug() << "onFinishSearch" << id;
     mCache.finish(id);
 }
