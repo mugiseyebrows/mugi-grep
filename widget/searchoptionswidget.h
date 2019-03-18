@@ -7,6 +7,8 @@
 class SearchBrowser;
 class Worker;
 class AnchorClickHandler;
+class RXInput;
+class RXPathInput;
 
 namespace Ui {
 class SearchOptionsWidget;
@@ -30,7 +32,7 @@ public:
     void emitTabTitle();
     void init(Worker *worker, AnchorClickHandler *clickHandler);
     void setBrowserValues();
-    void updateCollector();
+    void updateCompletions();
     void countMatchedFiles();
 
 signals:

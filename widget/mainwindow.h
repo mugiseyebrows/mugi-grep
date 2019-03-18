@@ -9,6 +9,7 @@
 class SessionWidget;
 class QSignalMapper;
 class AnchorClickHandler;
+class CompleterModelManager;
 
 namespace Ui {
 class MainWindow;
@@ -37,6 +38,7 @@ protected:
     Ui::MainWindow *ui;
     QSignalMapper* mMapper;
     AnchorClickHandler* mClickHandler;
+    CompleterModelManager* mCompleterModelManager;
 
 signals:
     void editorSet();
@@ -53,7 +55,6 @@ protected slots:
 
     void onReadStarted(QWidget *);
 
-    void onCollected();
 private slots:
     void on_tabs_currentChanged(int index);
 

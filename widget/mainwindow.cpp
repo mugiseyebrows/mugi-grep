@@ -18,10 +18,12 @@
 #include "rxcollector.h"
 #include <QJsonArray>
 #include "anchorclickhandler.h"
+#include "completermodelmanager.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow), mMapper(new QSignalMapper(this)), mClickHandler(new AnchorClickHandler())
+    ui(new Ui::MainWindow), mMapper(new QSignalMapper(this)),
+    mClickHandler(new AnchorClickHandler(this)), mCompleterModelManager(new CompleterModelManager(this))
 {
     ui->setupUi(this);
 
@@ -90,7 +92,10 @@ void MainWindow::addSession(const QJsonObject &v) {
     if (!v.isEmpty()) {
         session->deserialize(v);
     }
-    connect(session,SIGNAL(collected()),this,SLOT(onCollected()));
+    session->updateCompletions();
+    connect(session,&SessionWidget::collect,[=](){
+        mCompleterModelManager->onCollect(session->options(), ui->tabs);
+    });
 }
 
 void MainWindow::removeSession() {
@@ -211,8 +216,6 @@ void MainWindow::on_loadSessions_triggered() {
     }
 }
 
-
-
 void MainWindow::on_setEditors_triggered()
 {
     mClickHandler->onSetEditor();
@@ -239,25 +242,12 @@ void MainWindow::onReadStarted(QWidget* w) {
 
 void MainWindow::on_tabs_currentChanged(int index)
 {
-    SessionWidget* widget = tab(index);
+    /*SessionWidget* widget = tab(index);
     if (!widget) {
         qDebug() << "not SessionWidget at index" << index << ui->tabs->widget(index);
         return;
     }
-    widget->updateCollector();
-}
-
-void MainWindow::onCollected() {
-    qDebug() << "onCollected";
-    for(int index=0;index<ui->tabs->count();index++) {
-        SessionWidget* session = tab(index);
-        if (!session) {
-            qDebug() << "not SessionWidget at index" << index << ui->tabs->widget(index);
-            return;
-        }
-        session->updateCollector();
-    }
-    RXCollector::instance()->clean();
+    widget->updateCompletions();*/
 }
 
 void MainWindow::on_removeAllSessions_triggered()

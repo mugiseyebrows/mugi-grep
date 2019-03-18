@@ -18,30 +18,14 @@ RXCollector *RXCollector::instance()
     return mInstance;
 }
 
-namespace {
-
-QObjectList toObjectList(const QList<QStringListModel*>& models) {
-    QObjectList result;
-    foreach(QStringListModel* model, models) {
-        result << model;
-    }
-    return result;
-}
-
-}
-
 void RXCollector::collect(const RegExpPath &exp)
 {
-    mTrash.append(toObjectList(mPathExps));
     mPathExps = prependModels(mPathExps, exp.exps());
-    //qDebug() << mTrash.size() << "models in trash";
 }
 
 void RXCollector::collect(const RegExp &exp)
 {
-    mTrash.append(toObjectList(mExps));
     mExps = prependModels(mExps, exp.exps());
-    //qDebug() << mTrash.size() << "models in trash";
 }
 
 QList<QStringListModel *> RXCollector::prependModels(const QList<QStringListModel *> &models, const QStringList &exps) {
@@ -144,13 +128,11 @@ void RXCollector::deserialize(const QJsonObject &j)
     deserialize(mExps,j.value("exps").toArray());
 }
 
-void RXCollector::clean()
+QList<QStringListModel *> RXCollector::models()
 {
-    //qDebug() << "clean" << mTrash.size() << "models in trash";
-    foreach (QObject* object, mTrash) {
-        object->deleteLater();
-    }
-    mTrash.clear();
+    QList<QStringListModel *> result;
+    result << mPathExps << mExps;
+    return result;
 }
 
 RXCollector::RXCollector()

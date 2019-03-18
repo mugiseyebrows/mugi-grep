@@ -17,7 +17,6 @@ public:
     void collect(const RegExp& exp);
 
     void load(RXPathInput* input);
-    //void load();
 
     void serialize(QJsonObject& json);
 
@@ -27,14 +26,14 @@ public:
     void deserialize(const QList<QStringListModel *> &models, const QJsonArray &exps);
     QVariantList modelsLists(const QList<QStringListModel *> &models);
     void deserialize(const QJsonObject &j);
-    void clean();
+    QList<QStringListModel*> models();
+
 protected:
     RXCollector();
     static RXCollector* mInstance;
 
     QList<QStringListModel*> mPathExps;
     QList<QStringListModel*> mExps;
-    QObjectList mTrash;
 };
 
 #endif // RXCOLLECTOR_H

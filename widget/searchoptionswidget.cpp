@@ -26,11 +26,9 @@ SearchOptionsWidget::~SearchOptionsWidget()
 
 void SearchOptionsWidget::setBrowser(SearchBrowser *browser, bool setValues)
 {
-
     mBrowser = browser;
-
     if (setValues) {
-        updateCollector();
+        //updateCompletions();
         mActive = false;
         ui->filter->setValue(browser->filter());
         ui->exp->setValue(browser->exp());
@@ -94,14 +92,13 @@ void SearchOptionsWidget::setBrowserValues()
 void SearchOptionsWidget::collect()
 {
     RXCollector* collector = RXCollector::instance();
-    mActive = false;
+    //mActive = false;
     collector->collect(ui->exp->value());
     collector->collect(ui->filter->value());
     //updateCollector();
 }
 
-void SearchOptionsWidget::updateCollector() {
-    
+void SearchOptionsWidget::updateCompletions() {
     mActive = false;
     RXCollector* collector = RXCollector::instance();
     collector->load(ui->exp);

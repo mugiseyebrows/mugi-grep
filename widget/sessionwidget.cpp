@@ -101,13 +101,19 @@ void SessionWidget::onClone() {
     }
 }
 
+
+SearchOptionsWidget* SessionWidget::options() const{
+    return ui->options;
+}
+
 void SessionWidget::onSearch() {
 
     SearchBrowser* browser = currentTab();
     mCancel = false;
 
-    ui->options->collect();
-    emit collected();
+    /*ui->options->collect();
+    emit collected();*/
+    emit collect();
 
     int searchId = SearchId::instance()->next();
     browser->setText(QString());
@@ -162,9 +168,9 @@ void SessionWidget::deserialize(const QJsonObject &v)
     ui->options->setPath(v.value("path").toString());
 }
 
-void SessionWidget::updateCollector()
+void SessionWidget::updateCompletions()
 {
-    ui->options->updateCollector();
+    ui->options->updateCompletions();
 }
 
 void SessionWidget::save(const QString &path, const QString &text)

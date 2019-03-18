@@ -20,6 +20,7 @@ class Worker;
 class SearchBrowser;
 class QTabWidget;
 class AnchorClickHandler;
+class SearchOptionsWidget;
 
 /*
 Q_DECLARE_METATYPE(RegExp)
@@ -37,7 +38,7 @@ public:
 
     QString path() const;
 
-    void updateCollector();
+    void updateCompletions();
 
     void serialize(QJsonObject &json) const;
     void deserialize(const QJsonObject &v);
@@ -46,6 +47,7 @@ public:
     void countMatchedFiles();
     SearchBrowser *currentTab();
     int oldestTabIndex();
+    SearchOptionsWidget *options() const;
 protected:
 
     Worker* mWorker;
@@ -68,7 +70,8 @@ signals:
     void search(int searchId, QString path, RegExpPath filter, bool notBinary, RegExp search, int linesBofore, int linesAfter,bool cacheFileList);
     void searchMore(int searchId);
     void finishSearch(int searchId);
-    void collected();
+    //void collected();
+    void collect();
 
 public slots:
     void onCanceled();
