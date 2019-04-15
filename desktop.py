@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python3
 import os
 import shutil
 
@@ -10,7 +10,9 @@ sizes = ['128x128','16x16','256x256','32x32','48x48','512x512']
 icons = os.path.expanduser('~/.local/share/icons/hicolor')
 for size in sizes:
     src = os.path.join('./icons',size,'%s.png' % name)
-    dst = os.path.join(icons,size,'apps','%s.png' % name)
+    dst_dir = os.path.join(icons,size,'apps')
+    os.makedirs(dst_dir,exist_ok = True)
+    dst = os.path.join(dst_dir,'%s.png' % name)
     shutil.copy(src,dst)
 
 icon = dst = os.path.join(icons,'256x256','apps','%s.png' % name)
