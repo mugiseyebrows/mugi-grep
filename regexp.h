@@ -26,14 +26,15 @@ public:
     void deserealize(const QVariantMap& data);
 
     QStringList exps() const;
+    QRegularExpression includeExp() const;
 protected:
 
     void init(const QString &inc, const QString &exc, bool case_);
 
     QString mInclude;
     QString mExclude;
-    QRegularExpression mInclude_;
-    QRegularExpression mExclude_;
+    QRegularExpression mIncludeExp;
+    QRegularExpression mExcludeExp;
     bool mCase;
 };
 

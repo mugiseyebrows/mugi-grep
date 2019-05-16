@@ -7,6 +7,8 @@
 #include "regexppath.h"
 #include "version.h"
 
+#include "searchcache.h"
+
 int main(int argc, char *argv[])
 {
     //QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
@@ -23,6 +25,8 @@ int main(int argc, char *argv[])
 
     MainWindow w;
     w.show();
+
+    SearchCache::testTokenize();
     
     return a.exec();
 }

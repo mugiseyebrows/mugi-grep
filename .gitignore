@@ -13,3 +13,4 @@ ui_*
 mugi-grep
 .qmake.stash
 *.zip
+.vscode/

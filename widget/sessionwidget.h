@@ -65,13 +65,15 @@ protected:
 
     bool mSetValues;
     void save(bool plain);
+    void searchOrReplace(Worker::Action action);
 signals:
 
-    void search(int searchId, QString path, RegExpPath filter, bool notBinary, RegExp search, int linesBofore, int linesAfter,bool cacheFileList);
+    void search(int action, int searchId, QString path, RegExpPath filter, bool notBinary, RegExp search, int linesBofore, int linesAfter, bool cacheFileList, QString);
     void searchMore(int searchId);
     void finishSearch(int searchId);
     //void collected();
     void collect();
+    void replace(int);
 
 public slots:
     void onCanceled();
@@ -87,6 +89,8 @@ protected slots:
     void onTabTitle(QString title, bool isExecuted);
     void onPathChanged(QString path);
 
+    void onPreview();
+    void onReplace();
 private:
     Ui::SessionWidget *ui;
 };

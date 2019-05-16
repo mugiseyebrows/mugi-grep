@@ -47,7 +47,8 @@ HEADERS += \
     widget/searchprogresswidget.h \
     filereader.h \
     utils/isbinext.h \
-    completermodelmanager.h
+    completermodelmanager.h \
+    utils/lit.h
 
 
 SOURCES += \
@@ -87,7 +88,8 @@ SOURCES += \
     widget/searchprogresswidget.cpp \
     filereader.cpp \
     utils/isbinext.cpp \
-    completermodelmanager.cpp
+    completermodelmanager.cpp \
+    utils/lit.cpp
 
 FORMS += \
     widget/mainwindow.ui \

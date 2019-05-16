@@ -37,6 +37,8 @@ public:
 
 signals:
     void search();
+    void preview();
+    void replace();
     void clone();
     void tabTitle(QString, bool);
     void countMatchedFiles(QString,RegExpPath,bool);
@@ -51,6 +53,7 @@ protected slots:
     void onCacheFileListClicked(bool);
     void onCountMatchedFiles(int matched, int total);
     void onNotBinaryClicked(bool value);
+
 protected:
     Ui::SearchOptionsWidget *ui;
     bool mActive;
@@ -60,6 +63,9 @@ protected:
 private slots:
     void on_selectFiles_clicked();
     void on_path_textChanged(const QString &arg1);
+    void on_replace_clicked();
+    void on_preview_clicked();
+    void onReplacementTextChanged(QString arg1);
 };
 
 #endif // SEARCHOPTIONSWIDGET_H

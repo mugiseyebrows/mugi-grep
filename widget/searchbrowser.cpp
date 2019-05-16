@@ -102,4 +102,13 @@ void SearchBrowser::copy(SearchBrowser* dest) {
     dest->setCacheFileList(mCacheFileList);
     dest->setNotBinary(mNotBinary);
     dest->setChanged(mChanged);
+    dest->setReplacement(mReplacement);
+}
+
+QString SearchBrowser::replacement() const {
+    return mReplacement;
+}
+
+void SearchBrowser::setReplacement(const QString& value) {
+    mReplacement = value;
 }

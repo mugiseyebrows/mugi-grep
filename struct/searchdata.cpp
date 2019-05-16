@@ -4,12 +4,12 @@ SearchData::SearchData() {
 
 }
 
-SearchData::SearchData(QString path, RegExpPath filter, bool notBinary, RegExp search,
+SearchData::SearchData(int action, QString path, RegExpPath filter, bool notBinary, RegExp search,
                        QStringList files, int linesBefore, int linesAfter,
-                       int filesFiltered, int dirsFiltered)
+                       int filesFiltered, int dirsFiltered, const QString &replacement)
     : path(path), filter(filter), notBinary(notBinary),
       search(search), files(files), complete(0), linesBefore(linesBefore), linesAfter(linesAfter),
-      filesFiltered(filesFiltered), dirsFiltered(dirsFiltered)
+      filesFiltered(filesFiltered), dirsFiltered(dirsFiltered), action(action), replacement(replacement)
 {
 
 }

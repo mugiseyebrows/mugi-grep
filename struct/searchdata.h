@@ -7,8 +7,8 @@
 struct SearchData {
 
     SearchData();
-    SearchData(QString path, RegExpPath filter, bool notBinary, RegExp search,
-               QStringList files, int linesBefore, int linesAfter, int filesFiltered, int dirsFiltered);
+    SearchData(int action, QString path, RegExpPath filter, bool notBinary, RegExp search,
+               QStringList files, int linesBefore, int linesAfter, int filesFiltered, int dirsFiltered, const QString& replacement);
 
     QString path;
     RegExpPath filter;
@@ -20,6 +20,8 @@ struct SearchData {
     int linesAfter;
     int filesFiltered;
     int dirsFiltered;
+    int action;
+    QString replacement;
 };
 
 

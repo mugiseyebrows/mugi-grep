@@ -36,6 +36,7 @@ void SearchOptionsWidget::setBrowser(SearchBrowser *browser, bool setValues)
         ui->linesAfter->setValue(browser->linesAfter());
         ui->cacheFileList->setChecked(browser->cacheFileList());
         ui->notBinary->setChecked(browser->notBinary());
+        ui->replacement->setText(browser->replacement());
 
         ui->filter->hide();
         ui->filter->show(); // force layout to recalculate
@@ -58,6 +59,8 @@ void SearchOptionsWidget::init(Worker *worker, AnchorClickHandler* clickHandler)
     connect(ui->exp,SIGNAL(caseClicked(bool)),this,SLOT(onExpTextChanged()));
     connect(ui->linesBefore,SIGNAL(returnPressed()),this,SIGNAL(search()));
     connect(ui->linesAfter,SIGNAL(returnPressed()),this,SIGNAL(search()));
+    connect(ui->replacement,SIGNAL(returnPressed()),this,SIGNAL(preview()));
+    connect(ui->replacement,SIGNAL(textChanged(QString)),this,SLOT(onReplacementTextChanged(QString)));
 
     mWorker = worker;
     mClickHandler = clickHandler;
@@ -87,6 +90,7 @@ void SearchOptionsWidget::setBrowserValues()
     mBrowser->setLinesAfter(ui->linesAfter->value());
     mBrowser->setCacheFileList(ui->cacheFileList->isChecked());
     mBrowser->setNotBinary(ui->notBinary->isChecked());
+    mBrowser->setReplacement(ui->replacement->text());
 }
 
 void SearchOptionsWidget::collect()
@@ -231,4 +235,24 @@ void SearchOptionsWidget::onNotBinaryClicked(bool value) {
     mBrowser->setNotBinary(value);
 }
 
+void SearchOptionsWidget::on_replace_clicked()
+{
+    emit replace();
+}
 
+void SearchOptionsWidget::on_preview_clicked()
+{
+    emit preview();
+}
+
+void SearchOptionsWidget::onReplacementTextChanged(QString value)
+{
+    if (!mActive || !mBrowser) {
+        return;
+    }
+    if (mBrowser->isExecuted()) {
+        emit clone();
+        return;
+    }
+    mBrowser->setReplacement(value);
+}

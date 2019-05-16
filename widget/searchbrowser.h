@@ -30,7 +30,8 @@ public:
     void setChanged(const QDateTime& changed);
     bool isExecuted() const;
     void copy(SearchBrowser* dest);
-
+    QString replacement() const;
+    void setReplacement(const QString &value);
 protected:
     int mSearchId;
     RegExp mExp;
@@ -40,5 +41,6 @@ protected:
     bool mCacheFileList;
     bool mNotBinary;
     QDateTime mChanged;
+    QString mReplacement;
 };
 #endif // SEARCHBROWSER_H

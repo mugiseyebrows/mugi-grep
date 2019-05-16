@@ -6,7 +6,7 @@
 namespace Html
 {
 
-    QString span(const QString &text_, const QString &color);
+    QString span(const QString &text_, const QString &color, bool bold = false);
 
     QString anchor(const QString &text, const QString& path, const QString& color);
 

@@ -43,14 +43,18 @@ void RegExp::deserealize(const QVariantMap &data)
 void RegExp::init(const QString& inc, const QString& exc, bool case_) {
     mInclude = inc;
     mExclude = exc;
-    mInclude_ = QRegularExpression(inc, case_ ? QRegularExpression::NoPatternOption : QRegularExpression::CaseInsensitiveOption);
-    mExclude_ = QRegularExpression(exc, case_ ? QRegularExpression::NoPatternOption : QRegularExpression::CaseInsensitiveOption);
+    mIncludeExp = QRegularExpression(inc, case_ ? QRegularExpression::NoPatternOption : QRegularExpression::CaseInsensitiveOption);
+    mExcludeExp = QRegularExpression(exc, case_ ? QRegularExpression::NoPatternOption : QRegularExpression::CaseInsensitiveOption);
     mCase = case_;
 }
 
 QString RegExp::include() const
 {
     return mInclude;
+}
+
+QRegularExpression RegExp::includeExp() const {
+    return mIncludeExp;
 }
 
 QString RegExp::exclude() const
@@ -74,10 +78,7 @@ bool RegExp::match(const QString s, int* pos, int* len) const
     if (mInclude.isEmpty()) {
         inc = true;
     } else {
-        QRegularExpression e = mInclude_;
-
-        QRegularExpressionMatch m = e.match(s);
-
+        QRegularExpressionMatch m = mIncludeExp.match(s);
         if (m.hasMatch()) {
             int p = m.capturedStart();
             if (pos) {
@@ -91,7 +92,7 @@ bool RegExp::match(const QString s, int* pos, int* len) const
             inc = false;
         }
     }
-    return (inc) && (mExclude.isEmpty() || !mExclude_.match(s).hasMatch());
+    return (inc) && (mExclude.isEmpty() || !mExcludeExp.match(s).hasMatch());
 }
 
 

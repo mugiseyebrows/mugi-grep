@@ -42,14 +42,17 @@ SessionWidget::SessionWidget(QWidget *parent) :
 
     mWorker->moveToThread(mThread);
 
-    connect(this,SIGNAL(search(int,QString,RegExpPath,bool,RegExp,int,int,bool)),
-            mWorker,SLOT(onSearch(int,QString,RegExpPath,bool,RegExp,int,int,bool)));
+    connect(this,SIGNAL(search(int,int,QString,RegExpPath,bool,RegExp,int,int,bool,QString)),
+            mWorker,SLOT(onSearch(int,int,QString,RegExpPath,bool,RegExp,int,int,bool,QString)));
+    connect(this,SIGNAL(replace(int)),mWorker,SLOT(onReplace(int)));
     connect(mWorker,SIGNAL(found(int,QString,int,int,int,QString)),
             this,SLOT(onFound(int,QString,int,int,int,QString)));
     connect(this,SIGNAL(searchMore(int)),mWorker,SLOT(onSearchMore(int)));
     connect(this,SIGNAL(finishSearch(int)),mWorker,SLOT(onFinishSearch(int)));
     connect(ui->options,SIGNAL(clone()),this,SLOT(onClone()));
     connect(ui->options,SIGNAL(search()),this,SLOT(onSearch()));
+    connect(ui->options,SIGNAL(preview()),this,SLOT(onPreview()));
+    connect(ui->options,SIGNAL(replace()),this,SLOT(onReplace()));
     connect(ui->options,SIGNAL(tabTitle(QString,bool)),this,SLOT(onTabTitle(QString,bool)));
     connect(ui->options,SIGNAL(pathChanged(QString)),this,SLOT(onPathChanged(QString)));
     connect(ui->progress,SIGNAL(canceled()),this,SLOT(onCanceled()));
@@ -101,29 +104,38 @@ void SessionWidget::onClone() {
     }
 }
 
-
 SearchOptionsWidget* SessionWidget::options() const{
     return ui->options;
 }
 
-void SessionWidget::onSearch() {
-
+void SessionWidget::searchOrReplace(Worker::Action action) {
     SearchBrowser* browser = currentTab();
     mCancel = false;
-
-    /*ui->options->collect();
-    emit collected();*/
     emit collect();
-
     int searchId = SearchId::instance()->next();
     browser->setText(QString());
     browser->setSearchId(searchId);
     ui->options->emitTabTitle();
+    emit search(action, searchId, ui->options->path(),browser->filter(),browser->notBinary(),browser->exp(),
+                browser->linesBefore(),browser->linesAfter(),browser->cacheFileList(),browser->replacement());
 
-    emit search(searchId,ui->options->path(),browser->filter(),browser->notBinary(),browser->exp(),
-                browser->linesBefore(),browser->linesAfter(),browser->cacheFileList());
+    qDebug() << browser->replacement();
 
     ui->progress->started();
+}
+
+void SessionWidget::onSearch() {
+    searchOrReplace(Worker::Search);
+}
+
+void SessionWidget::onPreview() {
+    searchOrReplace(Worker::Preview);
+}
+
+void SessionWidget::onReplace() {
+    SearchBrowser* browser = currentTab();
+    int searchId = browser->searchId();
+    emit replace(searchId);
 }
 
 int SessionWidget::oldestTabIndex() { // todo test me

@@ -1,10 +1,13 @@
 #include "html.h"
 
-QString Html::span(const QString &text_, const QString &color)
+QString Html::span(const QString &text_, const QString &color, bool bold)
 {
     QString text = text_;
     text.replace("<","&lt;").replace(">","&gt;");
-    return QString("<span style=\"color:%1\">%2</span>").arg(color).arg(text);
+    if (bold) {
+        return QString("<span style=\"color:%1;font-weight:bold;\">%2</span>").arg(color).arg(text);
+    }
+    return QString("<span style=\"color:%1;\">%2</span>").arg(color).arg(text);
 }
 
 QString Html::anchor(const QString &text, const QString& path, const QString& color)
