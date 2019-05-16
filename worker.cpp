@@ -15,7 +15,7 @@ void Worker::onSearch(int action, int searchId, QString path, RegExpPath filter,
 
 void Worker::onReplace(int searchId)
 {
-
+    mCache.replace(searchId);
 }
 
 void Worker::onCountMatchedFiles(QString path, RegExpPath filter, bool notBinary) {
@@ -43,6 +43,6 @@ void Worker::onSearchMore(int id)
 
 void Worker::onFinishSearch(int id)
 {
-    //qDebug() << "onFinishSearch" << id;
+    emit canReplace(mCache.isPreview(id));
     mCache.finish(id);
 }

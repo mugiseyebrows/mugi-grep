@@ -22,6 +22,17 @@ QStringList toStringList(const QVariantList& vs) {
 
 }
 
+QStringList bytesToLines(const QByteArray& bytes) {
+    QTextCodec* codec = QTextCodec::codecForName("UTF-8");
+    QStringList lines = codec->toUnicode(bytes).split("\n");
+    return lines;
+}
+
+QByteArray linesToBytes(const QStringList& lines) {
+    QTextCodec* codec = QTextCodec::codecForName("UTF-8");
+    return codec->fromUnicode(lines.join("\n"));
+}
+
 QStringList searchLines(const QStringList& mLines, const QString& mPath, const QString& mRelativePath,
                         const RegExp& exp, int linesBefore, int linesAfter) {
 
@@ -153,16 +164,15 @@ QString withBackreferences(const QRegularExpressionMatch& m, const QVariantList&
     return result.join("");
 }
 
-QStringList replacePreview(const QStringList& mLines, const QString& mPath, const QString& mRelativePath,
+QStringList replacePreview(const QStringList& lines, const QString& path, const QString& mRelativePath,
                            const RegExp& exp, const QString& replacement, QList<Replacement>& replacements) {
 
     QStringList res;
 
-    QSet<int> matched;
-    QSet<int> siblings;
+    QList<int> matched;
 
-    for(int i=0;i<mLines.size();i++) {
-        if (exp.match(mLines[i])) {
+    for(int i=0;i<lines.size();i++) {
+        if (exp.match(lines[i])) {
             matched << i;
         }
     }
@@ -173,37 +183,52 @@ QStringList replacePreview(const QStringList& mLines, const QString& mPath, cons
 
     QRegularExpression rx = exp.includeExp();
     QVariantList replacement_ = tokenize(replacement);
-    QString href = "file:///" + QDir::toNativeSeparators(mPath);
+    QString href = "file:///" + QDir::toNativeSeparators(path);
     res << Html::anchor(mRelativePath, href, "violet");
+
+    QStringList oldLines;
+    QStringList newLines;
+
     foreach (int lineNum, matched) {
-        QString line = mLines[lineNum];
-        QRegularExpressionMatch m = rx.match(line);
+        QString line = lines[lineNum];
+
+        QRegularExpressionMatchIterator it = rx.globalMatch(line);
 
         QStringList oldLine;
-        oldLine << line.mid(0,m.capturedStart())
-                << line.mid(m.capturedStart(),m.capturedLength())
-                << line.mid(m.capturedEnd()+1);
-
         QStringList newLine;
-        newLine << oldLine[0]
-                << withBackreferences(m,replacement_)
-                << oldLine[2];
 
-        QStringList cols;
-        cols << Html::span("- ","red")
-             << Html::span(oldLine[0],"red")
-             << Html::span(oldLine[1],"red",true)
-             << Html::span(oldLine[2],"red");
-        res << cols.join("");
-        cols.clear();
+        int prev = 0;
+        while(it.hasNext()) {
+            QRegularExpressionMatch m = it.next();
+            QString s = line.mid(prev,m.capturedStart() - prev);
+            oldLine << s;
+            newLine << s;
 
-        cols << Html::span("+ ","green")
-             << Html::span(newLine[0],"green")
-             << Html::span(newLine[1],"green",true)
-             << Html::span(newLine[2],"green");
-        res << cols.join("");
-        cols.clear();
+            s = line.mid(m.capturedStart(),m.capturedLength());
+            oldLine << s;
+            newLine << withBackreferences(m,replacement_);
+            prev = m.capturedEnd();
+        }
+
+        if (prev < line.size()) {
+            oldLine << line.mid(prev);
+            newLine << line.mid(prev);
+        }
+
+        Q_ASSERT(oldLine.join("") == line);
+
+        res << Html::span("- ","red") + Html::spanZebra(oldLine,"red")
+            << Html::span("+ ","green") + Html::spanZebra(newLine,"green");
+
+        oldLines << oldLine.join("");
+        newLines << newLine.join("");
     }
+    QList<ReplacementLine> replacementLines;
+    for(int i=0;i<oldLines.size();i++) {
+        replacementLines.append(ReplacementLine(matched[i],oldLines[i],newLines[i]));
+    }
+
+    replacements.append(Replacement(path,replacementLines));
     return res;
 }
 
@@ -362,6 +387,11 @@ void SearchCache::finish(int searchId) {
     mSearchData.remove(searchId);
 }
 
+bool SearchCache::isPreview(int searchId) {
+    QMutexLocker locked(&mMutex);
+    return mSearchData.contains(searchId) && mSearchData[searchId].action == Worker::Preview;
+}
+
 void SearchCache::search(int searchId, QString &data, int *complete, int *total, int *filtered, QString &file) {
 
     QMutexLocker locked(&mMutex);
@@ -436,6 +466,49 @@ void SearchCache::search(int searchId, QString &data, int *complete, int *total,
     file = QString();
 }
 
+void SearchCache::replace(int searchId) {
+    QMutexLocker locked(&mMutex);
+    if (!mReplacements.contains(searchId)) {
+        return;
+    }
+    QList<Replacement> replacements = mReplacements[searchId];
+    foreach(const Replacement& replacement, replacements) {
+        bool readOk, tooBig, binary;
+        QString path = replacement.path();
+        QStringList lines = bytesToLines(FileReader::read(path,true,&binary,&readOk,&tooBig));
+        if (!readOk) {
+            qDebug() << "cannot read" << path;
+            continue;
+        }
+        if (tooBig) {
+            qDebug() << "too big" << path;
+            continue;
+        }
+        bool ok = true;
+        QList<ReplacementLine> replLines = replacement.lines();
+        foreach (const ReplacementLine& replLine, replLines) {
+            int lineNum = replLine.line();
+            if (lines[lineNum] == replLine.oldLine()) {
+                lines[lineNum] = replLine.newLine();
+            } else {
+                qDebug() << lines[lineNum];
+                qDebug() << replLine.oldLine();
+                ok = false;
+            }
+        }
+        if (!ok) {
+            qDebug() << "file changed" << path;
+            continue;
+        }
+        QFile file(path);
+        if (!file.open(QIODevice::WriteOnly)) {
+            qDebug() << "canot open file" << path;
+            continue;
+        }
+        file.write(linesToBytes(lines));
+        file.close();
+    }
+}
 
 void SearchCache::testTokenize() {
 

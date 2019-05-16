@@ -61,6 +61,8 @@ signals:
 
     void allFiles(QString, QStringList);
 
+    void canReplace(bool);
+
 public slots:
 
     void onReplace(int searchId);

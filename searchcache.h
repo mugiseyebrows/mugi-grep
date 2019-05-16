@@ -9,18 +9,48 @@
 #include <QMutex>
 #include <QDebug>
 
+class ReplacementLine {
+public:
+    ReplacementLine() {
+
+    }
+    ReplacementLine(int line, const QString& oldLine, const QString& newLine) : mLine(line), mOldLine(oldLine), mNewLine(newLine) {
+
+    }
+    int line() const {
+        return mLine;
+    }
+    QString oldLine() const {
+        return mOldLine;
+    }
+    QString newLine() const {
+        return mNewLine;
+    }
+
+protected:
+    int mLine;
+    QString mOldLine;
+    QString mNewLine;
+};
+
+
 class Replacement {
 public:
-    typedef QPair<int,QPair<QString,QString> > ReplaceLine;
     Replacement() {
 
     }
-    Replacement(QString& path, QList<ReplaceLine>& replacements) : mPath(path), mReplacements(replacements) {
+    Replacement(const QString& path, const QList<ReplacementLine>& lines) : mPath(path), mLines(lines) {
 
+    }
+    QString path() const {
+        return mPath;
+    }
+    QList<ReplacementLine> lines() const {
+        return mLines;
     }
 protected:
     QString mPath;
-    QList<ReplaceLine> mReplacements;
+    QList<ReplacementLine> mLines;
 };
 
 QString ext(const QString& path);
@@ -42,6 +72,8 @@ public:
     void add(int action, int searchId, QString path, RegExpPath filter, bool notBinary, RegExp search,
             int linesBefore, int linesAfter, bool cacheFileList, const QString &replacement);
 
+    void replace(int searchId);
+
     void finish(int searchId);
 
     void search(int searchId, QString& data, int* complete, int* total, int* filtered, QString& file);
@@ -53,6 +85,7 @@ public:
     static QStringList filterFiles(const QStringList &allFiles, RegExpPath filter, bool notBinary, int *filesFiltered, int *dirsFiltered);
     static void testTokenize();
 
+    bool isPreview(int searchId);
 protected:
 
     QMutex mMutex;
