@@ -13,7 +13,10 @@ void Worker::onSearch(SearchParams params)
 
 void Worker::onReplace(int searchId)
 {
-    mCache.replace(searchId);
+    int files,lines;
+    QStringList notChanged;
+    mCache.replace(searchId, &files, &lines, notChanged);
+    emit replaced(searchId, files, lines, notChanged);
 }
 
 void Worker::onCountMatchedFiles(QString path, RegExpPath filter, bool notBinary) {

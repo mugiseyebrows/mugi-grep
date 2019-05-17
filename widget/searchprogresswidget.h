@@ -19,6 +19,7 @@ public:
     void init();
     void progress(int i, int t, int s, QString path);
     void aborted();
+    void replaced(int files, int lines);
 signals:
     void canceled();
 private:

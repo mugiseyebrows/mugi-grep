@@ -48,3 +48,13 @@ void SearchProgressWidget::aborted() {
     ui->status2->setText(QString());
     ui->status2->hide();
 }
+
+void SearchProgressWidget::replaced(int files,int lines) {
+    ui->status1->setText(QString("%2 line%4 replaced in %1 file%3")
+                         .arg(files)
+                         .arg(lines)
+                         .arg(files == 1 ? "" : "s")
+                         .arg(lines == 1 ? "" : "s"));
+    ui->status2->setText(QString());
+    ui->status2->hide();
+}

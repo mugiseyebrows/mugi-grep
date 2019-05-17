@@ -105,12 +105,9 @@ protected slots:
     void onSearch();
     void onTabTitle(QString title, bool isExecuted);
     void onPathChanged(QString path);
-
     void onPreview();
     void onReplace();
-
-
-
+    void onReplaced(int, int, int, QStringList);
 private:
     Ui::SessionWidget *ui;
 };

@@ -403,7 +403,7 @@ void SearchCache::finish(int searchId) {
 
 bool SearchCache::isPreview(int searchId) {
     QMutexLocker locked(&mMutex);
-    return mSearchData.contains(searchId) && mSearchData[searchId].action() == Worker::Preview;
+    return mSearchData.contains(searchId) && mSearchData[searchId].action() == Worker::Preview && mReplacements.contains(searchId);
 }
 
 void SearchCache::search(int searchId, QString &data, int *complete, int *total, int *filtered, QString &file) {
@@ -480,11 +480,17 @@ void SearchCache::search(int searchId, QString &data, int *complete, int *total,
     file = QString();
 }
 
-void SearchCache::replace(int searchId) {
+void SearchCache::replace(int searchId, int* filesChanged, int* linesChanged, QStringList& notChanged) {
     QMutexLocker locked(&mMutex);
     if (!mReplacements.contains(searchId)) {
         return;
     }
+
+    SearchParams params = mSearchData[searchId];
+
+    *filesChanged = 0;
+    *linesChanged = 0;
+
     QList<Replacement> replacements = mReplacements[searchId];
     foreach(const Replacement& replacement, replacements) {
         bool readOk, tooBig, binary;
@@ -510,6 +516,13 @@ void SearchCache::replace(int searchId) {
                 ok = false;
             }
         }
+        if (ok) {
+            *filesChanged += 1;
+            *linesChanged += replLines.size();
+        } else {
+            notChanged << relPath(path,params.path());
+        }
+
         if (!ok) {
             qDebug() << "file changed" << path;
             continue;
@@ -522,6 +535,8 @@ void SearchCache::replace(int searchId) {
         file.write(linesToBytes(lines));
         file.close();
     }
+
+    mReplacements.remove(searchId);
 }
 
 void SearchCache::testTokenize() {

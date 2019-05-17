@@ -41,6 +41,8 @@ signals:
 
     void canReplace(int, bool);
 
+    void replaced(int,int,int,QStringList);
+
 public slots:
 
     void onCanReplace(int);

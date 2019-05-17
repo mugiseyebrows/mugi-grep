@@ -28,7 +28,7 @@ public:
 
     void add(SearchParams params);
 
-    void replace(int searchId);
+    void replace(int searchId, int* filesChanged, int* linesChanged, QStringList& notChanged);
 
     void finish(int searchId);
 

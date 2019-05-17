@@ -64,6 +64,7 @@ SessionWidget::SessionWidget(QWidget *parent) :
 
     connect(this,SIGNAL(canReplace(int)),mWorker,SLOT(onCanReplace(int)));
     connect(mWorker,SIGNAL(canReplace(int,bool)),this,SLOT(onCanReplace(int,bool)));
+    connect(mWorker,SIGNAL(replaced(int,int,int,QStringList)),this,SLOT(onReplaced(int,int,int,QStringList)));
 
     mThread->start();
 
@@ -347,4 +348,15 @@ void SessionWidget::onPathChanged(QString path)
     mTabWidget->setTabText(mTabWidget->indexOf(this),QFileInfo(path).fileName());
 }
 
-
+void SessionWidget::onReplaced(int searchId,int files,int lines,QStringList notChanged) {
+    SearchBrowser* browser = currentTab();
+    if (browser->searchId() != searchId) {
+        return;
+    }
+    onCanReplace(searchId,false);
+    ui->progress->replaced(files, lines);
+    if (notChanged.isEmpty()) {
+        return;
+    }
+    QMessageBox::critical(this,"Error",QString("Failed to replace in files:\n%1").arg(notChanged.join("\n")));
+}
