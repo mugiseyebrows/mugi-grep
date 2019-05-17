@@ -1,7 +1,6 @@
 #include "regexppath.h"
 
-#include "utils/sl.h"
-#include "utils/bl.h"
+#include "utils/lit.h"
 #include <QDebug>
 
 RegExpPath::RegExpPath()
@@ -96,6 +95,7 @@ void RegExpPath::test()
 
     QStringList paths;
     paths << "foo.bar" << "foo.bar.baz" << "foo";
+    using namespace Lit;
 
     test(paths,RegExpPath(sl("","bar","",""),false),bl(true,false,false));
     test(paths,RegExpPath(sl("","foo","",""),false),bl(false,false,false));

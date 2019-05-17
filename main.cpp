@@ -8,6 +8,7 @@
 #include "version.h"
 
 #include "searchcache.h"
+#include "searchparams.h"
 
 int main(int argc, char *argv[])
 {
@@ -15,6 +16,7 @@ int main(int argc, char *argv[])
 
     qRegisterMetaType<RegExp>();
     qRegisterMetaType<RegExpPath>();
+    qRegisterMetaType<SearchParams>();
 
     QApplication a(argc, argv);
     a.setApplicationName(APP_NAME);
@@ -26,7 +28,7 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.show();
 
-    SearchCache::testTokenize();
+    //SearchCache::testTokenize();
     
     return a.exec();
 }

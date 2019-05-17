@@ -3,55 +3,12 @@
 
 #include "regexp.h"
 #include "regexppath.h"
-#include "struct/searchdata.h"
 
 #include <QDirIterator>
 #include <QMutex>
 #include <QDebug>
-
-class ReplacementLine {
-public:
-    ReplacementLine() {
-
-    }
-    ReplacementLine(int line, const QString& oldLine, const QString& newLine) : mLine(line), mOldLine(oldLine), mNewLine(newLine) {
-
-    }
-    int line() const {
-        return mLine;
-    }
-    QString oldLine() const {
-        return mOldLine;
-    }
-    QString newLine() const {
-        return mNewLine;
-    }
-
-protected:
-    int mLine;
-    QString mOldLine;
-    QString mNewLine;
-};
-
-
-class Replacement {
-public:
-    Replacement() {
-
-    }
-    Replacement(const QString& path, const QList<ReplacementLine>& lines) : mPath(path), mLines(lines) {
-
-    }
-    QString path() const {
-        return mPath;
-    }
-    QList<ReplacementLine> lines() const {
-        return mLines;
-    }
-protected:
-    QString mPath;
-    QList<ReplacementLine> mLines;
-};
+#include "searchparams.h"
+#include "replacement.h"
 
 QString ext(const QString& path);
 
@@ -69,8 +26,7 @@ class SearchCache {
 public:
     SearchCache();
 
-    void add(int action, int searchId, QString path, RegExpPath filter, bool notBinary, RegExp search,
-            int linesBefore, int linesAfter, bool cacheFileList, const QString &replacement);
+    void add(SearchParams params);
 
     void replace(int searchId);
 
@@ -86,11 +42,12 @@ public:
     static void testTokenize();
 
     bool isPreview(int searchId);
+
 protected:
 
     QMutex mMutex;
-    QMap<int,SearchData> mSearchData;
-    QMap<int,QList<Replacement>> mReplacements;
+    QMap<int,SearchParams> mSearchData;
+    QMap<int,QList<Replacement> > mReplacements;
     QMap<QString, QStringList> mFileList;
 
 };

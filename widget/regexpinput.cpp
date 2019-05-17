@@ -5,10 +5,10 @@
 #include <QCheckBox>
 #include <QLabel>
 
-#include "utils/sl.h"
+#include "utils/lit.h"
 
 RegExpInput::RegExpInput(QWidget *parent) :
-    RegExpBaseInput(2,sl("include","exclude"),nullptr,parent)
+    RegExpBaseInput(2,Lit::sl("include","exclude"),nullptr,parent)
 {
     QList<QWidget*> widgets;
     for(int i=0;i<mInputs.size();i++) {

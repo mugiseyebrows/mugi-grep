@@ -21,7 +21,6 @@ HEADERS += \
     3rdparty/orderedmap.h \
     model/editorsmodel.h \
     struct/editor.h \
-    struct/searchdata.h \
     widget/intlineedit.h \
     widget/mainwindow.h \
     widget/regexpbaseinput.h \
@@ -33,8 +32,6 @@ HEADERS += \
     widget/searchbrowser.h \
     widget/sessionwidget.h \
     widget/settingsdialog.h \
-    utils/bl.h \
-    utils/sl.h \
     utils/jsonhelper.h \
     widget/elidedlabel.h \
     version.h \
@@ -48,7 +45,10 @@ HEADERS += \
     filereader.h \
     utils/isbinext.h \
     completermodelmanager.h \
-    utils/lit.h
+    utils/lit.h \
+    searchparams.h \
+    replacementline.h \
+    replacement.h
 
 
 SOURCES += \
@@ -62,7 +62,6 @@ SOURCES += \
     worker.cpp \
     model/editorsmodel.cpp \
     struct/editor.cpp \
-    struct/searchdata.cpp \
     widget/intlineedit.cpp \
     widget/mainwindow.cpp \
     widget/regexpbaseinput.cpp \
@@ -75,8 +74,6 @@ SOURCES += \
     widget/searchbrowser.cpp \
     widget/sessionwidget.cpp \
     widget/settingsdialog.cpp \
-    utils/bl.cpp \
-    utils/sl.cpp \
     utils/jsonhelper.cpp \
     widget/elidedlabel.cpp \
     widget/selectfilesdialog.cpp \
@@ -89,7 +86,10 @@ SOURCES += \
     filereader.cpp \
     utils/isbinext.cpp \
     completermodelmanager.cpp \
-    utils/lit.cpp
+    utils/lit.cpp \
+    searchparams.cpp \
+    replacementline.cpp \
+    replacement.cpp
 
 FORMS += \
     widget/mainwindow.ui \

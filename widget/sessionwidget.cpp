@@ -14,7 +14,6 @@
 #include <QMessageBox>
 
 #include "widget/searchbrowser.h"
-#include "utils/sl.h"
 
 #include "worker.h"
 #include "rxcollector.h"
@@ -44,6 +43,9 @@ SessionWidget::SessionWidget(QWidget *parent) :
 
     connect(this,SIGNAL(search(int,int,QString,RegExpPath,bool,RegExp,int,int,bool,QString)),
             mWorker,SLOT(onSearch(int,int,QString,RegExpPath,bool,RegExp,int,int,bool,QString)));
+
+    connect(this,SIGNAL(search(SearchParams)),mWorker,SLOT(onSearch(SearchParams)));
+
     connect(this,SIGNAL(replace(int)),mWorker,SLOT(onReplace(int)));
     connect(mWorker,SIGNAL(found(int,QString,int,int,int,QString)),
             this,SLOT(onFound(int,QString,int,int,int,QString)));
@@ -116,11 +118,11 @@ void SessionWidget::searchOrReplace(Worker::Action action) {
     browser->setText(QString());
     browser->setSearchId(searchId);
     ui->options->emitTabTitle();
-    emit search(action, searchId, ui->options->path(),browser->filter(),browser->notBinary(),browser->exp(),
+    /*emit search(action, searchId, ui->options->path(),browser->filter(),browser->notBinary(),browser->exp(),
                 browser->linesBefore(),browser->linesAfter(),browser->cacheFileList(),browser->replacement());
-
-    qDebug() << browser->replacement();
-
+    qDebug() << browser->replacement();*/
+    SearchParams params = browser->params(action, searchId, ui->options->path());
+    emit search(params);
     ui->progress->started();
 }
 
@@ -296,4 +298,5 @@ void SessionWidget::onPathChanged(QString path)
     }
     mTabWidget->setTabText(mTabWidget->indexOf(this),QFileInfo(path).fileName());
 }
+
 

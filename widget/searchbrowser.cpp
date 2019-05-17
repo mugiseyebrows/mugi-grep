@@ -112,3 +112,8 @@ QString SearchBrowser::replacement() const {
 void SearchBrowser::setReplacement(const QString& value) {
     mReplacement = value;
 }
+
+SearchParams SearchBrowser::params(int action, int id, const QString &path)
+{
+    return SearchParams(action, id, path, mFilter, mNotBinary, mExp, mLinesBefore, mLinesAfter, mCacheFileList, mReplacement);
+}

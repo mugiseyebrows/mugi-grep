@@ -10,6 +10,7 @@
 #include "regexppath.h"
 #include "widget/regexpbaseinput.h"
 #include "worker.h"
+#include "searchparams.h"
 
 namespace Ui {
 class SessionWidget;
@@ -68,6 +69,7 @@ protected:
     void searchOrReplace(Worker::Action action);
 signals:
 
+    void search(SearchParams);
     void search(int action, int searchId, QString path, RegExpPath filter, bool notBinary, RegExp search, int linesBofore, int linesAfter, bool cacheFileList, QString);
     void searchMore(int searchId);
     void finishSearch(int searchId);

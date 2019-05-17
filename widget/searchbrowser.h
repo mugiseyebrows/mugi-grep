@@ -6,6 +6,8 @@
 #include <QDateTime>
 #include <QTextBrowser>
 
+#include "searchparams.h"
+
 class QDebug;
 class SearchBrowser : public QTextBrowser {
     Q_OBJECT
@@ -32,6 +34,9 @@ public:
     void copy(SearchBrowser* dest);
     QString replacement() const;
     void setReplacement(const QString &value);
+
+    SearchParams params(int action, int id, const QString& path);
+
 protected:
     int mSearchId;
     RegExp mExp;

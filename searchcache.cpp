@@ -363,22 +363,29 @@ QStringList SearchCache::filterFiles(const QStringList& allFiles, RegExpPath fil
     return files;
 }
 
-void SearchCache::add(int action, int searchId, QString path, RegExpPath filter,
-                      bool notBinary, RegExp search,
-                      int linesBefore, int linesAfter, bool cacheFileList, const QString& replacement) {
+
+
+void SearchCache::add(SearchParams params) {
 
     QMutexLocker locked(&mMutex);
 
-    QStringList allFiles = getAllFiles(path,cacheFileList);
+    QString path = params.path();
+    bool cacheFileList = params.cacheFileList();
+    RegExpPath filter = params.filter();
+    bool notBinary = params.skipBinary();
+
+    int searchId = params.id();
+
+    QStringList allFiles = getAllFiles(path, cacheFileList);
     int filesFiltered;
     int dirsFiltered;
-    QStringList files = filterFiles(allFiles,filter,notBinary,&filesFiltered,&dirsFiltered);
+    QStringList files = filterFiles(allFiles, filter, notBinary, &filesFiltered, &dirsFiltered);
 
-    SearchData data = SearchData(action, path, filter, notBinary, search, files,
-                                 linesBefore, linesAfter,
-                                 filesFiltered, dirsFiltered, replacement);
+    params.setFiles(files);
+    params.setFilesFiltered(filesFiltered);
+    params.setDirsFiltered(dirsFiltered);
 
-    mSearchData.insert(searchId,data);
+    mSearchData.insert(searchId,params);
     mReplacements.insert(searchId,QList<Replacement>());
 }
 
@@ -389,7 +396,7 @@ void SearchCache::finish(int searchId) {
 
 bool SearchCache::isPreview(int searchId) {
     QMutexLocker locked(&mMutex);
-    return mSearchData.contains(searchId) && mSearchData[searchId].action == Worker::Preview;
+    return mSearchData.contains(searchId) && mSearchData[searchId].action() == Worker::Preview;
 }
 
 void SearchCache::search(int searchId, QString &data, int *complete, int *total, int *filtered, QString &file) {
@@ -401,7 +408,7 @@ void SearchCache::search(int searchId, QString &data, int *complete, int *total,
         return;
     }
 
-    SearchData& searchData = mSearchData[searchId];
+    SearchParams& searchParams = mSearchData[searchId];
     QList<Replacement>& replacements = mReplacements[searchId];
 
     //int lim = qMin(sd.complete + 100, sd.files.size());
@@ -410,16 +417,16 @@ void SearchCache::search(int searchId, QString &data, int *complete, int *total,
     int lineCount = 0;
     int fileCount = 0;
 
-    for (int i=searchData.complete;i<searchData.files.size();i++) {
-        QString path = searchData.files[i];
+    for (int i=searchParams.filesComplete();i<searchParams.filesSize();i++) {
+        QString path = searchParams.file(i);
 
         bool binary;
         bool readOk;
         bool tooBig;
 
         //QByteArray fileData = FileCache::instance()->file(path,sd.notBinary,&binary,&readOk);
-        QByteArray fileData = FileReader::read(path,searchData.notBinary,&binary,&readOk,&tooBig);
-        QString relPath_ = relPath(path,searchData.path);
+        QByteArray fileData = FileReader::read(path,searchParams.skipBinary(),&binary,&readOk,&tooBig);
+        QString relPath_ = relPath(path,searchParams.path());
 
         bool ok = true;
 
@@ -435,34 +442,34 @@ void SearchCache::search(int searchId, QString &data, int *complete, int *total,
         int fileLineCount = 0;
 
         if (ok) {
-            if (searchData.action == Worker::Search) {
+            if (searchParams.action() == Worker::Search) {
                 if (binary) {
-                    res << searchBinary(fileData, path, relPath_, searchData.search);
+                    res << searchBinary(fileData, path, relPath_, searchParams.search());
                 } else {
-                    res << searchLines(fileData, path, relPath_, searchData.search, searchData.linesBefore, searchData.linesAfter, &fileLineCount);
+                    res << searchLines(fileData, path, relPath_, searchParams.search(), searchParams.linesBefore(), searchParams.linesAfter(), &fileLineCount);
                 }
-            } else if (searchData.action == Worker::Preview) {
-                res << replacePreview(fileData, path, relPath_, searchData.search, &fileLineCount, searchData.replacement, replacements);
+            } else if (searchParams.action() == Worker::Preview) {
+                res << replacePreview(fileData, path, relPath_, searchParams.search(), &fileLineCount, searchParams.replace(), replacements);
             }
         }
 
         lineCount += fileLineCount;
         fileCount += 1;
-        searchData.complete = i + 1;
+        searchParams.setFilesComplete(i + 1);
 
         if (res.size() > 100 || lineCount > 4000 || fileCount > 50) {
             data = res.join("<br/>");
-            *complete = searchData.complete;
-            *total = searchData.files.size();
-            *filtered = searchData.filesFiltered;
+            *complete = searchParams.filesComplete();
+            *total = searchParams.filesSize();
+            *filtered = searchParams.filesFiltered();
             file = relPath_;
             return;
         }
     }
     data = res.join("<br/>");
-    *complete = searchData.complete;
-    *total = searchData.files.size();
-    *filtered = searchData.filesFiltered;
+    *complete = searchParams.filesComplete();
+    *total = searchParams.filesSize();
+    *filtered = searchParams.filesFiltered();
     file = QString();
 }
 

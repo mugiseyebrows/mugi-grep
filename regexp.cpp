@@ -1,7 +1,6 @@
 #include "regexp.h"
 
-#include "utils/bl.h"
-#include "utils/sl.h"
+#include "utils/lit.h"
 
 #include <QStringList>
 #include <QDebug>
@@ -98,7 +97,7 @@ bool RegExp::match(const QString s, int* pos, int* len) const
 
 
 QStringList RegExp::exps() const {
-    return sl(mInclude,mExclude);
+    return Lit::sl(mInclude,mExclude);
 }
 
 void RegExp::test(const QStringList &paths, const RegExp &exp, const QList<bool> &matched)
@@ -114,12 +113,12 @@ void RegExp::test()
     QStringList paths;
     paths << "foo.bar" << "foo.bar.baz" << "foo";
 
-    test(paths,RegExp("foo","",false),bl(true,true,true));
-    test(paths,RegExp("bar","",false),bl(true,true,false));
-    test(paths,RegExp("foo","baz",false),bl(true,false,true));
-    test(paths,RegExp("","bar",false),bl(false,false,true));
+    test(paths,RegExp("foo","",false),Lit::bl(true,true,true));
+    test(paths,RegExp("bar","",false),Lit::bl(true,true,false));
+    test(paths,RegExp("foo","baz",false),Lit::bl(true,false,true));
+    test(paths,RegExp("","bar",false),Lit::bl(false,false,true));
 
-    test(paths,RegExp("FOO","baz",true),bl(false,false,false));
+    test(paths,RegExp("FOO","baz",true),Lit::bl(false,false,false));
 
     qDebug() << "passed RegExp::test()";
 

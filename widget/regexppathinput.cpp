@@ -7,11 +7,10 @@
 #include <QCheckBox>
 #include <QDebug>
 
-#include "utils/sl.h"
-#include "utils/bl.h"
+#include "utils/lit.h"
 
 RegExpPathInput::RegExpPathInput(QWidget *parent) :
-    RegExpBaseInput(4,sl("include","exts","exclude","exts"),0,parent)
+    RegExpBaseInput(4,Lit::sl("include","exts","exclude","exts"),0,parent)
 {
     QList<QWidget*> widgets;
     for(int i=0;i<mInputs.size();i++) {

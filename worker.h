@@ -12,29 +12,7 @@
 #include <QDateTime>
 
 #include <QDirIterator>
-
-#include "struct/searchdata.h"
-
-#if 0
-
-class ReplaceData : QList<Replacement> {
-public:
-    ReplaceData();
-};
-
-class ReplaceCache {
-public:
-    void add(int id, const ReplaceData& data) {
-        mData[id] = data;
-    }
-    ReplaceData data(int id) {
-        return mData[id];
-    }
-protected:
-    QMap<int,ReplaceData> mData;
-};
-
-#endif
+#include "searchparams.h"
 
 #include "searchcache.h"
 class Worker : public QObject
@@ -70,7 +48,8 @@ public slots:
     void onFinishSearch(int);
     void onCountMatchedFiles(QString path, RegExpPath filter, bool notBinary);
     void onGetAllFiles(QString path);
-    void onSearch(int action, int searchId, QString path, RegExpPath filter, bool notBinary, RegExp search, int linesBefore, int linesAfter, bool cacheFileList, QString relpacement);
+    //void onSearch(int action, int searchId, QString path, RegExpPath filter, bool notBinary, RegExp search, int linesBefore, int linesAfter, bool cacheFileList, QString relpacement);
+    void onSearch(SearchParams);
 };
 
 #endif // WORKER2_H
