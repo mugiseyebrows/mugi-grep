@@ -5,15 +5,6 @@ Worker::Worker(QObject *parent) :
 {
 }
 
-#if 0
-void Worker::onSearch(int action, int searchId, QString path, RegExpPath filter, bool notBinary,
-                       RegExp search, int linesBefore, int linesAfter, bool cacheFileList, QString relpacement)
-{
-    mCache.add(action, searchId, path, filter, notBinary,search,linesBefore,linesAfter,cacheFileList, relpacement);
-    emit found(searchId,QString(),-1,0,0,QString());
-}
-#endif
-
 void Worker::onSearch(SearchParams params)
 {
     mCache.add(params);
@@ -48,8 +39,11 @@ void Worker::onSearchMore(int id)
     emit found(id,data,complete,total,filtered,file);
 }
 
-void Worker::onFinishSearch(int id)
-{
-    emit canReplace(mCache.isPreview(id));
-    mCache.finish(id);
+void Worker::onFinishSearch(int id) {
+    emit canReplace(id, mCache.isPreview(id));
+    //mCache.finish(id);
+}
+
+void Worker::onCanReplace(int id) {
+    emit canReplace(id, mCache.isPreview(id));
 }

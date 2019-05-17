@@ -18,6 +18,9 @@ public:
     RegExpPath();
     RegExpPath(const QStringList& regExps, bool case_);
     RegExpPath(const QVariantMap& data);
+
+    bool isEmpty() const;
+
     bool match(const QString& path) const;
 
     QStringList exps() const;

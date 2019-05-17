@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>650</width>
-    <height>170</height>
+    <width>660</width>
+    <height>178</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,13 +28,34 @@
    </property>
    <item>
     <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="path"/>
-     </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label">
+     <item row="4" column="0">
+      <widget class="QLabel" name="label_6">
        <property name="text">
-        <string>Path</string>
+        <string>Lines</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QLabel" name="fileCount">
+       <property name="text">
+        <string>fileCount</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QPushButton" name="selectPath">
+       <property name="text">
+        <string>select</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="2">
+      <widget class="QCheckBox" name="notBinary">
+       <property name="text">
+        <string>not binary</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -45,51 +66,37 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="1" colspan="2">
-      <widget class="RXPathInput" name="filter" native="true"/>
-     </item>
-     <item row="1" column="3">
-      <widget class="QCheckBox" name="notBinary">
-       <property name="text">
-        <string>not binary</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1" colspan="2">
-      <widget class="RXInput" name="exp" native="true"/>
-     </item>
-     <item row="0" column="2" colspan="2">
-      <widget class="QPushButton" name="selectPath">
-       <property name="text">
-        <string>select</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0">
+     <item row="3" column="0">
       <widget class="QLabel" name="label_3">
        <property name="text">
         <string>Find</string>
        </property>
       </widget>
      </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="label_6">
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="path"/>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label">
        <property name="text">
-        <string>Lines</string>
+        <string>Path</string>
        </property>
       </widget>
      </item>
-     <item row="7" column="2" colspan="2">
-      <widget class="QPushButton" name="replace">
+     <item row="1" column="1">
+      <widget class="RXPathInput" name="filter" native="true"/>
+     </item>
+     <item row="3" column="1">
+      <widget class="RXInput" name="exp" native="true"/>
+     </item>
+     <item row="5" column="0">
+      <widget class="QLabel" name="replaceLabel">
        <property name="text">
-        <string>replace</string>
+        <string>Replace</string>
        </property>
       </widget>
      </item>
-     <item row="3" column="1" colspan="3">
+     <item row="4" column="1" colspan="2">
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
         <widget class="QLabel" name="label_7">
@@ -151,27 +158,6 @@
         </spacer>
        </item>
        <item>
-        <widget class="QLabel" name="fileCount">
-         <property name="text">
-          <string>fileCount</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="selectFiles">
-         <property name="text">
-          <string>select</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QCheckBox" name="cacheFileList">
-         <property name="text">
-          <string>cache file list</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QPushButton" name="search">
          <property name="text">
           <string>search</string>
@@ -180,22 +166,26 @@
        </item>
       </layout>
      </item>
-     <item row="6" column="2" colspan="2">
-      <widget class="QPushButton" name="preview">
-       <property name="text">
-        <string>preview</string>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="0">
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>Replace</string>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="1">
-      <widget class="QLineEdit" name="replacement"/>
+     <item row="5" column="1" colspan="2">
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QLineEdit" name="replacement"/>
+       </item>
+       <item>
+        <widget class="QPushButton" name="preview">
+         <property name="text">
+          <string>preview</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="replace">
+         <property name="text">
+          <string>replace</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>

@@ -217,8 +217,13 @@ QStringList replacePreview(const QStringList& lines, const QString& path, const 
 
         Q_ASSERT(oldLine.join("") == line);
 
-        res << Html::span("- ","red") + Html::spanZebra(oldLine,"red")
-            << Html::span("+ ","green") + Html::spanZebra(newLine,"green");
+        QString lightRed = "#ffeef0";
+        QString red = "#fdb8c0";
+        QString lightGreen = "#e6ffed";
+        QString green = "#acf2bd";
+
+        res << Html::span("- ","blue",lightRed) + Html::spanZebra(oldLine,"black",lightRed,red)
+            << Html::span("+ ","blue",lightGreen) + Html::spanZebra(newLine,"black",lightGreen,green);
 
         oldLines << oldLine.join("");
         newLines << newLine.join("");
@@ -300,7 +305,7 @@ QPair<int,int> SearchCache::countMatchedFiles(QString path, RegExpPath filter, b
 
     QMutexLocker locked(&mMutex);
 
-    qDebug() << filter << notBinary;
+    //qDebug() << filter << notBinary;
 
     QStringList allFiles = getAllFiles(path, true);
     int filesFiltered;
@@ -390,8 +395,10 @@ void SearchCache::add(SearchParams params) {
 }
 
 void SearchCache::finish(int searchId) {
+    /*
     QMutexLocker locked(&mMutex);
     mSearchData.remove(searchId);
+    */
 }
 
 bool SearchCache::isPreview(int searchId) {

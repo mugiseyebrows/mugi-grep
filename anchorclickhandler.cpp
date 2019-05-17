@@ -12,6 +12,8 @@
 #include <QAction>
 #include <QMenu>
 #include <QScrollBar>
+#include <QClipboard>
+#include <QDir>
 
 namespace  {
 
@@ -158,11 +160,19 @@ void AnchorClickHandler::onCustomContextMenuRequested(QPoint point) {
     show->setEnabled(!anchor.isEmpty());
     menu->insertAction(menu->actions().value(1),show);
 
+    QAction* copyPath = new QAction("C&opy Path");
+    copyPath->setEnabled(!anchor.isEmpty());
+    menu->insertAction(menu->actions().value(1),copyPath);
+
     QAction* result = menu->exec(browser->mapToGlobal(point));
 
     if (result == show) {
         QString path = urlPath(QUrl(anchor));
         FileUtils::showInGraphicalShell(qApp->activeWindow(),path);
+    } else if (result == copyPath) {
+        QString path = urlPath(QUrl(anchor));
+        QClipboard* clipboard = qApp->clipboard();
+        clipboard->setText(QDir::toNativeSeparators(path));
     }
 
     delete show;

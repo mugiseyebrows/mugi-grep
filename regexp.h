@@ -13,6 +13,8 @@ public:
     RegExp(const QStringList& regExps, bool case_);
     RegExp(const QVariantMap& data);
 
+    bool isEmpty() const;
+
     QString include() const;
     QString exclude() const;
     bool case_() const;

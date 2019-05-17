@@ -9,14 +9,15 @@
 #include "worker.h"
 #include "anchorclickhandler.h"
 #include "selectfilesdialog.h"
-
+#include <QAction>
 
 SearchOptionsWidget::SearchOptionsWidget(QWidget *parent) :
     QWidget(parent),
+    mMode(ModeSearch),
+    mCacheFileList(0),
     ui(new Ui::SearchOptionsWidget)
 {
     ui->setupUi(this);
-
 }
 
 SearchOptionsWidget::~SearchOptionsWidget()
@@ -34,7 +35,6 @@ void SearchOptionsWidget::setBrowser(SearchBrowser *browser, bool setValues)
         ui->exp->setValue(browser->exp());
         ui->linesBefore->setValue(browser->linesBefore());
         ui->linesAfter->setValue(browser->linesAfter());
-        ui->cacheFileList->setChecked(browser->cacheFileList());
         ui->notBinary->setChecked(browser->notBinary());
         ui->replacement->setText(browser->replacement());
 
@@ -45,6 +45,17 @@ void SearchOptionsWidget::setBrowser(SearchBrowser *browser, bool setValues)
     mActive = true;
 }
 
+void SearchOptionsWidget::setMode(SearchOptionsWidget::Mode mode)
+{
+    mMode = mode;
+    QWidgetList widgets;
+    widgets << ui->replaceLabel << ui->replace << ui->preview << ui->replacement;
+    foreach(QWidget* widget, widgets) {
+        widget->setVisible(mode == ModeReplace);
+    }
+    ui->search->setVisible(mode == ModeSearch);
+}
+
 void SearchOptionsWidget::init(Worker *worker, AnchorClickHandler* clickHandler) {
 
     connect(ui->filter,SIGNAL(returnPressed()),this,SIGNAL(search()));
@@ -53,7 +64,6 @@ void SearchOptionsWidget::init(Worker *worker, AnchorClickHandler* clickHandler)
     connect(ui->exp,SIGNAL(textChanged()),this,SLOT(onExpTextChanged()));
     connect(ui->linesAfter,SIGNAL(valueChanged(int)),this,SLOT(onLinesAfterValueChanged()));
     connect(ui->linesBefore,SIGNAL(valueChanged(int)),this,SLOT(onLinesBeforeValueChanged()));
-    connect(ui->cacheFileList,SIGNAL(clicked(bool)),this,SLOT(onCacheFileListClicked(bool)));
     connect(ui->notBinary,SIGNAL(clicked(bool)),this,SLOT(onNotBinaryClicked(bool)));
     connect(ui->filter,SIGNAL(caseClicked(bool)),this,SLOT(onFilterTextChanged()));
     connect(ui->exp,SIGNAL(caseClicked(bool)),this,SLOT(onExpTextChanged()));
@@ -68,7 +78,8 @@ void SearchOptionsWidget::init(Worker *worker, AnchorClickHandler* clickHandler)
             mWorker,SLOT(onCountMatchedFiles(QString,RegExpPath,bool)));
     connect(mWorker,SIGNAL(count(int,int)),this,SLOT(onCountMatchedFiles(int,int)));
 
-    ui->fileCount->setText(QString());
+    ui->fileCount->setText("? / ?");
+    setMode(mMode);
 }
 
 
@@ -88,7 +99,6 @@ void SearchOptionsWidget::setBrowserValues()
     mBrowser->setExp(ui->exp->value());
     mBrowser->setLinesBefore(ui->linesBefore->value());
     mBrowser->setLinesAfter(ui->linesAfter->value());
-    mBrowser->setCacheFileList(ui->cacheFileList->isChecked());
     mBrowser->setNotBinary(ui->notBinary->isChecked());
     mBrowser->setReplacement(ui->replacement->text());
 }
@@ -131,8 +141,14 @@ void SearchOptionsWidget::on_search_clicked()
 
 void SearchOptionsWidget::countMatchedFiles() {
     // todo cache
-    if (!ui->cacheFileList->isChecked()) {
-        ui->fileCount->setText(QString());
+
+    if (!mCacheFileList) {
+        //qDebug() << "!mCacheFileList";
+        return;
+    }
+
+    if (!mCacheFileList->isChecked()) {
+        //ui->fileCount->setText(QString());
         return;
     }
     ui->fileCount->setText("? / ?");
@@ -140,6 +156,11 @@ void SearchOptionsWidget::countMatchedFiles() {
     RegExpPath filter = ui->filter->value();
     bool notBinary = ui->notBinary->isChecked();
     emit countMatchedFiles(path,filter,notBinary);
+}
+
+void SearchOptionsWidget::setCanReplace(bool can)
+{
+    ui->replace->setEnabled(can);
 }
 
 void SearchOptionsWidget::onFilterTextChanged() {
@@ -192,21 +213,7 @@ void SearchOptionsWidget::onLinesBeforeValueChanged() {
     mBrowser->setLinesBefore(ui->linesBefore->value());
 }
 
-void SearchOptionsWidget::onCacheFileListClicked(bool value) {
-    if (!mActive || !mBrowser) {
-        return;
-    }
-    if (mBrowser->isExecuted()) {
-        emit clone();
-        return;
-    }
-    mBrowser->setCacheFileList(value);
-}
-
-
-
-void SearchOptionsWidget::on_selectFiles_clicked()
-{
+void SearchOptionsWidget::select() {
     QString path = ui->path->text();
     SelectFilesDialog dialog(path, ui->filter->value(), mWorker, mClickHandler, this);
     if (dialog.exec() == QDialog::Accepted) {
@@ -214,12 +221,24 @@ void SearchOptionsWidget::on_selectFiles_clicked()
     }
 }
 
+void SearchOptionsWidget::setCacheFileList(QAction *action)
+{
+    mCacheFileList = action;
+    ui->fileCount->setVisible(action->isChecked());
+    connect(mCacheFileList,&QAction::toggled,[=](bool checked){
+        ui->fileCount->setVisible(checked);
+        if (checked && !ui->filter->value().isEmpty()) {
+            emit countMatchedFiles();
+        }
+    });
+}
+
 void SearchOptionsWidget::onCountMatchedFiles(int matched, int total)
 {
     ui->fileCount->setText(QString("%1 / %2 files").arg(matched).arg(total));
 }
 
-void SearchOptionsWidget::on_path_textChanged(const QString &path)
+void SearchOptionsWidget::on_path_textChanged(QString path)
 {
     emit pathChanged(path);
 }

@@ -2,7 +2,7 @@
 #include <QDebug>
 
 SearchBrowser::SearchBrowser(QWidget* parent)
-    : QTextBrowser(parent), mSearchId(-1), mLinesBefore(0), mLinesAfter(0), mCacheFileList(false),
+    : QTextBrowser(parent), mSearchId(-1), mLinesBefore(0), mLinesAfter(0),
       mNotBinary(false), mChanged(QDateTime::currentDateTime()) {
     setOpenLinks(false);
 //@todo external stylesheet
@@ -16,7 +16,7 @@ SearchBrowser::SearchBrowser(QWidget* parent)
 }
 
 SearchBrowser::~SearchBrowser() {
-    qDebug() << "~SearchBrowser()";
+    //qDebug() << "~SearchBrowser()";
 }
 int SearchBrowser::searchId() const {
     return mSearchId;
@@ -64,15 +64,6 @@ void SearchBrowser::setLinesAfter(int linesAfter) {
     mChanged = QDateTime::currentDateTime();
 }
 
-bool SearchBrowser::cacheFileList() const {
-    return mCacheFileList;
-}
-
-void SearchBrowser::setCacheFileList(bool cacheFileList) {
-    mCacheFileList = cacheFileList;
-    mChanged = QDateTime::currentDateTime();
-}
-
 bool SearchBrowser::notBinary() const {
     return mNotBinary;
 }
@@ -99,7 +90,6 @@ void SearchBrowser::copy(SearchBrowser* dest) {
     dest->setFilter(mFilter);
     dest->setLinesBefore(mLinesBefore);
     dest->setLinesAfter(mLinesAfter);
-    dest->setCacheFileList(mCacheFileList);
     dest->setNotBinary(mNotBinary);
     dest->setChanged(mChanged);
     dest->setReplacement(mReplacement);
@@ -113,7 +103,7 @@ void SearchBrowser::setReplacement(const QString& value) {
     mReplacement = value;
 }
 
-SearchParams SearchBrowser::params(int action, int id, const QString &path)
+SearchParams SearchBrowser::params(int action, int id, const QString &path, bool cacheFileList)
 {
-    return SearchParams(action, id, path, mFilter, mNotBinary, mExp, mLinesBefore, mLinesAfter, mCacheFileList, mReplacement);
+    return SearchParams(action, id, path, mFilter, mNotBinary, mExp, mLinesBefore, mLinesAfter, cacheFileList, mReplacement);
 }

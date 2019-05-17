@@ -77,6 +77,7 @@ void MainWindow::closeEvent(QCloseEvent * e)
 
 void MainWindow::addSession(const QJsonObject &v) {
     SessionWidget* session = new SessionWidget(ui->tabs);
+    session->setCacheFileList(ui->cacheFileList);
 
     //connect(session,SIGNAL(setEditor()),this,SLOT(onSetEditor()));
     //connect(this,SIGNAL(editorSet()),session,SLOT(onEditorSet()));
@@ -116,6 +117,10 @@ void MainWindow::removeSession() {
 SessionWidget *MainWindow::tab(int index)
 {
     return qobject_cast<SessionWidget*>(ui->tabs->widget(index));
+}
+
+SessionWidget *MainWindow::currentTab() {
+    return tab(ui->tabs->currentIndex());
 }
 
 void MainWindow::serializeSessions(QJsonArray& json) const
@@ -237,7 +242,6 @@ void MainWindow::onReadStarted(QWidget* w) {
         return;
     }
     ui->tabs->setTabText(index,name);
-
 }
 
 void MainWindow::on_tabs_currentChanged(int index)
@@ -255,4 +259,31 @@ void MainWindow::on_removeAllSessions_triggered()
     while (ui->tabs->count() > 0) {
         on_removeSession_triggered();
     }
+}
+
+void MainWindow::setCurrentTabMode(SearchOptionsWidget::Mode mode) {
+    SessionWidget* tab = currentTab();
+    if (!tab) {
+        return;
+    }
+    tab->setMode(mode);
+}
+
+void MainWindow::on_search_triggered()
+{
+    setCurrentTabMode(SearchOptionsWidget::ModeSearch);
+}
+
+void MainWindow::on_replace_triggered()
+{
+    setCurrentTabMode(SearchOptionsWidget::ModeReplace);
+}
+
+void MainWindow::on_select_triggered()
+{
+    SessionWidget* tab = currentTab();
+    if (!tab) {
+        return;
+    }
+    tab->select();
 }

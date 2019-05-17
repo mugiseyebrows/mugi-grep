@@ -24,8 +24,7 @@ public:
     void setLinesBefore(int linesBefore);
     int linesAfter() const;
     void setLinesAfter(int linesAfter);
-    bool cacheFileList() const;
-    void setCacheFileList(bool cacheFileList);
+
     bool notBinary() const;
     void setNotBinary(bool notBinary);
     QDateTime changed() const;
@@ -35,15 +34,16 @@ public:
     QString replacement() const;
     void setReplacement(const QString &value);
 
-    SearchParams params(int action, int id, const QString& path);
+    SearchParams params(int action, int id, const QString& path, bool cacheFileList);
 
 protected:
+    int mMode;
     int mSearchId;
     RegExp mExp;
     RegExpPath mFilter;
     int mLinesBefore;
     int mLinesAfter;
-    bool mCacheFileList;
+
     bool mNotBinary;
     QDateTime mChanged;
     QString mReplacement;

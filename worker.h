@@ -39,10 +39,11 @@ signals:
 
     void allFiles(QString, QStringList);
 
-    void canReplace(bool);
+    void canReplace(int, bool);
 
 public slots:
 
+    void onCanReplace(int);
     void onReplace(int searchId);
     void onSearchMore(int);
     void onFinishSearch(int);

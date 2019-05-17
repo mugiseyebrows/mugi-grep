@@ -5,6 +5,7 @@
 #include <QVariant>
 #include <QMetaType>
 #include <QJsonObject>
+#include "searchoptionswidget.h"
 
 class SessionWidget;
 class QSignalMapper;
@@ -29,16 +30,21 @@ public:
     void removeSession();
 
     SessionWidget* tab(int index);
+    SessionWidget *currentTab();
 
     void deserealizeSessions(const QJsonArray &vl);
     void serializeExps(QJsonObject &json) const;
     void deserealizeExps(const QJsonObject &exps);
     void serializeSessions(QJsonArray &json) const;
+    void setCurrentTabMode(SearchOptionsWidget::Mode mode);
+
+
 protected:
     Ui::MainWindow *ui;
     QSignalMapper* mMapper;
     AnchorClickHandler* mClickHandler;
     CompleterModelManager* mCompleterModelManager;
+
 
 signals:
     void editorSet();
@@ -55,11 +61,13 @@ protected slots:
 
     void onReadStarted(QWidget *);
 
-private slots:
     void on_tabs_currentChanged(int index);
 
     void on_removeAllSessions_triggered();
 
+    void on_search_triggered();
+    void on_replace_triggered();
+    void on_select_triggered();
 };
 
 #endif // MAINWINDOW_H

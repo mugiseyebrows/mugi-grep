@@ -40,12 +40,12 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuSession">
     <property name="title">
-     <string>Sessions</string>
+     <string>&amp;Sessions</string>
     </property>
     <addaction name="addSession"/>
     <addaction name="removeSession"/>
@@ -55,11 +55,21 @@
    </widget>
    <widget class="QMenu" name="menuSettings">
     <property name="title">
-     <string>Settings</string>
+     <string>&amp;Settings</string>
     </property>
+    <addaction name="cacheFileList"/>
     <addaction name="setEditors"/>
    </widget>
+   <widget class="QMenu" name="menuAction">
+    <property name="title">
+     <string>&amp;Action</string>
+    </property>
+    <addaction name="search"/>
+    <addaction name="replace"/>
+    <addaction name="select"/>
+   </widget>
    <addaction name="menuSession"/>
+   <addaction name="menuAction"/>
    <addaction name="menuSettings"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
@@ -73,7 +83,7 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="addSession">
    <property name="text">
-    <string>Add (Ctrl+T)</string>
+    <string>&amp;Add</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+T</string>
@@ -81,7 +91,7 @@
   </action>
   <action name="removeSession">
    <property name="text">
-    <string>Remove (Ctrl+W)</string>
+    <string>&amp;Remove</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+W</string>
@@ -89,7 +99,7 @@
   </action>
   <action name="saveSessions">
    <property name="text">
-    <string>Save (Ctrl+S)</string>
+    <string>&amp;Save</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
@@ -97,7 +107,7 @@
   </action>
   <action name="loadSessions">
    <property name="text">
-    <string>Load (Ctrl+L)</string>
+    <string>&amp;Load</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+L</string>
@@ -111,6 +121,35 @@
   <action name="removeAllSessions">
    <property name="text">
     <string>Remove All</string>
+   </property>
+  </action>
+  <action name="search">
+   <property name="text">
+    <string>&amp;Search</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="replace">
+   <property name="text">
+    <string>&amp;Replace</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+H</string>
+   </property>
+  </action>
+  <action name="select">
+   <property name="text">
+    <string>S&amp;elect</string>
+   </property>
+  </action>
+  <action name="cacheFileList">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Cache file list</string>
    </property>
   </action>
  </widget>

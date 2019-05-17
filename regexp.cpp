@@ -25,6 +25,11 @@ RegExp::RegExp(const QVariantMap &data)
     deserealize(data);
 }
 
+bool RegExp::isEmpty() const
+{
+    return mInclude.isEmpty() && mExclude.isEmpty();
+}
+
 QVariantMap RegExp::serialize() const
 {
     QVariantMap res;

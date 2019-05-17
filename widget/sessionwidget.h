@@ -11,6 +11,7 @@
 #include "widget/regexpbaseinput.h"
 #include "worker.h"
 #include "searchparams.h"
+#include "searchoptionswidget.h"
 
 namespace Ui {
 class SessionWidget;
@@ -21,7 +22,7 @@ class Worker;
 class SearchBrowser;
 class QTabWidget;
 class AnchorClickHandler;
-class SearchOptionsWidget;
+
 
 /*
 Q_DECLARE_METATYPE(RegExp)
@@ -32,8 +33,11 @@ class SessionWidget : public QWidget
     Q_OBJECT
     
 public:
+
     explicit SessionWidget(QWidget *parent = nullptr);
     ~SessionWidget();
+
+    void setCacheFileList(QAction* action);
 
     void cancelAll();
 
@@ -49,6 +53,10 @@ public:
     SearchBrowser *currentTab();
     int oldestTabIndex();
     SearchOptionsWidget *options() const;
+    void setMode(SearchOptionsWidget::Mode mode);
+
+    void select();
+
 protected:
 
     Worker* mWorker;
@@ -67,6 +75,9 @@ protected:
     bool mSetValues;
     void save(bool plain);
     void searchOrReplace(Worker::Action action);
+
+    QAction* mCacheFileList;
+
 signals:
 
     void search(SearchParams);
@@ -77,10 +88,14 @@ signals:
     void collect();
     void replace(int);
 
+    void canReplace(int);
+
 public slots:
     void onCanceled();
 
 protected slots:
+
+    void onCanReplace(int,bool);
 
     void on_saveText_clicked();
     void on_saveHtml_clicked();
@@ -93,6 +108,9 @@ protected slots:
 
     void onPreview();
     void onReplace();
+
+
+
 private:
     Ui::SessionWidget *ui;
 };

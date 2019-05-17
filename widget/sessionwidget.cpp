@@ -12,6 +12,7 @@
 #include <QTabWidget>
 #include <QUrlQuery>
 #include <QMessageBox>
+#include <QAction>
 
 #include "widget/searchbrowser.h"
 
@@ -22,6 +23,7 @@
 #include <QMessageBox>
 #include "anchorclickhandler.h"
 #include "widget/selectfilesdialog.h"
+#include "widget/mainwindow.h"
 
 #define RESULT_TAB_LIMIT 10
 
@@ -29,6 +31,7 @@ SessionWidget::SessionWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::SessionWidget),
     mClickHandler(new AnchorClickHandler()),
+    mCacheFileList(0),
     //mListenResultCurrentChanged(true),
     mSetValues(true)
 {
@@ -41,8 +44,8 @@ SessionWidget::SessionWidget(QWidget *parent) :
 
     mWorker->moveToThread(mThread);
 
-    connect(this,SIGNAL(search(int,int,QString,RegExpPath,bool,RegExp,int,int,bool,QString)),
-            mWorker,SLOT(onSearch(int,int,QString,RegExpPath,bool,RegExp,int,int,bool,QString)));
+    /*connect(this,SIGNAL(search(int,int,QString,RegExpPath,bool,RegExp,int,int,bool,QString)),
+            mWorker,SLOT(onSearch(int,int,QString,RegExpPath,bool,RegExp,int,int,bool,QString)));*/
 
     connect(this,SIGNAL(search(SearchParams)),mWorker,SLOT(onSearch(SearchParams)));
 
@@ -59,6 +62,9 @@ SessionWidget::SessionWidget(QWidget *parent) :
     connect(ui->options,SIGNAL(pathChanged(QString)),this,SLOT(onPathChanged(QString)));
     connect(ui->progress,SIGNAL(canceled()),this,SLOT(onCanceled()));
 
+    connect(this,SIGNAL(canReplace(int)),mWorker,SLOT(onCanReplace(int)));
+    connect(mWorker,SIGNAL(canReplace(int,bool)),this,SLOT(onCanReplace(int,bool)));
+
     mThread->start();
 
     while(ui->results->count() > 0) {
@@ -71,6 +77,8 @@ SessionWidget::SessionWidget(QWidget *parent) :
     SearchBrowser* browser_ = new SearchBrowser();
     mClickHandler->connectBrowser(browser_);
     ui->results->addTab(browser_,QString());
+
+    ui->statusGroup->hide();
 }
 
 SessionWidget::~SessionWidget()
@@ -83,6 +91,12 @@ SessionWidget::~SessionWidget()
     delete mThread;
     mThread = nullptr;
     delete ui;
+}
+
+void SessionWidget::setCacheFileList(QAction *action)
+{
+    mCacheFileList = action;
+    ui->options->setCacheFileList(action);
 }
 
 void SessionWidget::onClone() {
@@ -110,18 +124,32 @@ SearchOptionsWidget* SessionWidget::options() const{
     return ui->options;
 }
 
+void SessionWidget::setMode(SearchOptionsWidget::Mode mode)
+{
+    ui->options->setMode(mode);
+}
+
+void SessionWidget::select()
+{
+    ui->options->select();
+}
+
+
+
 void SessionWidget::searchOrReplace(Worker::Action action) {
+
     SearchBrowser* browser = currentTab();
+    if (browser->exp().isEmpty()) {
+        return;
+    }
     mCancel = false;
     emit collect();
     int searchId = SearchId::instance()->next();
     browser->setText(QString());
     browser->setSearchId(searchId);
     ui->options->emitTabTitle();
-    /*emit search(action, searchId, ui->options->path(),browser->filter(),browser->notBinary(),browser->exp(),
-                browser->linesBefore(),browser->linesAfter(),browser->cacheFileList(),browser->replacement());
-    qDebug() << browser->replacement();*/
-    SearchParams params = browser->params(action, searchId, ui->options->path());
+
+    SearchParams params = browser->params(action, searchId, ui->options->path(), mCacheFileList->isChecked());
     emit search(params);
     ui->progress->started();
 }
@@ -202,6 +230,18 @@ void SessionWidget::onCanceled() {
     mCancel = true;
 }
 
+void SessionWidget::onCanReplace(int searchId, bool can)
+{
+    SearchBrowser* browser = currentTab();
+    if (!browser) {
+        return;
+    }
+    if (browser->searchId() != searchId) {
+        return;
+    }
+    ui->options->setCanReplace(can);
+}
+
 void SessionWidget::on_saveText_clicked()
 {
     save(true);
@@ -252,6 +292,8 @@ void SessionWidget::onFound(int searchId, QString res, int i, int t, int s, QStr
         browser->append(res);
     }
 
+    ui->statusGroup->show();
+
     ui->progress->progress(i,t,s,path);
 
     if (i < t && !mCancel) {
@@ -288,6 +330,12 @@ void SessionWidget::on_results_currentChanged(int index) {
     ui->options->countMatchedFiles();
     mSetValues = true;
 
+    ui->options->setCanReplace(false);
+    int searchId = browser->searchId();
+    if (searchId < 0) {
+        return;
+    }
+    emit canReplace(searchId);
 }
 
 void SessionWidget::onPathChanged(QString path)

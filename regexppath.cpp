@@ -41,6 +41,14 @@ RegExpPath::RegExpPath(const QVariantMap &data)
     deserealize(data);
 }
 
+bool RegExpPath::isEmpty() const
+{
+    return mRegExps[PathInclude].isEmpty() &&
+            mRegExps[ExtInclude].isEmpty() &&
+            mRegExps[PathExclude].isEmpty() &&
+            mRegExps[ExtExclude].isEmpty();
+}
+
 QVariantMap RegExpPath::serialize() const
 {
     QVariantMap res;

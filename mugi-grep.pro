@@ -18,7 +18,6 @@ HEADERS += \
     settings.h \
     version.h \
     worker.h \
-    3rdparty/orderedmap.h \
     model/editorsmodel.h \
     struct/editor.h \
     widget/intlineedit.h \
