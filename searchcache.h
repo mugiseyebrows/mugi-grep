@@ -10,7 +10,6 @@
 #include "searchparams.h"
 #include "replacement.h"
 
-QString ext(const QString& path);
 
 QStringList searchLines(const QStringList &mLines, const QString& mPath, const QString& mRelativePath,
                         const RegExp& exp, int linesBefore, int linesAfter);
@@ -20,7 +19,6 @@ QStringList searchLines(const QByteArray& mLines, const QString& mPath, const QS
 
 QStringList fileLines(const QString& path, bool skipBinary, bool* binary = nullptr);
 
-QString relPath(const QString& path, const QString& base);
 
 class SearchCache {
 public:

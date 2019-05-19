@@ -6,21 +6,9 @@
 
 #include "html.h"
 #include "filereader.h"
-#include "utils/isbinext.h"
 #include "utils/lit.h"
 #include "worker.h"
-
-namespace {
-
-QStringList toStringList(const QVariantList& vs) {
-    QStringList res;
-    foreach(const QVariant& v, vs) {
-        res << v.toString();
-    }
-    return res;
-}
-
-}
+#include "utils/utils.h"
 
 QStringList bytesToLines(const QByteArray& bytes) {
     QTextCodec* codec = QTextCodec::codecForName("UTF-8");
@@ -32,6 +20,7 @@ QByteArray linesToBytes(const QStringList& lines) {
     QTextCodec* codec = QTextCodec::codecForName("UTF-8");
     return codec->fromUnicode(lines.join("\n"));
 }
+
 
 QStringList searchLines(const QStringList& mLines, const QString& mPath, const QString& mRelativePath,
                         const RegExp& exp, int linesBefore, int linesAfter) {
@@ -144,8 +133,8 @@ void compare(const QVariantList& e, const QVariantList& a) {
     if (e == a) {
         return;
     }
-    QString e_ = "{" + toStringList(e).join("|") + "}";
-    QString a_ = "{" + toStringList(a).join("|") + "}";
+    QString e_ = "{" + Utils::toStringList(e).join("|") + "}";
+    QString a_ = "{" + Utils::toStringList(a).join("|") + "}";
     qDebug() << "not equal, expected: " << e_.toStdString().c_str() << ", actual " << a_.toStdString().c_str();
 }
 
@@ -280,23 +269,6 @@ QStringList searchBinary(const QByteArray& bytes, const QString& path, const QSt
     return searchBinary(lines,path,relativePath,exp);
 }
 
-QString ext(const QString& path) {
-    if (path.indexOf(".")>-1)
-        return path.split(".").last().toLower();
-    return QString();
-}
-
-// todo: remove
-QString relPath(const QString& path, const QString& base) {
-    if (path.startsWith(base)) {
-        if (path[base.size()] == QChar('\\') && path.size() > base.size())
-            return path.mid(base.size()+1);
-        else
-            return path.mid(base.size());
-    }
-    return path;
-}
-
 SearchCache::SearchCache() {
 
 }
@@ -351,7 +323,7 @@ QStringList SearchCache::filterFiles(const QStringList& allFiles, RegExpPath fil
             filesFiltered_++;
             continue;
         }
-        if (notBinary && isBinExt(path)) {
+        if (notBinary && Utils::isBinExt(path)) {
             filesFiltered_++;
             continue;
         }
@@ -433,7 +405,7 @@ void SearchCache::search(int searchId, QString &data, int *complete, int *total,
 
         //QByteArray fileData = FileCache::instance()->file(path,sd.notBinary,&binary,&readOk);
         QByteArray fileData = FileReader::read(path,searchParams.skipBinary(),&binary,&readOk,&tooBig);
-        QString relPath_ = relPath(path,searchParams.path());
+        QString relPath = Utils::relPath(path,searchParams.path());
 
         bool ok = true;
 
@@ -451,12 +423,12 @@ void SearchCache::search(int searchId, QString &data, int *complete, int *total,
         if (ok) {
             if (searchParams.action() == Worker::Search) {
                 if (binary) {
-                    res << searchBinary(fileData, path, relPath_, searchParams.search());
+                    res << searchBinary(fileData, path, relPath, searchParams.search());
                 } else {
-                    res << searchLines(fileData, path, relPath_, searchParams.search(), searchParams.linesBefore(), searchParams.linesAfter(), &fileLineCount);
+                    res << searchLines(fileData, path, relPath, searchParams.search(), searchParams.linesBefore(), searchParams.linesAfter(), &fileLineCount);
                 }
             } else if (searchParams.action() == Worker::Preview) {
-                res << replacePreview(fileData, path, relPath_, searchParams.search(), &fileLineCount, searchParams.replace(), replacements);
+                res << replacePreview(fileData, path, relPath, searchParams.search(), &fileLineCount, searchParams.replace(), replacements);
             }
         }
 
@@ -469,7 +441,7 @@ void SearchCache::search(int searchId, QString &data, int *complete, int *total,
             *complete = searchParams.filesComplete();
             *total = searchParams.filesSize();
             *filtered = searchParams.filesFiltered();
-            file = relPath_;
+            file = relPath;
             return;
         }
     }
@@ -520,7 +492,7 @@ void SearchCache::replace(int searchId, int* filesChanged, int* linesChanged, QS
             *filesChanged += 1;
             *linesChanged += replLines.size();
         } else {
-            notChanged << relPath(path,params.path());
+            notChanged << Utils::relPath(path,params.path());
         }
 
         if (!ok) {

@@ -10,7 +10,6 @@ RC_FILE = mugi-grep.rc
 
 HEADERS += \
     regexp.h \
-    regexpinput.h \
     regexppath.h \
     rxcollector.h \
     searchcache.h \
@@ -23,8 +22,6 @@ HEADERS += \
     widget/intlineedit.h \
     widget/mainwindow.h \
     widget/regexpbaseinput.h \
-    widget/regexppathinput.h \
-    widget/regexpwidget.h \
     widget/rxbaseinput.h \
     widget/rxinput.h \
     widget/rxpathinput.h \
@@ -42,12 +39,12 @@ HEADERS += \
     widget/searchoptionswidget.h \
     widget/searchprogresswidget.h \
     filereader.h \
-    utils/isbinext.h \
-    completermodelmanager.h \
     utils/lit.h \
     searchparams.h \
     replacementline.h \
-    replacement.h
+    replacement.h \
+    completermodelmanager.h \
+    utils/utils.h
 
 
 SOURCES += \
@@ -64,9 +61,6 @@ SOURCES += \
     widget/intlineedit.cpp \
     widget/mainwindow.cpp \
     widget/regexpbaseinput.cpp \
-    widget/regexpinput.cpp \
-    widget/regexppathinput.cpp \
-    widget/regexpwidget.cpp \
     widget/rxbaseinput.cpp \
     widget/rxinput.cpp \
     widget/rxpathinput.cpp \
@@ -83,12 +77,12 @@ SOURCES += \
     widget/searchoptionswidget.cpp \
     widget/searchprogresswidget.cpp \
     filereader.cpp \
-    utils/isbinext.cpp \
-    completermodelmanager.cpp \
     utils/lit.cpp \
     searchparams.cpp \
     replacementline.cpp \
-    replacement.cpp
+    replacement.cpp \
+    completermodelmanager.cpp \
+    utils/utils.cpp
 
 FORMS += \
     widget/mainwindow.ui \

@@ -2,7 +2,7 @@
 
 #include <QIODevice>
 #include <QFile>
-#include "utils/isbinext.h"
+#include "utils/utils.h"
 
 #define FILESIZE_TOOBIG (128*1024*1024)
 #define DATASAMPLE_SIZE (2*1024)
@@ -19,7 +19,7 @@ QByteArray FileReader::read(const QString &path, bool skipBinary, bool *binary, 
     *binary = false;
     *tooBig = false;
 
-    if (skipBinary && isBinExt(path)) {
+    if (skipBinary && Utils::isBinExt(path)) {
         *binary = true;
         return QByteArray();
     }

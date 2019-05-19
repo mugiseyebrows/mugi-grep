@@ -1,18 +1,12 @@
-#include "isbinext.h"
+#include "utils.h"
 
-#include <QStringList>
-
-namespace {
-
-QString ext(const QString& path) {
+QString Utils::ext(const QString& path) {
     if (path.indexOf(".")>-1)
         return path.split(".").last().toLower();
     return QString();
 }
 
-}
-
-bool isBinExt(const QString &path)
+bool Utils::isBinExt(const QString &path)
 {
     static QStringList binaryExts;
     if (binaryExts.isEmpty()) {
@@ -25,4 +19,23 @@ bool isBinExt(const QString &path)
                    << "xlsx" << "xlt" << "xmcd" << "zip";
     }
     return binaryExts.contains(ext(path));
+}
+
+QString Utils::relPath(const QString& path, const QString& base) {
+    if (path.startsWith(base)) {
+        if (path[base.size()] == QChar('\\') && path.size() > base.size())
+            return path.mid(base.size()+1);
+        else
+            return path.mid(base.size());
+    }
+    return path;
+}
+
+
+QStringList Utils::toStringList(const QVariantList& vs) {
+    QStringList res;
+    foreach(const QVariant& v, vs) {
+        res << v.toString();
+    }
+    return res;
 }
