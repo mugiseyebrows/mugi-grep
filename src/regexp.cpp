@@ -1,6 +1,6 @@
 #include "regexp.h"
 
-#include "utils/lit.h"
+#include "lit.h"
 
 #include <QStringList>
 #include <QDebug>

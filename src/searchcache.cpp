@@ -6,9 +6,9 @@
 
 #include "html.h"
 #include "filereader.h"
-#include "utils/lit.h"
+#include "lit.h"
 #include "worker.h"
-#include "utils/utils.h"
+#include "utils.h"
 
 QStringList bytesToLines(const QByteArray& bytes) {
     QTextCodec* codec = QTextCodec::codecForName("UTF-8");
@@ -358,11 +358,10 @@ void SearchCache::add(SearchParams params) {
     int dirsFiltered;
     QStringList files = filterFiles(allFiles, filter, notBinary, &filesFiltered, &dirsFiltered);
 
-    params.setFiles(files);
-    params.setFilesFiltered(filesFiltered);
-    params.setDirsFiltered(dirsFiltered);
+    SearchData data(files, filesFiltered, dirsFiltered);
 
-    mSearchData.insert(searchId,params);
+    mSearchParams.insert(searchId,params);
+    mSearchData.insert(searchId,data);
     mReplacements.insert(searchId,QList<Replacement>());
 }
 
@@ -375,19 +374,20 @@ void SearchCache::finish(int searchId) {
 
 bool SearchCache::isPreview(int searchId) {
     QMutexLocker locked(&mMutex);
-    return mSearchData.contains(searchId) && mSearchData[searchId].action() == Worker::Preview && mReplacements.contains(searchId);
+    return mSearchParams.contains(searchId) && mSearchParams[searchId].action() == Worker::Preview && mReplacements.contains(searchId);
 }
 
 void SearchCache::search(int searchId, QString &data, int *complete, int *total, int *filtered, QString &file) {
 
     QMutexLocker locked(&mMutex);
 
-    if (!mSearchData.contains(searchId)) {
+    if (!mSearchParams.contains(searchId)) {
         qDebug() << "!mSearchData.contains(searchId)";
         return;
     }
 
-    SearchParams& searchParams = mSearchData[searchId];
+    SearchParams& searchParams = mSearchParams[searchId];
+    SearchData& searchData = mSearchData[searchId];
     QList<Replacement>& replacements = mReplacements[searchId];
 
     //int lim = qMin(sd.complete + 100, sd.files.size());
@@ -396,8 +396,8 @@ void SearchCache::search(int searchId, QString &data, int *complete, int *total,
     int lineCount = 0;
     int fileCount = 0;
 
-    for (int i=searchParams.filesComplete();i<searchParams.filesSize();i++) {
-        QString path = searchParams.file(i);
+    for (int i=searchData.filesComplete();i<searchData.filesSize();i++) {
+        QString path = searchData.file(i);
 
         bool binary;
         bool readOk;
@@ -434,21 +434,21 @@ void SearchCache::search(int searchId, QString &data, int *complete, int *total,
 
         lineCount += fileLineCount;
         fileCount += 1;
-        searchParams.setFilesComplete(i + 1);
+        searchData.setFilesComplete(i + 1);
 
         if (res.size() > 100 || lineCount > 4000 || fileCount > 50) {
             data = res.join("<br/>");
-            *complete = searchParams.filesComplete();
-            *total = searchParams.filesSize();
-            *filtered = searchParams.filesFiltered();
+            *complete = searchData.filesComplete();
+            *total = searchData.filesSize();
+            *filtered = searchData.filesFiltered();
             file = relPath;
             return;
         }
     }
     data = res.join("<br/>");
-    *complete = searchParams.filesComplete();
-    *total = searchParams.filesSize();
-    *filtered = searchParams.filesFiltered();
+    *complete = searchData.filesComplete();
+    *total = searchData.filesSize();
+    *filtered = searchData.filesFiltered();
     file = QString();
 }
 
@@ -458,7 +458,7 @@ void SearchCache::replace(int searchId, int* filesChanged, int* linesChanged, QS
         return;
     }
 
-    SearchParams params = mSearchData[searchId];
+    SearchParams params = mSearchParams[searchId];
 
     *filesChanged = 0;
     *linesChanged = 0;

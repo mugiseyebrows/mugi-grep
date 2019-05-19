@@ -8,7 +8,7 @@
 #include <QApplication>
 #include <QUrlQuery>
 #include <QDebug>
-#include "utils/fileutils.h"
+#include "fileutils.h"
 #include <QAction>
 #include <QMenu>
 #include <QScrollBar>

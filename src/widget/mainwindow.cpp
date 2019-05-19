@@ -10,10 +10,9 @@
 #include <QMessageBox>
 #include <QVariantMap>
 
-#include "widget/sessionwidget.h"
-
-#include "widget/settingsdialog.h"
-#include "utils/jsonhelper.h"
+#include "sessionwidget.h"
+#include "settingsdialog.h"
+#include "jsonhelper.h"
 #include "settings.h"
 #include "rxcollector.h"
 #include <QJsonArray>
@@ -244,7 +243,7 @@ void MainWindow::onReadStarted(QWidget* w) {
     ui->tabs->setTabText(index,name);
 }
 
-void MainWindow::on_tabs_currentChanged(int index)
+void MainWindow::on_tabs_currentChanged(int)
 {
     /*SessionWidget* widget = tab(index);
     if (!widget) {

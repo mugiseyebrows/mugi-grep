@@ -3,7 +3,7 @@
 
 #include <QString>
 
-#include "struct/editor.h"
+#include "editor.h"
 #include <QList>
 #include <QJsonArray>
 #include <QJsonObject>

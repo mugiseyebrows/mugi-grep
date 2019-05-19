@@ -1,4 +1,4 @@
-#include "struct/editor.h"
+#include "editor.h"
 #include <QJsonObject>
 
 /*********************** CONSTRUCTORS ***********************/

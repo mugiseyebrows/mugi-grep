@@ -2,7 +2,7 @@
 
 #include <QIODevice>
 #include <QFile>
-#include "utils/utils.h"
+#include "utils.h"
 
 #define FILESIZE_TOOBIG (128*1024*1024)
 #define DATASAMPLE_SIZE (2*1024)

@@ -1,8 +1,8 @@
 #include "searchparams.h"
 
 SearchParams::SearchParams()
-    : mAction(-1), mId(-1), mLinesBefore(-1), mLinesAfter(-1), mFilesComplete(-1),
-      mFilesFiltered(-1), mDirsFiltered(-1) {
+    : mAction(-1), mId(-1), mSkipBinary(false), mLinesBefore(-1), mLinesAfter(-1),
+      mCacheFileList(false) {
 }
 
 SearchParams::SearchParams(int action, int id, const QString& path, const RegExpPath& filter,
@@ -10,8 +10,7 @@ SearchParams::SearchParams(int action, int id, const QString& path, const RegExp
                            bool cacheFileList, const QString& replace)
     : mAction(action), mId(id), mPath(path), mFilter(filter), mSkipBinary(skipBinary),
       mSearch(search), mLinesBefore(linesBefore), mLinesAfter(linesAfter),
-      mCacheFileList(cacheFileList), mReplace(replace), mFilesComplete(0), mFilesFiltered(0),
-      mDirsFiltered(0) {
+      mCacheFileList(cacheFileList), mReplace(replace) {
 }
 
 int SearchParams::action() const {
@@ -92,44 +91,4 @@ QString SearchParams::replace() const {
 
 void SearchParams::setReplace(const QString& replace) {
     mReplace = replace;
-}
-
-QStringList SearchParams::files() const {
-    return mFiles;
-}
-
-void SearchParams::setFiles(const QStringList& files) {
-    mFiles = files;
-}
-
-int SearchParams::filesComplete() const {
-    return mFilesComplete;
-}
-
-void SearchParams::setFilesComplete(int filesComplete) {
-    mFilesComplete = filesComplete;
-}
-
-int SearchParams::filesFiltered() const {
-    return mFilesFiltered;
-}
-
-void SearchParams::setFilesFiltered(int filesFiltered) {
-    mFilesFiltered = filesFiltered;
-}
-
-int SearchParams::dirsFiltered() const {
-    return mDirsFiltered;
-}
-
-void SearchParams::setDirsFiltered(int dirsFiltered) {
-    mDirsFiltered = dirsFiltered;
-}
-
-int SearchParams::filesSize() const {
-    return mFiles.size();
-}
-
-QString SearchParams::file(int i) const {
-    return mFiles[i];
 }

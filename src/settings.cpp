@@ -8,7 +8,7 @@
 #include <QDebug>
 #include <QApplication>
 #include <QMessageBox>
-#include "utils/jsonhelper.h"
+#include "jsonhelper.h"
 #include "regexppath.h"
 
 /*static*/

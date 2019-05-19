@@ -3,7 +3,7 @@ import subprocess
 
 name = 'mugi-grep'
 sizes = ['128x128','16x16','256x256','32x32','48x48','512x512']
-ico = './mugi-grep.ico[1]'
+ico = './src/mugi-grep.ico[1]'
 
 for size in sizes:
     d = os.path.join('./icons',size)

@@ -8,6 +8,7 @@
 #include <QMutex>
 #include <QDebug>
 #include "searchparams.h"
+#include "searchdata.h"
 #include "replacement.h"
 
 
@@ -44,7 +45,8 @@ public:
 protected:
 
     QMutex mMutex;
-    QMap<int,SearchParams> mSearchData;
+    QMap<int,SearchParams> mSearchParams;
+    QMap<int,SearchData> mSearchData;
     QMap<int,QList<Replacement> > mReplacements;
     QMap<QString, QStringList> mFileList;
 

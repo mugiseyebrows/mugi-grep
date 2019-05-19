@@ -10,7 +10,7 @@ ElidedLabel::ElidedLabel(QWidget *parent) : QWidget(parent), mTextElideMode(Qt::
 
 }
 
-void ElidedLabel::paintEvent(QPaintEvent *event)
+void ElidedLabel::paintEvent(QPaintEvent *)
 {
     QStyle *style = QWidget::style();
     QPainter painter(this);

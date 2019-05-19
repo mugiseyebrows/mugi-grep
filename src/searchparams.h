@@ -4,7 +4,6 @@
 #include "regexppath.h"
 #include <QMetaType>
 #include <QString>
-#include <QStringList>
 
 class SearchParams {
 public:
@@ -32,16 +31,6 @@ public:
     void setCacheFileList(bool cacheFileList);
     QString replace() const;
     void setReplace(const QString& replace);
-    QStringList files() const;
-    void setFiles(const QStringList& files);
-    int filesComplete() const;
-    void setFilesComplete(int filesComplete);
-    int filesFiltered() const;
-    void setFilesFiltered(int filesFiltered);
-    int dirsFiltered() const;
-    void setDirsFiltered(int dirsFiltered);
-    int filesSize() const;
-    QString file(int i) const;
 
 protected:
     int mAction;
@@ -54,10 +43,6 @@ protected:
     int mLinesAfter;
     bool mCacheFileList;
     QString mReplace;
-    QStringList mFiles;
-    int mFilesComplete;
-    int mFilesFiltered;
-    int mDirsFiltered;
 };
 Q_DECLARE_METATYPE(SearchParams)
 
