@@ -167,9 +167,9 @@
       </layout>
      </item>
      <item row="5" column="1" colspan="2">
-      <layout class="QHBoxLayout" name="horizontalLayout">
+      <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,0">
        <item>
-        <widget class="QLineEdit" name="replacement"/>
+        <widget class="RXReplaceInput" name="replacement" native="true"/>
        </item>
        <item>
         <widget class="QPushButton" name="preview">
@@ -207,6 +207,12 @@
    <class>RXInput</class>
    <extends>QWidget</extends>
    <header>widget/rxinput.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>RXReplaceInput</class>
+   <extends>QWidget</extends>
+   <header>widget/rxreplaceinput.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

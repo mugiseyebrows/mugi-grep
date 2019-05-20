@@ -23,7 +23,7 @@ bool Utils::isBinExt(const QString &path)
 
 QString Utils::relPath(const QString& path, const QString& base) {
     if (path.startsWith(base)) {
-        if (path[base.size()] == QChar('\\') && path.size() > base.size())
+        if ((path[base.size()] == QChar('\\') || path[base.size()] == QChar('/')) && path.size() > base.size())
             return path.mid(base.size()+1);
         else
             return path.mid(base.size());

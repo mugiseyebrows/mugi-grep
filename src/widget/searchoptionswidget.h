@@ -33,6 +33,8 @@ public:
     QString path() const;
     void setPath(const QString& path);
 
+    bool validate();
+
     void collect();
     void emitTabTitle();
     void init(Worker *worker, AnchorClickHandler *clickHandler);

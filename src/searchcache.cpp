@@ -428,7 +428,11 @@ void SearchCache::search(int searchId, QString &data, int *complete, int *total,
                     res << searchLines(fileData, path, relPath, searchParams.search(), searchParams.linesBefore(), searchParams.linesAfter(), &fileLineCount);
                 }
             } else if (searchParams.action() == Worker::Preview) {
-                res << replacePreview(fileData, path, relPath, searchParams.search(), &fileLineCount, searchParams.replace(), replacements);
+                if (binary) {
+
+                } else {
+                    res << replacePreview(fileData, path, relPath, searchParams.search(), &fileLineCount, searchParams.replace(), replacements);
+                }
             }
         }
 

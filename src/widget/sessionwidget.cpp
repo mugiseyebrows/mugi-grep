@@ -143,6 +143,12 @@ void SessionWidget::searchOrReplace(Worker::Action action) {
     if (browser->exp().isEmpty()) {
         return;
     }
+
+    bool valid = ui->options->validate();
+    if (!valid) {
+        return;
+    }
+
     mCancel = false;
     emit collect();
     int searchId = SearchId::instance()->next();
@@ -151,6 +157,7 @@ void SessionWidget::searchOrReplace(Worker::Action action) {
     ui->options->emitTabTitle();
 
     SearchParams params = browser->params(action, searchId, ui->options->path(), mCacheFileList->isChecked());
+
     emit search(params);
     ui->progress->started();
 }
@@ -358,5 +365,5 @@ void SessionWidget::onReplaced(int searchId,int files,int lines,QStringList notC
     if (notChanged.isEmpty()) {
         return;
     }
-    QMessageBox::critical(this,"Error",QString("Failed to replace in files:\n%1").arg(notChanged.join("\n")));
+    QMessageBox::critical(this,"Error",QString("Failed to replace text in files:\n%1").arg(notChanged.join("\n")));
 }

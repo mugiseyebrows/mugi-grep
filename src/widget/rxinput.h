@@ -21,6 +21,7 @@ public:
 
     RegExp value() const;
     void setValue(const RegExp &value);
+
 protected:
     Ui::RXInput *ui;
 
@@ -29,6 +30,8 @@ signals:
     void textChanged();
     void caseClicked(bool);
 
+protected slots:
+    void onClearValidation();
 };
 
 #endif // RXINPUT_H

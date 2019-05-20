@@ -18,6 +18,7 @@ SearchOptionsWidget::SearchOptionsWidget(QWidget *parent) :
     ui(new Ui::SearchOptionsWidget)
 {
     ui->setupUi(this);
+    ui->search->setEnabled(false);
 }
 
 SearchOptionsWidget::~SearchOptionsWidget()
@@ -36,7 +37,7 @@ void SearchOptionsWidget::setBrowser(SearchBrowser *browser, bool setValues)
         ui->linesBefore->setValue(browser->linesBefore());
         ui->linesAfter->setValue(browser->linesAfter());
         ui->notBinary->setChecked(browser->notBinary());
-        ui->replacement->setText(browser->replacement());
+        ui->replacement->setValue(browser->replacement());
 
         ui->filter->hide();
         ui->filter->show(); // force layout to recalculate
@@ -93,6 +94,16 @@ void SearchOptionsWidget::setPath(const QString &path)
     ui->path->setText(path);
 }
 
+bool SearchOptionsWidget::validate()
+{
+    QPalette palette = this->palette();
+
+    bool ok1 = ui->filter->validate(palette);
+    bool ok2 = ui->exp->validate(palette);
+    bool ok3 = mMode == ModeReplace ? ui->replacement->validate(palette) : true;
+    return ok1 && ok2 && ok3;
+}
+
 void SearchOptionsWidget::setBrowserValues()
 {
     mBrowser->setFilter(ui->filter->value());
@@ -100,7 +111,7 @@ void SearchOptionsWidget::setBrowserValues()
     mBrowser->setLinesBefore(ui->linesBefore->value());
     mBrowser->setLinesAfter(ui->linesAfter->value());
     mBrowser->setNotBinary(ui->notBinary->isChecked());
-    mBrowser->setReplacement(ui->replacement->text());
+    mBrowser->setReplacement(ui->replacement->value());
 }
 
 void SearchOptionsWidget::collect()
@@ -109,6 +120,7 @@ void SearchOptionsWidget::collect()
     //mActive = false;
     collector->collect(ui->exp->value());
     collector->collect(ui->filter->value());
+    collector->collect(ui->replacement->value());
     //updateCollector();
 }
 
@@ -117,6 +129,7 @@ void SearchOptionsWidget::updateCompletions() {
     RXCollector* collector = RXCollector::instance();
     collector->load(ui->exp);
     collector->load(ui->filter);
+    collector->load(ui->replacement);
     mActive = true;
 }
 
@@ -176,6 +189,7 @@ void SearchOptionsWidget::onFilterTextChanged() {
 }
 
 void SearchOptionsWidget::onExpTextChanged() {
+    ui->search->setEnabled(!ui->exp->value().isEmpty());
     if (!mActive || !mBrowser) {
         return;
     }
@@ -188,7 +202,18 @@ void SearchOptionsWidget::onExpTextChanged() {
 }
 
 void SearchOptionsWidget::emitTabTitle() {
-    emit tabTitle(ui->exp->value().include(), mBrowser->isExecuted());
+
+    QString include = ui->exp->value().include();
+    QString exclude = ui->exp->value().exclude();
+    QString title;
+    if (include.isEmpty() && exclude.isEmpty()) {
+        title = "";
+    } else if (!include.isEmpty()) {
+        title = include;
+    } else {
+        title = "~" + exclude;
+    }
+    emit tabTitle(title, mBrowser->isExecuted());
 }
 
 void SearchOptionsWidget::onLinesAfterValueChanged() {

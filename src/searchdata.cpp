@@ -4,7 +4,7 @@ SearchData::SearchData() : mFilesComplete(-1), mFilesFiltered(-1), mDirsFiltered
 }
 
 SearchData::SearchData(const QStringList& files, int filesFiltered, int dirsFiltered)
-    : mFiles(files), mFilesFiltered(filesFiltered), mDirsFiltered(dirsFiltered) {
+    : mFiles(files), mFilesComplete(0), mFilesFiltered(filesFiltered), mDirsFiltered(dirsFiltered) {
 }
 
 QStringList SearchData::files() const {

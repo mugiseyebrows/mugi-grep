@@ -46,7 +46,8 @@ HEADERS += \
     src/widget/intlineedit.h \
     src/widget/elidedlabel.h \
     src/model/editorsmodel.h \
-    src/model/checkablestringlistmodel.h
+    src/model/checkablestringlistmodel.h \
+    src/widget/rxreplaceinput.h
 
 SOURCES += \
     src/searchcache.cpp \
@@ -84,7 +85,8 @@ SOURCES += \
     src/widget/intlineedit.cpp \
     src/widget/elidedlabel.cpp \
     src/model/editorsmodel.cpp \
-    src/model/checkablestringlistmodel.cpp
+    src/model/checkablestringlistmodel.cpp \
+    src/widget/rxreplaceinput.cpp
 
 FORMS += \
     src/widget/sessionwidget.ui \
@@ -94,7 +96,8 @@ FORMS += \
     src/widget/selectfilesdialog.ui \
     src/widget/searchprogresswidget.ui \
     src/widget/rxpathinput.ui \
-    src/widget/rxinput.ui
+    src/widget/rxinput.ui \
+    src/widget/rxreplaceinput.ui
 
 target.path = /usr/local/bin
 INSTALLS += target
