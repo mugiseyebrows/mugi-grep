@@ -206,9 +206,9 @@ QStringList replacePreview(const QStringList& lines, const QString& path, const 
 
         Q_ASSERT(oldLine.join("") == line);
 
-        QString lightRed = "#ffeef0";
+        QString lightRed = "#FFD9DD";
         QString red = "#fdb8c0";
-        QString lightGreen = "#e6ffed";
+        QString lightGreen = "#D9FFE3";
         QString green = "#acf2bd";
 
         res << Html::span("- ","blue",lightRed) + Html::spanZebra(oldLine,"black",lightRed,red)
