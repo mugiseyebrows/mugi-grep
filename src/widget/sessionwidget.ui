@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SessionWidget</class>
+ <widget class="QWidget" name="SessionWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>730</width>
+    <height>596</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="statusGroup">
+     <property name="title">
+      <string>Status</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_3" columnstretch="0">
+      <item row="0" column="0">
+       <widget class="SearchProgressWidget" name="progress" native="true"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="title">
+      <string>Search</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2" columnstretch="0,0">
+      <item row="1" column="0" colspan="2">
+       <widget class="QTabWidget" name="results">
+        <widget class="QWidget" name="tab">
+         <attribute name="title">
+          <string>Tab 1</string>
+         </attribute>
+        </widget>
+        <widget class="QWidget" name="tab_2">
+         <attribute name="title">
+          <string>Tab 2</string>
+         </attribute>
+        </widget>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="2">
+       <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,0">
+        <item>
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string>save as</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="saveText">
+          <property name="text">
+           <string>text</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="saveHtml">
+          <property name="text">
+           <string>html</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="0" column="0" colspan="2">
+       <widget class="SearchOptionsWidget" name="options" native="true"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>SearchOptionsWidget</class>
+   <extends>QWidget</extends>
+   <header>widget/searchoptionswidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>SearchProgressWidget</class>
+   <extends>QWidget</extends>
+   <header>widget/searchprogresswidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

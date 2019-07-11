@@ -1,2 +1,6 @@
 text browser context menu: show in explorer, copy path, copy name
 editors dialog: copy event filter
+move tests to tests.cpp
+implement line-by line search and replace
+clean searchcache on tab remove
+show context lines on preview(replace)

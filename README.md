@@ -2,7 +2,7 @@
 
 ## Problem
 
-Suppose you don't have search utility in your editor that satisfies all your needs. But you're clever so at first you're like
+Suppose you don't have search utility in your editor that satisfies all your needs. But you're clever so at first you
 
 `grep something *.cpp *.h`
 
@@ -18,15 +18,21 @@ and then you
 
 `find . \( -iname '*.cpp' -or -iname '*.h' \) -exec grep -Hn something {} \; | grep -v butNotThat`
 
-and then you need to repeat pre-previous search, but keep current results so you tmux (and then you can't easily scroll) or ctrl-shift-t and then you lost in ten tabs
+and then you need to repeat previous search, but also keep current results so you open new tab or pane
 
-and then you wish you could use results to click-junp to specific file on specific line in your editor of choice.
+and then you wish you could use results to click-jump to specific file on specific line in your editor of choice
+
+and then you wish you could `sed -i` on results without breaking everything
 
 ## Solution
 
 Struggle no more, _mugi-grep_ is here to help. Look at that beauty!
 
-![mugi-grep](https://mugiseyebrows.github.io/img/mugi-grep-1.0.1.png)
+### Search action
+![mugi-grep](https://mugiseyebrows.github.io/img/mugi-grep-search.png)
+
+### Replace action
+![mugi-grep](https://mugiseyebrows.github.io/img/mugi-grep-replace.png)
 
 # Build
 
