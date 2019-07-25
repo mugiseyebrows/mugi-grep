@@ -8,12 +8,27 @@
 #include "rxcollector.h"
 #include "searchcache.h"
 #include "model/checkablestringlistmodel.h"
+#include "callonce.h"
+
+namespace  {
+
+QStringList mapSplitColumn(const QStringList& items, const QRegularExpression sep, int col) {
+    QStringList res;
+    foreach(const QString item, items) {
+        QStringList cols = item.split(sep);
+        res << cols.value(col);
+    }
+    return res;
+}
+
+}
 
 SelectFilesDialog::SelectFilesDialog(const QString& path, RegExpPath filter,
                                      Worker* worker, AnchorClickHandler *clickHandler,
                                      QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::SelectFilesDialog)
+    ui(new Ui::SelectFilesDialog),
+    mFilterFiles(new CallOnce("onFilterFiles",0,this))
 {
     ui->setupUi(this);
 
@@ -36,6 +51,9 @@ SelectFilesDialog::SelectFilesDialog(const QString& path, RegExpPath filter,
     clickHandler->connectBrowser(ui->files);
 
     RXCollector::instance()->load(ui->filter);
+
+    connect(ui->filter,SIGNAL(textChanged()),mFilterFiles,SLOT(onPost()));
+    connect(mFilterFiles,SIGNAL(call()),this,SLOT(onFilterFiles()));
 
     ui->filter->setValue(filter);
 }
@@ -92,21 +110,24 @@ void SelectFilesDialog::onAllFiles(QString path,QStringList files) {
 
     connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex)),this,SLOT(onExtensionsDataChanged(QModelIndex,QModelIndex)));
 
-    on_filter_textChanged();
+    mFilterFiles->setTimeout(mFiles.size() > 100 ? 500 : 0);
+    mFilterFiles->onPost();
 }
 
-namespace  {
-
-QStringList mapSplitColumn(const QStringList& items, const QRegularExpression sep, int col) {
-    QStringList res;
-    foreach(const QString item, items) {
-        QStringList cols = item.split(sep);
-        res << cols.value(col);
+void SelectFilesDialog::onFilterFiles()
+{
+    if (mFiles.isEmpty()) {
+        return;
     }
-    return res;
+    int filesFiltered;
+    int dirsFiltered;
+    QStringList files = SearchCache::filterFiles(mFiles,ui->filter->value(),false,&filesFiltered,&dirsFiltered);
+    if (files.size() > 1000) {
+        files = files.mid(0,1000);
+    }
+    showInBrowser(mPath,files);
 }
 
-}
 
 void SelectFilesDialog::onExtensionsDataChanged(QModelIndex,QModelIndex) {
 
@@ -115,24 +136,5 @@ void SelectFilesDialog::onExtensionsDataChanged(QModelIndex,QModelIndex) {
         return;
     }
     QStringList exts = mapSplitColumn(model->checked(),QRegularExpression("\\s+"),0);
-    //ui->filter->setIn
-
     ui->filter->setIncludeExtValue(exts.join("|"));
-
-}
-
-void SelectFilesDialog::on_filter_textChanged()
-{
-    //qDebug() << "on_filter_textChanged";
-
-    if (mFiles.isEmpty()) {
-        return;
-    }
-
-    int filesFiltered;
-    int dirsFiltered;
-
-    QStringList files = SearchCache::filterFiles(mFiles,ui->filter->value(),false,&filesFiltered,&dirsFiltered);
-    showInBrowser(mPath,files);
-
 }

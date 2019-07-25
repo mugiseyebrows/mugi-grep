@@ -523,27 +523,27 @@ void SearchCache::testTokenize() {
     QVariantList a,e;
 
     t = "foo\\1bar\\2baz";
-    e = Lit::vl("foo",1,"bar",2,"baz");
+    e = {"foo",1,"bar",2,"baz"};
     a = tokenize(t);
     compare(e,a);
 
     t = "foo\\1bar\\2baz\\3";
-    e = Lit::vl("foo",1,"bar",2,"baz",3);
+    e = {"foo",1,"bar",2,"baz",3};
     a = tokenize(t);
     compare(e,a);
 
     t = "foo\\1bar\\2baz\\3a";
-    e = Lit::vl("foo",1,"bar",2,"baz",3,"a");
+    e = {"foo",1,"bar",2,"baz",3,"a"};
     a = tokenize(t);
     compare(e,a);
 
     t = "\\1bar\\2baz\\3";
-    e = Lit::vl(1,"bar",2,"baz",3);
+    e = {1,"bar",2,"baz",3};
     a = tokenize(t);
     compare(e,a);
 
     t = "\\1bar\\2\\3baz\\52";
-    e = Lit::vl(1,"bar",2,3,"baz",52);
+    e = {1,"bar",2,3,"baz",52};
     a = tokenize(t);
     compare(e,a);
 

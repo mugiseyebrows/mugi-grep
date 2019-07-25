@@ -13,6 +13,7 @@ class SelectFilesDialog;
 }
 
 class AnchorClickHandler;
+class CallOnce;
 
 class SelectFilesDialog : public QDialog
 {
@@ -29,6 +30,7 @@ public:
 protected:
     QStringList mFiles;
     QString mPath;
+    CallOnce* mFilterFiles;
 
     void showInBrowser(const QString &path, const QStringList &files);
 
@@ -38,7 +40,8 @@ signals:
 protected slots:
     void onExtensionsDataChanged(QModelIndex, QModelIndex);
     void onAllFiles(QString path, QStringList files);
-    void on_filter_textChanged();
+
+    void onFilterFiles();
 private:
     Ui::SelectFilesDialog *ui;
 };

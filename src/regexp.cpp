@@ -115,8 +115,7 @@ void RegExp::test(const QStringList &paths, const RegExp &exp, const QList<bool>
 void RegExp::test()
 {
 
-    QStringList paths;
-    paths << "foo.bar" << "foo.bar.baz" << "foo";
+    QStringList paths = {"foo.bar","foo.bar.baz","foo"};
 
     test(paths,RegExp("foo","",false),Lit::bl(true,true,true));
     test(paths,RegExp("bar","",false),Lit::bl(true,true,false));

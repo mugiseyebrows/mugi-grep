@@ -5,7 +5,7 @@ import os
 plugins = [p for p in [
     'C:\\Qt5\\5.11.1\\mingw53_32\\plugins',
     'D:\\qt\\Qt5.11.3\\5.11.3\\mingw53_32\\plugins'
-] if os.path.exists(p)]
+] if os.path.exists(p)][0]
 
 conf = {
     'AppName': 'mugi-grep',
@@ -34,7 +34,7 @@ conf = {
         ]
     }],
     'QtPlugins': ['qwindows', 'qwindowsvistastyle'],
-    'QtPluginsSource': plugins[0]
+    'QtPluginsSource': plugins
 }
 
 m = Manager(conf)

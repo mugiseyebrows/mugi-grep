@@ -47,7 +47,8 @@ HEADERS += \
     src/widget/elidedlabel.h \
     src/model/editorsmodel.h \
     src/model/checkablestringlistmodel.h \
-    src/widget/rxreplaceinput.h
+    src/widget/rxreplaceinput.h \
+    src/callonce.h
 
 SOURCES += \
     src/searchcache.cpp \
@@ -86,7 +87,8 @@ SOURCES += \
     src/widget/elidedlabel.cpp \
     src/model/editorsmodel.cpp \
     src/model/checkablestringlistmodel.cpp \
-    src/widget/rxreplaceinput.cpp
+    src/widget/rxreplaceinput.cpp \
+    src/callonce.cpp
 
 FORMS += \
     src/widget/sessionwidget.ui \
