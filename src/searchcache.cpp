@@ -138,7 +138,7 @@ void compare(const QVariantList& e, const QVariantList& a) {
     qDebug() << "not equal, expected: " << e_.toStdString().c_str() << ", actual " << a_.toStdString().c_str();
 }
 
-bool isAllLower(const QString& t) {
+bool allLettersAreLower(const QString& t) {
     for(int i=0;i<t.size();i++) {
         if (t[i].isLetter() && t[i].isUpper()) {
             return false;
@@ -147,7 +147,7 @@ bool isAllLower(const QString& t) {
     return true;
 }
 
-bool isAllUpper(const QString& t) {
+bool allLettersAreUpper(const QString& t) {
     for(int i=0;i<t.size();i++) {
         if (t[i].isLetter() && t[i].isLower()) {
             return false;
@@ -155,34 +155,14 @@ bool isAllUpper(const QString& t) {
     }
     return true;
 }
-#if 0
-bool isCamelCase(const QString& t) {
-    bool prevUpper = t[0].isLetter() && t[0].isUpper();
-    for(int i=1;i<t.size();i++) {
-        bool currentUpper = t[i].isLetter() && t[i].isUpper();
-        if (prevUpper && currentUpper) {
-            return false;
-        }
-        prevUpper = currentUpper;
-    }
-    return true;
-}
-#endif
 
 QString sameCase(const QString& repl, const QString orig) {
-    if (isAllLower(orig)) {
+    if (allLettersAreLower(orig)) {
         return repl.toLower();
-    } else if (isAllUpper(orig)) {
+    } else if (allLettersAreUpper(orig)) {
         return repl.toUpper();
     }
-
-    QString repl_ = repl.toLower();
-    for(int i=0;i<orig.size();i++) {
-        if (orig[i].isLetter() && orig[i].isUpper()) {
-            repl_[i] = repl_[i].toUpper();
-        }
-    }
-    return repl_;
+    return repl;
 }
 
 QString withBackreferences(const QRegularExpressionMatch& m, const QVariantList& replacement, bool preserveCase) {
