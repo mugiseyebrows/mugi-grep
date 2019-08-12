@@ -38,6 +38,7 @@ void SearchOptionsWidget::setBrowser(SearchBrowser *browser, bool setValues)
         ui->linesAfter->setValue(browser->linesAfter());
         ui->notBinary->setChecked(browser->notBinary());
         ui->replacement->setValue(browser->replacement());
+        ui->replacement->setPreserveCase(browser->preserveCase());
 
         ui->filter->hide();
         ui->filter->show(); // force layout to recalculate
@@ -72,6 +73,7 @@ void SearchOptionsWidget::init(Worker *worker, AnchorClickHandler* clickHandler)
     connect(ui->linesAfter,SIGNAL(returnPressed()),this,SIGNAL(search()));
     connect(ui->replacement,SIGNAL(returnPressed()),this,SIGNAL(preview()));
     connect(ui->replacement,SIGNAL(textChanged(QString)),this,SLOT(onReplacementTextChanged(QString)));
+    connect(ui->replacement,SIGNAL(preserveCaseClicked(bool)),this,SLOT(onPreserveCaseClicked(bool)));
 
     mWorker = worker;
     mClickHandler = clickHandler;
@@ -112,6 +114,7 @@ void SearchOptionsWidget::setBrowserValues()
     mBrowser->setLinesAfter(ui->linesAfter->value());
     mBrowser->setNotBinary(ui->notBinary->isChecked());
     mBrowser->setReplacement(ui->replacement->value());
+    mBrowser->setPreserveCase(ui->replacement->preserveCase());
 }
 
 void SearchOptionsWidget::collect()
@@ -299,4 +302,8 @@ void SearchOptionsWidget::onReplacementTextChanged(QString value)
         return;
     }
     mBrowser->setReplacement(value);
+}
+
+void SearchOptionsWidget::onPreserveCaseClicked(bool value) {
+    mBrowser->setPreserveCase(value);
 }

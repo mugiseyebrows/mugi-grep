@@ -1,6 +1,6 @@
 #include "searchdata.h"
 
-SearchData::SearchData() : mFilesComplete(-1), mFilesFiltered(-1), mDirsFiltered(-1) {
+SearchData::SearchData() : mFilesComplete(0), mFilesFiltered(0), mDirsFiltered(0) {
 }
 
 SearchData::SearchData(const QStringList& files, int filesFiltered, int dirsFiltered)

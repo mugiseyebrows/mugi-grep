@@ -61,13 +61,13 @@ protected slots:
     void onLinesBeforeValueChanged();
     void onCountMatchedFiles(int matched, int total);
     void onNotBinaryClicked(bool value);
+    void onPreserveCaseClicked(bool value);
     void onReplacementTextChanged(QString path);
     void on_selectPath_clicked();
     void on_search_clicked();
     void on_path_textChanged(QString path);
     void on_replace_clicked();
     void on_preview_clicked();
-
 protected:
     Ui::SearchOptionsWidget *ui;
     bool mActive;

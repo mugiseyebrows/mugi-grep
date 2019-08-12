@@ -15,6 +15,7 @@ RXReplaceInput::RXReplaceInput(QWidget *parent) :
         connect(input->lineEdit(),SIGNAL(textChanged(QString)),this,SIGNAL(textChanged(QString)));
         connect(input->lineEdit(),SIGNAL(textChanged(QString)),this,SLOT(onClearValidation()));
     }
+    connect(ui->preserveCase,SIGNAL(clicked(bool)),this,SIGNAL(preserveCaseClicked(bool)));
 }
 
 RXReplaceInput::~RXReplaceInput()
@@ -33,6 +34,16 @@ void RXReplaceInput::setValue(const QString &value)
     QStringList exps;
     exps << value;
     setExps(exps);
+}
+
+bool RXReplaceInput::preserveCase() const
+{
+    return ui->preserveCase->isChecked();
+}
+
+void RXReplaceInput::setPreserveCase(bool value)
+{
+    ui->preserveCase->setChecked(value);
 }
 
 bool RXReplaceInput::validate(const QPalette &palette)

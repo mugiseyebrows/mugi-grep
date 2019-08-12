@@ -19,12 +19,15 @@ public:
 
     QString value() const;
     void setValue(const QString& value);
+    bool preserveCase() const;
+    void setPreserveCase(bool value);
 
     bool validate(const QPalette &palette) override;
 
 signals:
     void returnPressed();
     void textChanged(QString);
+    void preserveCaseClicked(bool);
 
 protected slots:
     void onClearValidation();

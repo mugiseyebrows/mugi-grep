@@ -2,8 +2,8 @@
 #include <QDebug>
 
 SearchBrowser::SearchBrowser(QWidget* parent)
-    : QTextBrowser(parent), mSearchId(-1), mLinesBefore(0), mLinesAfter(0),
-      mNotBinary(false), mChanged(QDateTime::currentDateTime()) {
+    : QTextBrowser(parent), mSearchId(-1), mLinesBefore(0), mLinesAfter(0), mNotBinary(false),
+      mChanged(QDateTime::currentDateTime()) {
     setOpenLinks(false);
 //@todo external stylesheet
 #ifdef Q_OS_LINUX
@@ -16,7 +16,7 @@ SearchBrowser::SearchBrowser(QWidget* parent)
 }
 
 SearchBrowser::~SearchBrowser() {
-    //qDebug() << "~SearchBrowser()";
+    qDebug() << "~SearchBrowser()";
 }
 int SearchBrowser::searchId() const {
     return mSearchId;
@@ -25,7 +25,6 @@ int SearchBrowser::searchId() const {
 void SearchBrowser::setSearchId(int searchId) {
     mSearchId = searchId;
     mChanged = QDateTime::currentDateTime();
-    qDebug() << "searchId changed";
 }
 
 RegExp SearchBrowser::exp() const {
@@ -81,6 +80,24 @@ void SearchBrowser::setChanged(const QDateTime& changed) {
     mChanged = changed;
 }
 
+QString SearchBrowser::replacement() const {
+    return mReplacement;
+}
+
+void SearchBrowser::setReplacement(const QString& replacement) {
+    mReplacement = replacement;
+    mChanged = QDateTime::currentDateTime();
+}
+
+bool SearchBrowser::preserveCase() const {
+    return mPreserveCase;
+}
+
+void SearchBrowser::setPreserveCase(bool preserveCase) {
+    mPreserveCase = preserveCase;
+    mChanged = QDateTime::currentDateTime();
+}
+
 bool SearchBrowser::isExecuted() const {
     return mSearchId > -1;
 }
@@ -93,17 +110,10 @@ void SearchBrowser::copy(SearchBrowser* dest) {
     dest->setNotBinary(mNotBinary);
     dest->setChanged(mChanged);
     dest->setReplacement(mReplacement);
+    dest->setPreserveCase(mPreserveCase);
 }
 
-QString SearchBrowser::replacement() const {
-    return mReplacement;
-}
-
-void SearchBrowser::setReplacement(const QString& value) {
-    mReplacement = value;
-}
-
-SearchParams SearchBrowser::params(int action, int id, const QString &path, bool cacheFileList)
-{
-    return SearchParams(action, id, path, mFilter, mNotBinary, mExp, mLinesBefore, mLinesAfter, cacheFileList, mReplacement);
+SearchParams SearchBrowser::params(int action, int id, const QString& path, bool cacheFileList) {
+    return SearchParams(action, id, path, mFilter, mNotBinary, mExp, mLinesBefore, mLinesAfter,
+                        cacheFileList, mPreserveCase, mReplacement);
 }

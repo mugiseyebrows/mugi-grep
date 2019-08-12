@@ -1,16 +1,14 @@
 #include "searchparams.h"
 
-SearchParams::SearchParams()
-    : mAction(-1), mId(-1), mSkipBinary(false), mLinesBefore(-1), mLinesAfter(-1),
-      mCacheFileList(false) {
+SearchParams::SearchParams() {
 }
 
 SearchParams::SearchParams(int action, int id, const QString& path, const RegExpPath& filter,
                            bool skipBinary, const RegExp& search, int linesBefore, int linesAfter,
-                           bool cacheFileList, const QString& replace)
+                           bool cacheFileList, bool preserveCase, const QString& replace)
     : mAction(action), mId(id), mPath(path), mFilter(filter), mSkipBinary(skipBinary),
       mSearch(search), mLinesBefore(linesBefore), mLinesAfter(linesAfter),
-      mCacheFileList(cacheFileList), mReplace(replace) {
+      mCacheFileList(cacheFileList), mPreserveCase(preserveCase), mReplace(replace) {
 }
 
 int SearchParams::action() const {
@@ -83,6 +81,14 @@ bool SearchParams::cacheFileList() const {
 
 void SearchParams::setCacheFileList(bool cacheFileList) {
     mCacheFileList = cacheFileList;
+}
+
+bool SearchParams::preserveCase() const {
+    return mPreserveCase;
+}
+
+void SearchParams::setPreserveCase(bool preserveCase) {
+    mPreserveCase = preserveCase;
 }
 
 QString SearchParams::replace() const {

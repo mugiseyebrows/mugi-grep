@@ -2,11 +2,11 @@
 #define SEARCHBROWSER_H
 #include "regexp.h"
 #include "regexppath.h"
+#include "searchparams.h"
 #include <QDate>
 #include <QDateTime>
+#include <QString>
 #include <QTextBrowser>
-
-#include "searchparams.h"
 
 class QDebug;
 class SearchBrowser : public QTextBrowser {
@@ -24,28 +24,27 @@ public:
     void setLinesBefore(int linesBefore);
     int linesAfter() const;
     void setLinesAfter(int linesAfter);
-
     bool notBinary() const;
     void setNotBinary(bool notBinary);
     QDateTime changed() const;
     void setChanged(const QDateTime& changed);
+    QString replacement() const;
+    void setReplacement(const QString& replacement);
+    bool preserveCase() const;
+    void setPreserveCase(bool preserveCase);
     bool isExecuted() const;
     void copy(SearchBrowser* dest);
-    QString replacement() const;
-    void setReplacement(const QString &value);
-
     SearchParams params(int action, int id, const QString& path, bool cacheFileList);
 
 protected:
-    int mMode;
     int mSearchId;
     RegExp mExp;
     RegExpPath mFilter;
     int mLinesBefore;
     int mLinesAfter;
-
     bool mNotBinary;
     QDateTime mChanged;
     QString mReplacement;
+    bool mPreserveCase;
 };
 #endif // SEARCHBROWSER_H

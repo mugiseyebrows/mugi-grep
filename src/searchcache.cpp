@@ -138,8 +138,54 @@ void compare(const QVariantList& e, const QVariantList& a) {
     qDebug() << "not equal, expected: " << e_.toStdString().c_str() << ", actual " << a_.toStdString().c_str();
 }
 
+bool isAllLower(const QString& t) {
+    for(int i=0;i<t.size();i++) {
+        if (t[i].isLetter() && t[i].isUpper()) {
+            return false;
+        }
+    }
+    return true;
+}
 
-QString withBackreferences(const QRegularExpressionMatch& m, const QVariantList& replacement) {
+bool isAllUpper(const QString& t) {
+    for(int i=0;i<t.size();i++) {
+        if (t[i].isLetter() && t[i].isLower()) {
+            return false;
+        }
+    }
+    return true;
+}
+#if 0
+bool isCamelCase(const QString& t) {
+    bool prevUpper = t[0].isLetter() && t[0].isUpper();
+    for(int i=1;i<t.size();i++) {
+        bool currentUpper = t[i].isLetter() && t[i].isUpper();
+        if (prevUpper && currentUpper) {
+            return false;
+        }
+        prevUpper = currentUpper;
+    }
+    return true;
+}
+#endif
+
+QString sameCase(const QString& repl, const QString orig) {
+    if (isAllLower(orig)) {
+        return repl.toLower();
+    } else if (isAllUpper(orig)) {
+        return repl.toUpper();
+    }
+
+    QString repl_ = repl.toLower();
+    for(int i=0;i<orig.size();i++) {
+        if (orig[i].isLetter() && orig[i].isUpper()) {
+            repl_[i] = repl_[i].toUpper();
+        }
+    }
+    return repl_;
+}
+
+QString withBackreferences(const QRegularExpressionMatch& m, const QVariantList& replacement, bool preserveCase) {
     QStringList result;
     foreach(const QVariant& v, replacement) {
         if (v.type() == QVariant::Int) {
@@ -150,11 +196,12 @@ QString withBackreferences(const QRegularExpressionMatch& m, const QVariantList&
             qDebug() << "withBackreferences error:" << v;
         }
     }
-    return result.join("");
+    QString result_ = result.join("");
+    return preserveCase ? sameCase(result_, m.captured(0)) : result_;
 }
 
 QStringList replacePreview(const QStringList& lines, const QString& path, const QString& mRelativePath,
-                           const RegExp& exp, const QString& replacement, QList<Replacement>& replacements) {
+                           const RegExp& exp, const QString& replacement, bool preserveCase, QList<Replacement>& replacements) {
 
     QStringList res;
 
@@ -195,7 +242,7 @@ QStringList replacePreview(const QStringList& lines, const QString& path, const 
 
             s = line.mid(m.capturedStart(),m.capturedLength());
             oldLine << s;
-            newLine << withBackreferences(m,replacement_);
+            newLine << withBackreferences(m,replacement_,preserveCase);
             prev = m.capturedEnd();
         }
 
@@ -253,12 +300,12 @@ QStringList searchLines(const QByteArray& bytes, const QString& path, const QStr
 }
 
 QStringList replacePreview(const QByteArray& bytes, const QString& path, const QString& relativePath,
-                        const RegExp& exp, int* lineCount, const QString& replacement, QList<Replacement>& replacements) {
+                        const RegExp& exp, int* lineCount, const QString& replacement, bool preserveCase, QList<Replacement>& replacements) {
 
     QTextCodec* codec = QTextCodec::codecForName("UTF-8");
     QStringList lines = codec->toUnicode(bytes).split("\n");
     *lineCount = lines.size();
-    return replacePreview(lines,path,relativePath,exp,replacement,replacements);
+    return replacePreview(lines,path,relativePath,exp,replacement,preserveCase,replacements);
 }
 
 QStringList searchBinary(const QByteArray& bytes, const QString& path, const QString& relativePath,
@@ -431,7 +478,7 @@ void SearchCache::search(int searchId, QString &data, int *complete, int *total,
                 if (binary) {
 
                 } else {
-                    res << replacePreview(fileData, path, relPath, searchParams.search(), &fileLineCount, searchParams.replace(), replacements);
+                    res << replacePreview(fileData, path, relPath, searchParams.search(), &fileLineCount, searchParams.replace(), searchParams.preserveCase(), replacements);
                 }
             }
         }

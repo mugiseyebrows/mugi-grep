@@ -10,7 +10,7 @@ public:
     SearchParams();
     SearchParams(int action, int id, const QString& path, const RegExpPath& filter, bool skipBinary,
                  const RegExp& search, int linesBefore, int linesAfter, bool cacheFileList,
-                 const QString& replace);
+                 bool preserveCase, const QString& replace);
     int action() const;
     void setAction(int action);
     int id() const;
@@ -29,6 +29,8 @@ public:
     void setLinesAfter(int linesAfter);
     bool cacheFileList() const;
     void setCacheFileList(bool cacheFileList);
+    bool preserveCase() const;
+    void setPreserveCase(bool preserveCase);
     QString replace() const;
     void setReplace(const QString& replace);
 
@@ -42,6 +44,7 @@ protected:
     int mLinesBefore;
     int mLinesAfter;
     bool mCacheFileList;
+    bool mPreserveCase;
     QString mReplace;
 };
 Q_DECLARE_METATYPE(SearchParams)

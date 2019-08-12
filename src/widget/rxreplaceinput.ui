@@ -7,13 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>34</height>
+    <height>43</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0">
    <property name="leftMargin">
     <number>0</number>
    </property>
@@ -30,6 +30,13 @@
     <widget class="QComboBox" name="replace">
      <property name="editable">
       <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="preserveCase">
+     <property name="text">
+      <string>preserve case</string>
      </property>
     </widget>
    </item>
