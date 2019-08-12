@@ -138,28 +138,10 @@ void compare(const QVariantList& e, const QVariantList& a) {
     qDebug() << "not equal, expected: " << e_.toStdString().c_str() << ", actual " << a_.toStdString().c_str();
 }
 
-bool allLettersAreLower(const QString& t) {
-    for(int i=0;i<t.size();i++) {
-        if (t[i].isLetter() && t[i].isUpper()) {
-            return false;
-        }
-    }
-    return true;
-}
-
-bool allLettersAreUpper(const QString& t) {
-    for(int i=0;i<t.size();i++) {
-        if (t[i].isLetter() && t[i].isLower()) {
-            return false;
-        }
-    }
-    return true;
-}
-
-QString sameCase(const QString& repl, const QString orig) {
-    if (allLettersAreLower(orig)) {
+QString sameCase(const QString& repl, const QString& orig) {
+    if (orig.toLower() == orig) {
         return repl.toLower();
-    } else if (allLettersAreUpper(orig)) {
+    } else if (orig.toUpper() == orig) {
         return repl.toUpper();
     }
     return repl;
