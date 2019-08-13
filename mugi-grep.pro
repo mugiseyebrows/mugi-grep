@@ -48,7 +48,9 @@ HEADERS += \
     src/model/editorsmodel.h \
     src/model/checkablestringlistmodel.h \
     src/widget/rxreplaceinput.h \
-    src/callonce.h
+    src/callonce.h \
+    src/coloredline.h \
+    src/coloredlinespan.h
 
 SOURCES += \
     src/searchcache.cpp \
@@ -88,7 +90,9 @@ SOURCES += \
     src/model/editorsmodel.cpp \
     src/model/checkablestringlistmodel.cpp \
     src/widget/rxreplaceinput.cpp \
-    src/callonce.cpp
+    src/callonce.cpp \
+    src/coloredline.cpp \
+    src/coloredlinespan.cpp
 
 FORMS += \
     src/widget/sessionwidget.ui \

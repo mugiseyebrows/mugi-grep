@@ -9,6 +9,7 @@
 #include "lit.h"
 #include "worker.h"
 #include "utils.h"
+#include "coloredline.h"
 
 QStringList bytesToLines(const QByteArray& bytes) {
     QTextCodec* codec = QTextCodec::codecForName("UTF-8");
@@ -49,26 +50,44 @@ QStringList searchLines(const QStringList& mLines, const QString& mPath, const Q
         }
     }
 
+    static QStringList backgroundColors = {"#ffffff","#ffdfba","#baffc9","#bae1ff","#ffffba","#ffb3ba"};
+
     // pass 2
     for(int i=0;i<mLines.length();i++) {
 
         if (matched.contains(i)) {
 
             QString line = mLines[i];
-            /*int p = line.indexOf(include);
-            int matchedLength = include.matchedLength();*/
-            int p;
-            int matchedLength;
-            exp.match(mLines[i],&p,&matchedLength);
+
+            QRegularExpression regexp = exp.includeExp();
+            QRegularExpressionMatchIterator it = regexp.globalMatch(line);
+
+            ColoredLine coloredLine(line);
+            while(it.hasNext()) {
+                QRegularExpressionMatch m = it.next();
+                int jmax = qMin(m.lastCapturedIndex(), backgroundColors.size() - 1);
+                for(int j=1;j<=jmax;j++) {
+                    coloredLine.paintBackground(m.capturedStart(j), m.capturedEnd(j), j);
+                }
+                coloredLine.paintForeground(m.capturedStart(), m.capturedEnd(), 1);
+            }
+
             QString href = "file:///" + QDir::toNativeSeparators(mPath) + "?line=" + QString::number(i+1);
             QStringList cols;
-            cols << Html::anchor(mRelativePath, href, "violet") //span(mRelativePath, "violet")
+            cols << Html::anchor(mRelativePath, href, "violet")
                  << Html::span(":", "blue")
                  << Html::span(QString::number(i+1), "green")
-                 << Html::span(":", "blue")
-                 << Html::span(line.mid(0,p), "black")
-                 << Html::span(line.mid(p, matchedLength), "red")
-                 << Html::span(line.mid(p + matchedLength), "black");
+                 << Html::span(":", "blue");
+
+            QList<ColoredLineSpan> spans = coloredLine.spans();
+            foreach(const ColoredLineSpan& span, spans) {
+                QString col = line.mid(span.start(), span.length());
+                if (span.background() == 0) {
+                    cols << Html::span(col, span.foreground() == 0 ? "black" : "red");
+                } else {
+                    cols << Html::span(col, span.foreground() == 0 ? "black" : "red", backgroundColors[span.background()]);
+                }
+            }
             res << cols.join("");
 
         } else if (siblings.contains(i)) {
