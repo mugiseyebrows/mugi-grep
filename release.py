@@ -9,7 +9,7 @@ plugins = [p for p in [
 
 conf = {
     'AppName': 'mugi-grep',
-    'AppVersion': '1.2.0',
+    'AppVersion': '1.3.0',
     'Binaries': [{
         'Source': 'D:\\dev\\mugi-grep\\release\\mugi-grep.exe',
         'Dest': ''
