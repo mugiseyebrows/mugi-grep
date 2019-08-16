@@ -11,12 +11,11 @@
 #include "searchdata.h"
 #include "replacement.h"
 
-
 QStringList searchLines(const QStringList &mLines, const QString& mPath, const QString& mRelativePath,
-                        const RegExp& exp, int linesBefore, int linesAfter);
+                        const SearchParams &params);
 
 QStringList searchLines(const QByteArray& mLines, const QString& mPath, const QString& mRelativePath,
-                        const RegExp& exp, int linesBefore, int linesAfter, int *lineCount);
+                        const SearchParams &params, int *lineCount);
 
 QStringList fileLines(const QString& path, bool skipBinary, bool* binary = nullptr);
 

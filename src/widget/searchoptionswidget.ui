@@ -115,7 +115,7 @@
          </property>
          <property name="maximumSize">
           <size>
-           <width>80</width>
+           <width>40</width>
            <height>16777215</height>
           </size>
          </property>
@@ -135,12 +135,39 @@
         <widget class="IntLineEdit" name="linesAfter">
          <property name="maximumSize">
           <size>
-           <width>80</width>
+           <width>40</width>
            <height>16777215</height>
           </size>
          </property>
          <property name="text">
           <string>0</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="showFileName">
+         <property name="text">
+          <string>Filename</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="showLineNumber">
+         <property name="text">
+          <string>Line number</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="onlyMatched">
+         <property name="text">
+          <string>Only matched</string>
          </property>
         </widget>
        </item>

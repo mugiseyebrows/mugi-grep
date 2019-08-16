@@ -2,7 +2,8 @@
 #include <QDebug>
 
 SearchBrowser::SearchBrowser(QWidget* parent)
-    : QTextBrowser(parent), mSearchId(-1), mLinesBefore(0), mLinesAfter(0), mNotBinary(false),
+    : QTextBrowser(parent), mSearchId(-1), mLinesBefore(0), mLinesAfter(0), mShowFileName(true),
+      mShowLineNumber(true), mOnlyMatched(false), mNotBinary(true),
       mChanged(QDateTime::currentDateTime()) {
     setOpenLinks(false);
 //@todo external stylesheet
@@ -63,6 +64,33 @@ void SearchBrowser::setLinesAfter(int linesAfter) {
     mChanged = QDateTime::currentDateTime();
 }
 
+bool SearchBrowser::showFileName() const {
+    return mShowFileName;
+}
+
+void SearchBrowser::setShowFileName(bool showFileName) {
+    mShowFileName = showFileName;
+    mChanged = QDateTime::currentDateTime();
+}
+
+bool SearchBrowser::showLineNumber() const {
+    return mShowLineNumber;
+}
+
+void SearchBrowser::setShowLineNumber(bool showLineNumber) {
+    mShowLineNumber = showLineNumber;
+    mChanged = QDateTime::currentDateTime();
+}
+
+bool SearchBrowser::onlyMatched() const {
+    return mOnlyMatched;
+}
+
+void SearchBrowser::setOnlyMatched(bool onlyMatched) {
+    mOnlyMatched = onlyMatched;
+    mChanged = QDateTime::currentDateTime();
+}
+
 bool SearchBrowser::notBinary() const {
     return mNotBinary;
 }
@@ -107,6 +135,9 @@ void SearchBrowser::copy(SearchBrowser* dest) {
     dest->setFilter(mFilter);
     dest->setLinesBefore(mLinesBefore);
     dest->setLinesAfter(mLinesAfter);
+    dest->setShowFileName(mShowFileName);
+    dest->setShowLineNumber(mShowLineNumber);
+    dest->setOnlyMatched(mOnlyMatched);
     dest->setNotBinary(mNotBinary);
     dest->setChanged(mChanged);
     dest->setReplacement(mReplacement);
@@ -114,6 +145,7 @@ void SearchBrowser::copy(SearchBrowser* dest) {
 }
 
 SearchParams SearchBrowser::params(int action, int id, const QString& path, bool cacheFileList) {
-    return SearchParams(action, id, path, mFilter, mNotBinary, mExp, mLinesBefore, mLinesAfter,
-                        cacheFileList, mPreserveCase, mReplacement);
+    return SearchParams(action, id, path, cacheFileList, mFilter, mNotBinary, mExp, mLinesBefore,
+                        mLinesAfter, mShowFileName, mShowLineNumber, mOnlyMatched, mReplacement,
+                        mPreserveCase);
 }

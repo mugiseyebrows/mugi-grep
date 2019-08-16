@@ -7,6 +7,7 @@
 #include <QDateTime>
 #include <QString>
 #include <QTextBrowser>
+#include <QWidget>
 
 class QDebug;
 class SearchBrowser : public QTextBrowser {
@@ -24,6 +25,12 @@ public:
     void setLinesBefore(int linesBefore);
     int linesAfter() const;
     void setLinesAfter(int linesAfter);
+    bool showFileName() const;
+    void setShowFileName(bool showFileName);
+    bool showLineNumber() const;
+    void setShowLineNumber(bool showLineNumber);
+    bool onlyMatched() const;
+    void setOnlyMatched(bool onlyMatched);
     bool notBinary() const;
     void setNotBinary(bool notBinary);
     QDateTime changed() const;
@@ -42,6 +49,9 @@ protected:
     RegExpPath mFilter;
     int mLinesBefore;
     int mLinesAfter;
+    bool mShowFileName;
+    bool mShowLineNumber;
+    bool mOnlyMatched;
     bool mNotBinary;
     QDateTime mChanged;
     QString mReplacement;

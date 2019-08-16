@@ -50,7 +50,8 @@ HEADERS += \
     src/widget/rxreplaceinput.h \
     src/callonce.h \
     src/coloredline.h \
-    src/coloredlinespan.h
+    src/coloredlinespan.h \
+    src/hunk.h
 
 SOURCES += \
     src/searchcache.cpp \
@@ -92,7 +93,8 @@ SOURCES += \
     src/widget/rxreplaceinput.cpp \
     src/callonce.cpp \
     src/coloredline.cpp \
-    src/coloredlinespan.cpp
+    src/coloredlinespan.cpp \
+    src/hunk.cpp
 
 FORMS += \
     src/widget/sessionwidget.ui \

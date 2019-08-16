@@ -1,8 +1,12 @@
 #include "coloredline.h"
 
-ColoredLine::ColoredLine(const QString& string) : mString(string) {
-    for (int i = 0; i < string.size(); i++) {
+ColoredLine::ColoredLine(const QString& string, const QList<int>& foreground,
+                         const QList<int>& background)
+    : mString(string), mForeground(foreground), mBackground(background) {
+    while (mForeground.size() < mString.size()) {
         mForeground << 0;
+    }
+    while (mBackground.size() < mString.size()) {
         mBackground << 0;
     }
 }
@@ -33,7 +37,12 @@ void ColoredLine::paint(int start, int end, int color, QList<int>& dest) {
     }
 }
 
-QList<ColoredLineSpan> ColoredLine::spans() {
+ColoredLine ColoredLine::mid(int pos, int length) const {
+    return ColoredLine(mString.mid(pos, length), mForeground.mid(pos, length),
+                       mBackground.mid(pos, length));
+}
+
+QList<ColoredLineSpan> ColoredLine::spans() const {
     QList<ColoredLineSpan> result;
     if (mForeground.isEmpty()) {
         return result;

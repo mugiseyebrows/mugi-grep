@@ -10,6 +10,7 @@
 #include "worker.h"
 #include "utils.h"
 #include "coloredline.h"
+#include "hunk.h"
 
 QStringList bytesToLines(const QByteArray& bytes) {
     QTextCodec* codec = QTextCodec::codecForName("UTF-8");
@@ -22,22 +23,46 @@ QByteArray linesToBytes(const QStringList& lines) {
     return codec->fromUnicode(lines.join("\n"));
 }
 
+QStringList toHtmlSpans(const ColoredLine& coloredLine, const QStringList& backgroundColors) {
+    QStringList cols;
+    QList<ColoredLineSpan> spans = coloredLine.spans();
+    foreach(const ColoredLineSpan& span, spans) {
+        QString col = coloredLine.string().mid(span.start(), span.length());
+        if (span.background() == 0 || span.background() >= backgroundColors.size()) {
+            cols << Html::span(col, span.foreground() == 0 ? "black" : "red");
+        } else {
+            cols << Html::span(col, span.foreground() == 0 ? "black" : "red", backgroundColors[span.background()]);
+        }
+    }
+    return cols;
+}
 
-QStringList searchLines(const QStringList& mLines, const QString& mPath, const QString& mRelativePath,
-                        const RegExp& exp, int linesBefore, int linesAfter) {
+QStringList fileNameLineNumber(bool showFileName, bool showLineNumber, const QString& relativePath, const QString& href, int lineNumber) {
+    QStringList cols;
+    if (showFileName) {
+        cols << Html::anchor(relativePath, href, "violet")
+             << Html::span(":", "blue");
+    }
+    if (showLineNumber) {
+        cols << Html::span(QString::number(lineNumber), "green")
+        << Html::span(":", "blue");
+    }
+    return cols;
+}
 
-    QStringList res;
-
-    QSet<int> matched;
-    QSet<int> siblings;
-
-    // pass 1
-    for(int i=0;i<mLines.size();i++) {
-        if (exp.match(mLines[i])) {
+QList<int> getMatched(const QStringList& lines, const RegExp& exp)
+{
+    QList<int> matched;
+    for(int i=0;i<lines.size();i++) {
+        if (exp.match(lines[i])) {
             matched << i;
         }
     }
+    return matched;
+}
 
+QSet<int> getSiblings(const QList<int>& matched, int linesBefore, int linesAfter) {
+    QSet<int> siblings;
     int match;
     foreach(match,matched) {
         for (int i=0;i<linesBefore;i++) {
@@ -49,59 +74,85 @@ QStringList searchLines(const QStringList& mLines, const QString& mPath, const Q
             siblings << match + i + 1;
         }
     }
+    return siblings;
+}
+
+
+QStringList searchLines(const QStringList& lines, const QString& mPath, const QString& mRelativePath,
+                        const SearchParams& params) {
+
+    QStringList res;
+
+    RegExp exp = params.search();
+    int linesBefore = params.linesBefore();
+    int linesAfter = params.linesAfter();
+
+    QList<int> matched = getMatched(lines, exp);
+    QSet<int> siblings = getSiblings(matched, linesBefore, linesAfter);
 
     static QStringList backgroundColors = {"#ffffff","#ffdfba","#baffc9","#bae1ff","#ffffba","#ffb3ba"};
 
+    bool onlyMatched = params.onlyMatched();
+    bool showFileName = params.showFileName();
+    bool showLineNumber = params.showLineNumber();
+
     // pass 2
-    for(int i=0;i<mLines.length();i++) {
+    for(int i=0;i<lines.length();i++) {
 
         if (matched.contains(i)) {
 
-            QString line = mLines[i];
+            QString line = lines[i];
 
             QRegularExpression regexp = exp.includeExp();
             QRegularExpressionMatchIterator it = regexp.globalMatch(line);
 
-            ColoredLine coloredLine(line);
-            while(it.hasNext()) {
-                QRegularExpressionMatch m = it.next();
-                int jmax = qMin(m.lastCapturedIndex(), backgroundColors.size() - 1);
-                for(int j=1;j<=jmax;j++) {
-                    coloredLine.paintBackground(m.capturedStart(j), m.capturedEnd(j), j);
-                }
-                coloredLine.paintForeground(m.capturedStart(), m.capturedEnd(), 1);
-            }
-
             QString href = "file:///" + QDir::toNativeSeparators(mPath) + "?line=" + QString::number(i+1);
-            QStringList cols;
-            cols << Html::anchor(mRelativePath, href, "violet")
-                 << Html::span(":", "blue")
-                 << Html::span(QString::number(i+1), "green")
-                 << Html::span(":", "blue");
 
-            QList<ColoredLineSpan> spans = coloredLine.spans();
-            foreach(const ColoredLineSpan& span, spans) {
-                QString col = line.mid(span.start(), span.length());
-                if (span.background() == 0) {
-                    cols << Html::span(col, span.foreground() == 0 ? "black" : "red");
-                } else {
-                    cols << Html::span(col, span.foreground() == 0 ? "black" : "red", backgroundColors[span.background()]);
+            if (onlyMatched) {
+                // each match on new line
+                while(it.hasNext()) {
+                    QStringList cols = fileNameLineNumber(showFileName, showLineNumber, mRelativePath, href, i+1);
+                    QRegularExpressionMatch m = it.next();
+                    ColoredLine coloredLine(line);
+                    int jmax = qMin(m.lastCapturedIndex(), backgroundColors.size() - 1);
+                    for(int j=1;j<=jmax;j++) {
+                        coloredLine.paintBackground(m.capturedStart(j), m.capturedEnd(j), j);
+                    }
+                    coloredLine.paintForeground(m.capturedStart(), m.capturedEnd(), 1);
+                    cols << toHtmlSpans(coloredLine.mid(m.capturedStart(),m.capturedLength()), backgroundColors);
+                    res << cols.join("");
                 }
+            } else {
+                // all matches on one line
+                QStringList cols = fileNameLineNumber(showFileName, showLineNumber, mRelativePath, href, i+1);
+                ColoredLine coloredLine(line);
+                while(it.hasNext()) {
+                    QRegularExpressionMatch m = it.next();
+                    int jmax = qMin(m.lastCapturedIndex(), backgroundColors.size() - 1);
+                    for(int j=1;j<=jmax;j++) {
+                        coloredLine.paintBackground(m.capturedStart(j), m.capturedEnd(j), j);
+                    }
+                    coloredLine.paintForeground(m.capturedStart(), m.capturedEnd(), 1);
+                }
+                cols << toHtmlSpans(coloredLine, backgroundColors);
+                res << cols.join("");
             }
-            res << cols.join("");
 
         } else if (siblings.contains(i)) {
 
-            QString line = mLines[i];
+            QString line = lines[i];
             QString href = "file:///" + QDir::toNativeSeparators(mPath) + "?line=" + QString::number(i+1);
             QStringList cols;
-            cols << Html::anchor(mRelativePath, href, "violet")
-                 << Html::span("-", "blue")
-                 << Html::span(QString::number(i+1), "green")
-                 << Html::span("-", "blue")
-                 << Html::span(line, "black");
+            if (showFileName) {
+                cols << Html::anchor(mRelativePath, href, "violet")
+                     << Html::span("-", "blue");
+            }
+            if (showLineNumber) {
+                cols << Html::span(QString::number(i+1), "green")
+                     << Html::span("-", "blue");
+            }
+            cols << Html::span(line, "black");
             res << cols.join("");
-
         }
     }
 
@@ -182,17 +233,16 @@ QString withBackreferences(const QRegularExpressionMatch& m, const QVariantList&
 }
 
 QStringList replacePreview(const QStringList& lines, const QString& path, const QString& mRelativePath,
-                           const RegExp& exp, const QString& replacement, bool preserveCase, QList<Replacement>& replacements) {
+                           const SearchParams& params, QList<Replacement>& replacements) {
 
     QStringList res;
 
-    QList<int> matched;
+    RegExp exp = params.search();
+    QString replacement = params.replace();
+    bool preserveCase = params.preserveCase();
 
-    for(int i=0;i<lines.size();i++) {
-        if (exp.match(lines[i])) {
-            matched << i;
-        }
-    }
+    QList<int> matched = getMatched(lines, exp);
+    QSet<int> siblings = getSiblings(matched, params.linesBefore(), params.linesAfter());
 
     if (matched.isEmpty()) {
         return res;
@@ -206,45 +256,65 @@ QStringList replacePreview(const QStringList& lines, const QString& path, const 
     QStringList oldLines;
     QStringList newLines;
 
-    foreach (int lineNum, matched) {
-        QString line = lines[lineNum];
+    Hunk hunk;
 
-        QRegularExpressionMatchIterator it = rx.globalMatch(line);
+    QString lightRed = "#FFD9DD";
+    QString red = "#fdb8c0";
+    QString lightGreen = "#D9FFE3";
+    QString green = "#acf2bd";
 
-        QStringList oldLine;
-        QStringList newLine;
+    for(int i=0;i<lines.size();i++) {
+        if (matched.contains(i)) {
+            QString line = lines[i];
+            QRegularExpressionMatchIterator it = rx.globalMatch(line);
+            QStringList oldLine;
+            QStringList newLine;
+            int prev = 0;
+            while(it.hasNext()) {
+                QRegularExpressionMatch m = it.next();
+                QString s = line.mid(prev,m.capturedStart() - prev);
+                oldLine << s;
+                newLine << s;
 
-        int prev = 0;
-        while(it.hasNext()) {
-            QRegularExpressionMatch m = it.next();
-            QString s = line.mid(prev,m.capturedStart() - prev);
-            oldLine << s;
-            newLine << s;
+                s = line.mid(m.capturedStart(),m.capturedLength());
+                oldLine << s;
+                newLine << withBackreferences(m,replacement_,preserveCase);
+                prev = m.capturedEnd();
+            }
 
-            s = line.mid(m.capturedStart(),m.capturedLength());
-            oldLine << s;
-            newLine << withBackreferences(m,replacement_,preserveCase);
-            prev = m.capturedEnd();
+            if (prev < line.size()) {
+                oldLine << line.mid(prev);
+                newLine << line.mid(prev);
+            }
+
+            Q_ASSERT(oldLine.join("") == line);
+
+            QString subj = Html::span("- ","blue",lightRed) + Html::spanZebra(oldLine,"black",lightRed,red);
+            QString repl = Html::span("+ ","blue",lightGreen) + Html::spanZebra(newLine,"black",lightGreen,green);
+
+            hunk.replace(i + 1, subj, repl);
+            oldLines << oldLine.join("");
+            newLines << newLine.join("");
+        } else if (siblings.contains(i)) {
+            QString subj = Html::span("&nbsp;&nbsp;" + lines[i], "black");
+            hunk.context(i + 1, subj);
+        } else {
+            if (!hunk.isEmpty()) {
+                QStringList value = hunk.value();
+                res << Html::span(QString("@@ %1,%2 %1,%2 @@").arg(hunk.line()).arg(hunk.count()), "blue")
+                    << value;
+                hunk = Hunk();
+            }
         }
-
-        if (prev < line.size()) {
-            oldLine << line.mid(prev);
-            newLine << line.mid(prev);
-        }
-
-        Q_ASSERT(oldLine.join("") == line);
-
-        QString lightRed = "#FFD9DD";
-        QString red = "#fdb8c0";
-        QString lightGreen = "#D9FFE3";
-        QString green = "#acf2bd";
-
-        res << Html::span("- ","blue",lightRed) + Html::spanZebra(oldLine,"black",lightRed,red)
-            << Html::span("+ ","blue",lightGreen) + Html::spanZebra(newLine,"black",lightGreen,green);
-
-        oldLines << oldLine.join("");
-        newLines << newLine.join("");
     }
+
+    if (!hunk.isEmpty()) {
+        QStringList value = hunk.value();
+        res << Html::span(QString("@@ %1,%2 %1,%2 @@").arg(hunk.line()).arg(hunk.count()), "blue")
+            << value;
+        hunk = Hunk();
+    }
+
     QList<ReplacementLine> replacementLines;
     for(int i=0;i<oldLines.size();i++) {
         replacementLines.append(ReplacementLine(matched[i],oldLines[i],newLines[i]));
@@ -255,8 +325,9 @@ QStringList replacePreview(const QStringList& lines, const QString& path, const 
 }
 
 QStringList searchBinary(const QStringList& lines, const QString& path, const QString& relativePath,
-                        const RegExp& exp) {
+                        const SearchParams& params) {
     QStringList res;
+    RegExp exp = params.search();
     foreach(const QString& line, lines) {
         if (exp.match(line)) {
             QString href = "file:///" + QDir::toNativeSeparators(path); // todo binary offset?
@@ -272,29 +343,29 @@ QStringList searchBinary(const QStringList& lines, const QString& path, const QS
 }
 
 QStringList searchLines(const QByteArray& bytes, const QString& path, const QString& relativePath,
-                        const RegExp& exp, int linesBefore, int linesAfter, int* lineCount) {
+                        const SearchParams& params, int* lineCount) {
 
     QTextCodec* codec = QTextCodec::codecForName("UTF-8");
     QStringList lines = codec->toUnicode(bytes).split("\n");
     *lineCount = lines.size();
-    return searchLines(lines,path,relativePath,exp,linesBefore,linesAfter);
+    return searchLines(lines, path, relativePath, params);
 }
 
 QStringList replacePreview(const QByteArray& bytes, const QString& path, const QString& relativePath,
-                        const RegExp& exp, int* lineCount, const QString& replacement, bool preserveCase, QList<Replacement>& replacements) {
+                           const SearchParams& params, int* lineCount, QList<Replacement>& replacements) {
 
     QTextCodec* codec = QTextCodec::codecForName("UTF-8");
     QStringList lines = codec->toUnicode(bytes).split("\n");
     *lineCount = lines.size();
-    return replacePreview(lines,path,relativePath,exp,replacement,preserveCase,replacements);
+    return replacePreview(lines, path, relativePath, params, replacements);
 }
 
 QStringList searchBinary(const QByteArray& bytes, const QString& path, const QString& relativePath,
-                         const RegExp& exp) {
+                         const SearchParams& params) {
 
     QTextCodec* codec = QTextCodec::codecForName("UTF-8"); // todo guess or chose encoding
     QStringList lines = codec->toUnicode(bytes).split("\n");
-    return searchBinary(lines,path,relativePath,exp);
+    return searchBinary(lines,path,relativePath,params);
 }
 
 SearchCache::SearchCache() {
@@ -337,8 +408,6 @@ QStringList SearchCache::getAllFiles(QString path, bool cacheFileList) {
     return allFiles;
 }
 
-
-
 QStringList SearchCache::filterFiles(const QStringList& allFiles, RegExpPath filter, bool notBinary, int* filesFiltered, int* dirsFiltered) {
 
     int filesFiltered_ = 0;
@@ -367,8 +436,6 @@ QStringList SearchCache::filterFiles(const QStringList& allFiles, RegExpPath fil
 
     return files;
 }
-
-
 
 void SearchCache::add(SearchParams params) {
 
@@ -451,15 +518,15 @@ void SearchCache::search(int searchId, QString &data, int *complete, int *total,
         if (ok) {
             if (searchParams.action() == Worker::Search) {
                 if (binary) {
-                    res << searchBinary(fileData, path, relPath, searchParams.search());
+                    res << searchBinary(fileData, path, relPath, searchParams);
                 } else {
-                    res << searchLines(fileData, path, relPath, searchParams.search(), searchParams.linesBefore(), searchParams.linesAfter(), &fileLineCount);
+                    res << searchLines(fileData, path, relPath, searchParams, &fileLineCount);
                 }
             } else if (searchParams.action() == Worker::Preview) {
                 if (binary) {
 
                 } else {
-                    res << replacePreview(fileData, path, relPath, searchParams.search(), &fileLineCount, searchParams.replace(), searchParams.preserveCase(), replacements);
+                    res << replacePreview(fileData, path, relPath, searchParams, &fileLineCount, replacements);
                 }
             }
         }

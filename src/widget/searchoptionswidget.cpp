@@ -13,6 +13,10 @@
 
 SearchOptionsWidget::SearchOptionsWidget(QWidget *parent) :
     QWidget(parent),
+    mActive(true),
+    mBrowser(0),
+    mWorker(0),
+    mClickHandler(0),
     mMode(ModeSearch),
     mCacheFileList(0),
     ui(new Ui::SearchOptionsWidget)
@@ -39,7 +43,9 @@ void SearchOptionsWidget::setBrowser(SearchBrowser *browser, bool setValues)
         ui->notBinary->setChecked(browser->notBinary());
         ui->replacement->setValue(browser->replacement());
         ui->replacement->setPreserveCase(browser->preserveCase());
-
+        ui->showFileName->setChecked(browser->showFileName());
+        ui->showLineNumber->setChecked(browser->showLineNumber());
+        ui->onlyMatched->setChecked(browser->onlyMatched());
         ui->filter->hide();
         ui->filter->show(); // force layout to recalculate
     }
@@ -57,6 +63,7 @@ void SearchOptionsWidget::setMode(SearchOptionsWidget::Mode mode)
     }
     ui->search->setVisible(mode == ModeSearch);
 }
+
 
 void SearchOptionsWidget::init(Worker *worker, AnchorClickHandler* clickHandler) {
 
@@ -115,6 +122,9 @@ void SearchOptionsWidget::setBrowserValues()
     mBrowser->setNotBinary(ui->notBinary->isChecked());
     mBrowser->setReplacement(ui->replacement->value());
     mBrowser->setPreserveCase(ui->replacement->preserveCase());
+    mBrowser->setShowFileName(ui->showFileName->isChecked());
+    mBrowser->setShowLineNumber(ui->showLineNumber->isChecked());
+    mBrowser->setOnlyMatched(ui->onlyMatched->isChecked());
 }
 
 void SearchOptionsWidget::collect()
@@ -220,24 +230,24 @@ void SearchOptionsWidget::emitTabTitle() {
 }
 
 void SearchOptionsWidget::onLinesAfterValueChanged() {
-    if (!mActive || !mBrowser) {
+    /*if (!mActive || !mBrowser) {
         return;
     }
     if (mBrowser->isExecuted()) {
         emit clone();
         return;
-    }
+    }*/
     mBrowser->setLinesAfter(ui->linesAfter->value());
 }
 
 void SearchOptionsWidget::onLinesBeforeValueChanged() {
-    if (!mActive || !mBrowser) {
+    /*if (!mActive || !mBrowser) {
         return;
     }
     if (mBrowser->isExecuted()) {
         emit clone();
         return;
-    }
+    }*/
     mBrowser->setLinesBefore(ui->linesBefore->value());
 }
 
@@ -272,13 +282,13 @@ void SearchOptionsWidget::on_path_textChanged(QString path)
 }
 
 void SearchOptionsWidget::onNotBinaryClicked(bool value) {
-    if (!mActive || !mBrowser) {
+    /*if (!mActive || !mBrowser) {
         return;
     }
     if (mBrowser->isExecuted()) {
         emit clone();
         return;
-    }
+    }*/
     mBrowser->setNotBinary(value);
 }
 
@@ -306,4 +316,19 @@ void SearchOptionsWidget::onReplacementTextChanged(QString value)
 
 void SearchOptionsWidget::onPreserveCaseClicked(bool value) {
     mBrowser->setPreserveCase(value);
+}
+
+void SearchOptionsWidget::on_showFileName_clicked(bool checked)
+{
+    mBrowser->setShowFileName(checked);
+}
+
+void SearchOptionsWidget::on_showLineNumber_clicked(bool checked)
+{
+    mBrowser->setShowLineNumber(checked);
+}
+
+void SearchOptionsWidget::on_onlyMatched_clicked(bool checked)
+{
+    mBrowser->setOnlyMatched(checked);
 }

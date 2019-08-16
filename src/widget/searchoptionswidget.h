@@ -68,6 +68,9 @@ protected slots:
     void on_path_textChanged(QString path);
     void on_replace_clicked();
     void on_preview_clicked();
+    void on_showFileName_clicked(bool checked);
+    void on_showLineNumber_clicked(bool checked);
+    void on_onlyMatched_clicked(bool checked);
 protected:
     Ui::SearchOptionsWidget *ui;
     bool mActive;

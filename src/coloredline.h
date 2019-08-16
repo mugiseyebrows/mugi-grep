@@ -6,13 +6,15 @@
 
 class ColoredLine {
 public:
-    ColoredLine(const QString& string);
+    ColoredLine(const QString& string = QString(), const QList<int>& foreground = {},
+                const QList<int>& background = {});
     QString string() const;
     QList<int> foreground() const;
     QList<int> background() const;
     void paintForeground(int start, int end, int color);
     void paintBackground(int start, int end, int color);
-    QList<ColoredLineSpan> spans();
+    ColoredLine mid(int pos, int length = -1) const;
+    QList<ColoredLineSpan> spans() const;
 
 protected:
     static void paint(int start, int end, int color, QList<int>& dest);
