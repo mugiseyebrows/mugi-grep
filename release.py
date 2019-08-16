@@ -9,7 +9,7 @@ plugins = [p for p in [
 
 conf = {
     'AppName': 'mugi-grep',
-    'AppVersion': '1.3.0',
+    'AppVersion': '1.4.0',
     'Binaries': [{
         'Source': 'D:\\dev\\mugi-grep\\release\\mugi-grep.exe',
         'Dest': ''
@@ -24,6 +24,8 @@ conf = {
         'cwd': 'D:\\dev\\mugi-grep'
     }],
     'BuildDir': 'D:\\dev\\mugi-grep',
+    'RcFile': 'D:\\dev\\mugi-grep\\src\\mugi-grep.rc',
+    'VersionHeader': 'D:\\dev\\mugi-grep\\src\\version.h',
     'Arch': 'win32',
     'VersionUpdater': 'QtVersionUpdater',
     'Packer': 'SimplePacker',
