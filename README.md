@@ -29,10 +29,10 @@ and then you wish you could `sed -i` on results without breaking everything
 Struggle no more, _mugi-grep_ is here to help. Look at that beauty!
 
 ### Search action
-![mugi-grep](https://mugiseyebrows.github.io/img/mugi-grep-search.png)
+<img src="https://mugiseyebrows.github.io/img/mugi-grep-search.png" width="600"/>
 
 ### Replace action
-![mugi-grep](https://mugiseyebrows.github.io/img/mugi-grep-replace.png)
+<img src="https://mugiseyebrows.github.io/img/mugi-grep-replace2.png width="600"/>
 
 # Build
 
