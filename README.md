@@ -32,7 +32,7 @@ Struggle no more, _mugi-grep_ is here to help. Look at that beauty!
 <img src="https://mugiseyebrows.github.io/img/mugi-grep-search.png" width="600"/>
 
 ### Replace action
-<img src="https://mugiseyebrows.github.io/img/mugi-grep-replace2.png width="600"/>
+<img src="https://mugiseyebrows.github.io/img/mugi-grep-replace2.png" width="600"/>
 
 # Build
 
