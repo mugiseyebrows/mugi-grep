@@ -71,6 +71,7 @@ protected slots:
     void on_showFileName_clicked(bool checked);
     void on_showLineNumber_clicked(bool checked);
     void on_onlyMatched_clicked(bool checked);
+    void onCacheToggled(bool checked);
 protected:
     Ui::SearchOptionsWidget *ui;
     bool mActive;

@@ -263,12 +263,14 @@ void SearchOptionsWidget::setCacheFileList(QAction *action)
 {
     mCacheFileList = action;
     ui->fileCount->setVisible(action->isChecked());
-    connect(mCacheFileList,&QAction::toggled,[=](bool checked){
-        ui->fileCount->setVisible(checked);
-        if (checked && !ui->filter->value().isEmpty()) {
-            emit countMatchedFiles();
-        }
-    });
+    connect(action,SIGNAL(toggled(bool)),this,SLOT(onCacheToggled(bool)));
+}
+
+void SearchOptionsWidget::onCacheToggled(bool checked) {
+    ui->fileCount->setVisible(checked);
+    if (checked && !ui->filter->value().isEmpty()) {
+        emit countMatchedFiles();
+    }
 }
 
 void SearchOptionsWidget::onCountMatchedFiles(int matched, int total)
