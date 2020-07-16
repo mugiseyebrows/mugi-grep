@@ -38,13 +38,12 @@ public:
     void serializeSessions(QJsonArray &json) const;
     void setCurrentTabMode(SearchOptionsWidget::Mode mode);
 
-
 protected:
+
     Ui::MainWindow *ui;
     QSignalMapper* mMapper;
     AnchorClickHandler* mClickHandler;
     CompleterModelManager* mCompleterModelManager;
-
 
 signals:
     void editorSet();
@@ -68,6 +67,12 @@ protected slots:
     void on_search_triggered();
     void on_replace_triggered();
     void on_select_triggered();
+
+    // QWidget interface
+protected:
+    void dragEnterEvent(QDragEnterEvent *event);
+    void dropEvent(QDropEvent *event);
+
 };
 
 #endif // MAINWINDOW_H

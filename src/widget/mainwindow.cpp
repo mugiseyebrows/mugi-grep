@@ -9,6 +9,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QVariantMap>
+#include <QMimeData>
 
 #include "sessionwidget.h"
 #include "settingsdialog.h"
@@ -285,4 +286,23 @@ void MainWindow::on_select_triggered()
         return;
     }
     tab->select();
+}
+
+
+
+void MainWindow::dragEnterEvent(QDragEnterEvent *event) {
+    QUrl url(event->mimeData()->text());
+    if (url.isValid() && url.scheme() == "file")
+        event->acceptProposedAction();
+}
+
+void MainWindow::dropEvent(QDropEvent *event) {
+    QString fileName = QUrl(event->mimeData()->text()).toLocalFile();
+    if (!QDir(fileName).exists()) {
+        return;
+    }
+    QJsonObject data;
+    data["path"] = fileName;
+    addSession(data);
+    ui->tabs->setCurrentIndex(ui->tabs->count()-1);
 }
