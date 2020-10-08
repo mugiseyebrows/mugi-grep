@@ -12,8 +12,11 @@ INCLUDEPATH += src src/widget src/model
 
 HEADERS += \
     src/searchdata.h \
+    src/searchhit.h \
+    src/searchhits.h \
     src/searchparams.h \
     src/searchcache.h \
+    src/searchtab.h \
     src/worker.h \
     src/utils.h \
     src/replacementline.h \
@@ -55,8 +58,11 @@ HEADERS += \
 
 SOURCES += \
     src/searchcache.cpp \
+    src/searchhit.cpp \
+    src/searchhits.cpp \
     src/searchparams.cpp \
     src/searchdata.cpp \
+    src/searchtab.cpp \
     src/worker.cpp \
     src/utils.cpp \
     src/filereader.cpp \

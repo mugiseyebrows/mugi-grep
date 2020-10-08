@@ -27,11 +27,12 @@ protected:
 
 signals:
     void returnPressed();
-    void textChanged();
+    void textChanged(RegExp);
     void caseClicked(bool);
 
 protected slots:
     void onClearValidation();
+    void onTextChanged();
 };
 
 #endif // RXINPUT_H

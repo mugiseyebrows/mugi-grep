@@ -1,5 +1,7 @@
 #include "worker.h"
 
+#include "searchhits.h"
+
 Worker::Worker(QObject *parent) :
     QObject(parent)
 {
@@ -8,7 +10,9 @@ Worker::Worker(QObject *parent) :
 void Worker::onSearch(SearchParams params)
 {
     mCache.add(params);
-    emit found(params.id(),QString(),-1,0,0,QString());
+    SearchHits hits = SearchHits();
+    hits.setSearch(params.search());
+    emit found(params.id(), hits);
 }
 
 void Worker::onReplace(int searchId)
@@ -26,6 +30,7 @@ void Worker::onCountMatchedFiles(QString path, RegExpPath filter, bool notBinary
 
 void Worker::onGetAllFiles(QString path)
 {
+    //qDebug() << "Worker::onGetAllFiles" << path;
     QStringList files = mCache.getAllFiles(path,true);
     emit allFiles(path,files);
 }
@@ -33,20 +38,22 @@ void Worker::onGetAllFiles(QString path)
 void Worker::onSearchMore(int id)
 {
     //qDebug() << "Worker::onSearchMore";
-    QString data;
-    QString file;
-    int complete;
-    int total;
-    int filtered;
-    mCache.search(id,data,&complete,&total,&filtered,file);
-    emit found(id,data,complete,total,filtered,file);
+    /*QString data;
+    QString file;*/
+
+    SearchHits hits;
+    bool finish = mCache.search(id,hits);
+    emit found(id,hits);
+    if (finish) {
+        mCache.finish(id);
+    }
 }
 
 void Worker::onFinishSearch(int id) {
-    emit canReplace(id, mCache.isPreview(id));
+    //emit canReplace(id, mCache.isPreview(id));
     //mCache.finish(id);
 }
 
 void Worker::onCanReplace(int id) {
-    emit canReplace(id, mCache.isPreview(id));
+    //emit canReplace(id, mCache.isPreview(id));
 }

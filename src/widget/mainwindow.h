@@ -36,7 +36,7 @@ public:
     void serializeExps(QJsonObject &json) const;
     void deserealizeExps(const QJsonObject &exps);
     void serializeSessions(QJsonArray &json) const;
-    void setCurrentTabMode(SearchOptionsWidget::Mode mode);
+    //void setCurrentTabMode(SearchOptionsWidget::Mode mode);
 
 protected:
 

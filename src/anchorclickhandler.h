@@ -24,8 +24,9 @@ signals:
 public slots:
 
     void onSetEditor();
-protected slots:
     void onAnchorClicked(QUrl);
+protected slots:
+
     void onCustomContextMenuRequested(QPoint point);
 };
 

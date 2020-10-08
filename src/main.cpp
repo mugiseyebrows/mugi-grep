@@ -9,6 +9,7 @@
 
 #include "searchcache.h"
 #include "searchparams.h"
+#include "searchhits.h"
 
 int main(int argc, char *argv[])
 {
@@ -17,6 +18,7 @@ int main(int argc, char *argv[])
     qRegisterMetaType<RegExp>();
     qRegisterMetaType<RegExpPath>();
     qRegisterMetaType<SearchParams>();
+    qRegisterMetaType<SearchHits>();
 
     QApplication a(argc, argv);
     a.setApplicationName(APP_NAME);

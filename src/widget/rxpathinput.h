@@ -32,6 +32,7 @@ protected slots:
     //void onTextChanged();
 
     void onClearValidation();
+    void onTextChanged();
 protected:
     bool mEmitTextChanged;
     QList<bool> mFocus;
@@ -39,7 +40,7 @@ protected:
     Ui::RXPathInput *ui;
 signals:
     void returnPressed();
-    void textChanged();
+    void textChanged(RegExpPath);
     void caseClicked(bool);
 };
 

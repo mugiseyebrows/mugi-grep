@@ -25,15 +25,21 @@
 #include "widget/selectfilesdialog.h"
 #include "widget/mainwindow.h"
 
+#include <QCompleter>
+#include <QStandardItemModel>
+#include <QHeaderView>
+#include <QTreeView>
+#include "searchtab.h"
+
 #define RESULT_TAB_LIMIT 10
 
 SessionWidget::SessionWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::SessionWidget),
     mClickHandler(new AnchorClickHandler()),
-    mCacheFileList(0),
+    mCacheFileList(0)//,
     //mListenResultCurrentChanged(true),
-    mSetValues(true)
+    //mSetValues(true)
 {
     ui->setupUi(this);
 
@@ -47,6 +53,7 @@ SessionWidget::SessionWidget(QWidget *parent) :
     /*connect(this,SIGNAL(search(int,int,QString,RegExpPath,bool,RegExp,int,int,bool,QString)),
             mWorker,SLOT(onSearch(int,int,QString,RegExpPath,bool,RegExp,int,int,bool,QString)));*/
 
+#if 0
     connect(this,SIGNAL(search(SearchParams)),mWorker,SLOT(onSearch(SearchParams)));
 
     connect(this,SIGNAL(replace(int)),mWorker,SLOT(onReplace(int)));
@@ -66,18 +73,29 @@ SessionWidget::SessionWidget(QWidget *parent) :
     connect(mWorker,SIGNAL(canReplace(int,bool)),this,SLOT(onCanReplace(int,bool)));
     connect(mWorker,SIGNAL(replaced(int,int,int,QStringList)),this,SLOT(onReplaced(int,int,int,QStringList)));
 
+    connect(this,SIGNAL(getAllFiles(QString)),mWorker,SLOT(onGetAllFiles(QString)));
+    connect(mWorker,SIGNAL(allFiles(QString,QStringList)),this,SLOT(onAllFiles(QString,QStringList)));
+
+   #endif
+
+    connect(this,SIGNAL(search(SearchParams)),mWorker,SLOT(onSearch(SearchParams)));
+    connect(this,SIGNAL(searchMore(int)),mWorker,SLOT(onSearchMore(int)));
+    connect(mWorker,SIGNAL(found(int,SearchHits)),this,SLOT(onFound(int,SearchHits)));
+
     mThread->start();
 
     while(ui->results->count() > 0) {
         ui->results->removeTab(0);
     }
 
-    ui->options->init(mWorker, mClickHandler);
+    //ui->options->init(mWorker, mClickHandler);
     ui->progress->init();
 
-    SearchBrowser* browser_ = new SearchBrowser();
+    /*SearchBrowser* browser_ = new SearchBrowser();
     mClickHandler->connectBrowser(browser_);
-    ui->results->addTab(browser_,QString());
+    ui->results->addTab(browser_,QString());*/
+
+    //connect(ui->options,SIGNAL())
 
     ui->statusGroup->hide();
 }
@@ -97,9 +115,10 @@ SessionWidget::~SessionWidget()
 void SessionWidget::setCacheFileList(QAction *action)
 {
     mCacheFileList = action;
-    ui->options->setCacheFileList(action);
+    //ui->options->setCacheFileList(action);
 }
 
+#if 0
 void SessionWidget::onClone() {
     SearchBrowser* browser = currentTab();
     SearchBrowser* browser_ = new SearchBrowser();
@@ -120,25 +139,26 @@ void SessionWidget::onClone() {
         }
     }
 }
+#endif
 
 SearchOptionsWidget* SessionWidget::options() const{
     return ui->options;
 }
-
+/*
 void SessionWidget::setMode(SearchOptionsWidget::Mode mode)
 {
     ui->options->setMode(mode);
-}
+}*/
 
 void SessionWidget::select()
 {
-    ui->options->select();
+    //ui->options->select();
 }
 
 
 
 void SessionWidget::searchOrReplace(Worker::Action action) {
-
+#if 0
     SearchBrowser* browser = currentTab();
     if (browser->exp().isEmpty()) {
         return;
@@ -160,10 +180,30 @@ void SessionWidget::searchOrReplace(Worker::Action action) {
 
     emit search(params);
     ui->progress->started();
+#endif
 }
 
 void SessionWidget::onSearch() {
-    searchOrReplace(Worker::Search);
+    //searchOrReplace(Worker::Search);
+
+    SearchTab* tab = currentTab();
+    if (tab->params().search().isEmpty()) {
+        return;
+    }
+    bool valid = ui->options->validate();
+    if (!valid) {
+        return;
+    }
+
+    mCancel = false;
+    //emit collect();
+    int searchId = SearchId::instance()->next();
+
+    tab->params().setId(searchId);
+    SearchParams params = tab->params();
+
+    emit search(params);
+    ui->progress->started();
 }
 
 void SessionWidget::onPreview() {
@@ -171,12 +211,15 @@ void SessionWidget::onPreview() {
 }
 
 void SessionWidget::onReplace() {
+#if 0
     SearchBrowser* browser = currentTab();
     int searchId = browser->searchId();
     emit replace(searchId);
+#endif
 }
 
 int SessionWidget::oldestTabIndex() { // todo test me
+#if 0
     int count = ui->results->count();
     if (count < 1) {
         return -1;
@@ -192,6 +235,8 @@ int SessionWidget::oldestTabIndex() { // todo test me
         }
     }
     return index;
+#endif
+    return -1;
 }
 
 void SessionWidget::onTabTitle(QString title, bool isExecuted) {
@@ -240,6 +285,7 @@ void SessionWidget::onCanceled() {
 
 void SessionWidget::onCanReplace(int searchId, bool can)
 {
+#if 0
     SearchBrowser* browser = currentTab();
     if (!browser) {
         return;
@@ -248,6 +294,7 @@ void SessionWidget::onCanReplace(int searchId, bool can)
         return;
     }
     ui->options->setCanReplace(can);
+#endif
 }
 
 void SessionWidget::on_saveText_clicked()
@@ -261,6 +308,7 @@ void SessionWidget::on_saveHtml_clicked()
 }
 
 void SessionWidget::save(bool plain) {
+#if 0
     SearchBrowser* browser = currentTab();
     if (!browser) {
         return;
@@ -271,19 +319,21 @@ void SessionWidget::save(bool plain) {
         return;
     }
     save(path,plain ? browser->toPlainText() : browser->toHtml());
+#endif
 }
 
-SearchBrowser* SessionWidget::find(int searchId) {
+SearchTab* SessionWidget::find(int searchId) {
     int count = ui->results->count();
     for(int i=0;i<count;i++) {
-        SearchBrowser* browser = tab(i);
-        if (browser->searchId() == searchId) {
+        SearchTab* browser = tab(i);
+        if (browser->id() == searchId) {
             return browser;
         }
     }
     return 0;
 }
 
+#if 0
 void SessionWidget::onFound(int searchId, QString res, int i, int t, int s, QString path)
 {
 
@@ -314,28 +364,29 @@ void SessionWidget::onFound(int searchId, QString res, int i, int t, int s, QStr
         ui->progress->aborted();
     }
 }
+#endif
 
-SearchBrowser* SessionWidget::currentTab() {
+SearchTab* SessionWidget::currentTab() {
     return tab(ui->results->currentIndex());
 }
 
-SearchBrowser* SessionWidget::tab(int index) {
-    return qobject_cast<SearchBrowser*>(ui->results->widget(index));
+SearchTab* SessionWidget::tab(int index) {
+    return qobject_cast<SearchTab*>(ui->results->widget(index));
 }
 
 void SessionWidget::on_results_currentChanged(int index) {
-
+#if 0
     /*if (!mListenResultCurrentChanged) {
         return;
     }*/
     //qDebug() << "on_results_currentChanged" << index << this;
-    SearchBrowser* browser = tab(index);
+    SearchTab* browser = tab(index);
     if (!browser) {
         //qDebug() << "not a browser at index" << index;
         return;
     }
     ui->options->setBrowser(browser,mSetValues);
-    ui->options->countMatchedFiles();
+    //ui->options->countMatchedFiles();
     mSetValues = true;
 
     ui->options->setCanReplace(false);
@@ -344,6 +395,14 @@ void SessionWidget::on_results_currentChanged(int index) {
         return;
     }
     emit canReplace(searchId);
+#endif
+}
+
+void SessionWidget::onFound(int searchId, SearchHits hits)
+{
+    SearchTab* tab = find(searchId);
+    tab->hits().append(hits);
+    emit searchMore(searchId);
 }
 
 void SessionWidget::onPathChanged(QString path)
@@ -352,10 +411,20 @@ void SessionWidget::onPathChanged(QString path)
         qDebug() << "cannot cast";
         return;
     }
+    if (path.isEmpty()) {
+        return;
+    }
+#if 0
+    if (QDir(path).exists()) {
+        //qDebug() << "getAllFiles" << path;
+        emit getAllFiles(path);
+    }
     mTabWidget->setTabText(mTabWidget->indexOf(this),QFileInfo(path).fileName());
+#endif
 }
 
 void SessionWidget::onReplaced(int searchId,int files,int lines,QStringList notChanged) {
+#if 0
     SearchBrowser* browser = currentTab();
     if (browser->searchId() != searchId) {
         return;
@@ -366,4 +435,61 @@ void SessionWidget::onReplaced(int searchId,int files,int lines,QStringList notC
         return;
     }
     QMessageBox::critical(this,"Error",QString("Failed to replace text in files:\n%1").arg(notChanged.join("\n")));
+#endif
+}
+
+QString nameFromPath(const QString& path) {
+    int p = qMax(path.lastIndexOf('/'), path.lastIndexOf('\\'));
+    if (p < 0) {
+        return path;
+    }
+    return path.mid(p + 1);
+}
+
+void SessionWidget::onAllFiles(QString path, QStringList files) {
+
+    //qDebug() << "SessionWidget::onAllFiles" << path;
+
+    QString path_ = ui->options->path();
+    if (path != path_) {
+        return;
+    }
+    mFileList = files;
+
+    QCompleter* completer = new QCompleter(ui->open);
+
+    QStandardItemModel* model = new QStandardItemModel(mFileList.size(), 2);
+
+    for(int r=0;r<model->rowCount();r++) {
+        model->setData(model->index(r,0), nameFromPath(files[r]));
+        model->setData(model->index(r,1), files[r]);
+    }
+
+    completer->setModel(model);
+    completer->setCompletionMode(QCompleter::PopupCompletion);
+    completer->setFilterMode(Qt::MatchContains);
+    completer->setCaseSensitivity(Qt::CaseInsensitive);
+
+    QTreeView* view = new QTreeView;
+    completer->setPopup(view);
+    view->header()->hide();
+
+    view->header()->setSectionResizeMode(1, QHeaderView::Stretch);
+    view->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+    view->header()->setStretchLastSection(false);
+    view->setRootIsDecorated(false);
+
+    ui->open->setCompleter(completer);
+
+    //connect(completer, SIGNAL(activated(QModelIndex)), this, SLOT(onCompleterActivated(QModelIndex)));
+}
+
+void SessionWidget::onCompleterActivated(QModelIndex index) {
+
+    const QAbstractItemModel* model = index.model();
+    //qDebug() << "data" << model->data(index) << model->data(model->index(index.row(),1));
+
+    QString path = model->data(model->index(index.row(),1)).toString();
+    QUrl url = QUrl::fromLocalFile(path);
+    mClickHandler->onAnchorClicked(url);
 }

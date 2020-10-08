@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include "regexppath.h"
+#include "regexp.h"
 
 class SearchBrowser;
 class Worker;
@@ -19,27 +20,38 @@ class SearchOptionsWidget : public QWidget
     Q_OBJECT
 
 public:
+#if 0
     enum Mode {
         ModeSearch,
         ModeReplace
     };
+#endif
     explicit SearchOptionsWidget(QWidget *parent = nullptr);
     ~SearchOptionsWidget();
 
-    void setActive(bool active);
-    void setBrowser(SearchBrowser* browser, bool setValues = true);
-    void setMode(Mode mode);
+    void collect();
 
     QString path() const;
     void setPath(const QString& path);
 
+    void updateCompletions();
+
     bool validate();
 
-    void collect();
-    void emitTabTitle();
+#if 0
+    void setActive(bool active);
+    void setBrowser(SearchBrowser* browser, bool setValues = true);
+    void setMode(Mode mode);
+
+
+
+
+
+
+    //void emitTabTitle();
     void init(Worker *worker, AnchorClickHandler *clickHandler);
-    void setBrowserValues();
-    void updateCompletions();
+    //void setBrowserValues();
+
     void countMatchedFiles();
 
     void setCanReplace(bool can);
@@ -51,14 +63,14 @@ signals:
     void preview();
     void replace();
     void clone();
-    void tabTitle(QString, bool);
+    //void tabTitle(QString, bool);
     void countMatchedFiles(QString,RegExpPath,bool);
     void pathChanged(QString);
 protected slots:
-    void onFilterTextChanged();
-    void onExpTextChanged();
-    void onLinesAfterValueChanged();
-    void onLinesBeforeValueChanged();
+    //void onFilterTextChanged();
+    //void onExpTextChanged();
+    //void onLinesAfterValueChanged();
+    //void onLinesBeforeValueChanged();
     void onCountMatchedFiles(int matched, int total);
     void onNotBinaryClicked(bool value);
     void onPreserveCaseClicked(bool value);
@@ -73,13 +85,24 @@ protected slots:
     void on_onlyMatched_clicked(bool checked);
     void onCacheToggled(bool checked);
 protected:
-    Ui::SearchOptionsWidget *ui;
-    bool mActive;
+
+
     SearchBrowser* mBrowser;
     Worker* mWorker;
     AnchorClickHandler* mClickHandler;
     Mode mMode;
     QAction* mCacheFileList;
+
+#endif
+
+signals:
+    void onSearchChanged(RegExp);
+    void onFilterChanged(RegExpPath);
+    void search();
+
+protected:
+    Ui::SearchOptionsWidget *ui;
+bool mActive;
 };
 
 #endif // SEARCHOPTIONSWIDGET_H

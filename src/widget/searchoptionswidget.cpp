@@ -14,15 +14,19 @@
 SearchOptionsWidget::SearchOptionsWidget(QWidget *parent) :
     QWidget(parent),
     mActive(true),
-    mBrowser(0),
+    /*mBrowser(0),
     mWorker(0),
     mClickHandler(0),
     mMode(ModeSearch),
-    mCacheFileList(0),
+    mCacheFileList(0),*/
     ui(new Ui::SearchOptionsWidget)
 {
     ui->setupUi(this);
-    ui->search->setEnabled(false);
+    //ui->search->setEnabled(false);
+
+    connect(ui->search,SIGNAL(textChanged(RegExp)),this,SIGNAL(onSearchChanged(RegExp)));
+    connect(ui->filter,SIGNAL(textChanged(RegExpPath)),this,SIGNAL(onFilterChanged(RegExpPath)));
+    connect(ui->search,SIGNAL(returnPressed()),this,SIGNAL(search()));
 }
 
 SearchOptionsWidget::~SearchOptionsWidget()
@@ -30,8 +34,10 @@ SearchOptionsWidget::~SearchOptionsWidget()
     delete ui;
 }
 
+#if 0
 void SearchOptionsWidget::setBrowser(SearchBrowser *browser, bool setValues)
 {
+
     mBrowser = browser;
     if (setValues) {
         //updateCompletions();
@@ -90,28 +96,10 @@ void SearchOptionsWidget::init(Worker *worker, AnchorClickHandler* clickHandler)
 
     ui->fileCount->setText("? / ?");
     setMode(mMode);
+
 }
 
 
-QString SearchOptionsWidget::path() const
-{
-    return ui->path->text();
-}
-
-void SearchOptionsWidget::setPath(const QString &path)
-{
-    ui->path->setText(path);
-}
-
-bool SearchOptionsWidget::validate()
-{
-    QPalette palette = this->palette();
-
-    bool ok1 = ui->filter->validate(palette);
-    bool ok2 = ui->exp->validate(palette);
-    bool ok3 = mMode == ModeReplace ? ui->replacement->validate(palette) : true;
-    return ok1 && ok2 && ok3;
-}
 
 void SearchOptionsWidget::setBrowserValues()
 {
@@ -127,24 +115,6 @@ void SearchOptionsWidget::setBrowserValues()
     mBrowser->setOnlyMatched(ui->onlyMatched->isChecked());
 }
 
-void SearchOptionsWidget::collect()
-{
-    RXCollector* collector = RXCollector::instance();
-    //mActive = false;
-    collector->collect(ui->exp->value());
-    collector->collect(ui->filter->value());
-    collector->collect(ui->replacement->value());
-    //updateCollector();
-}
-
-void SearchOptionsWidget::updateCompletions() {
-    mActive = false;
-    RXCollector* collector = RXCollector::instance();
-    collector->load(ui->exp);
-    collector->load(ui->filter);
-    collector->load(ui->replacement);
-    mActive = true;
-}
 
 void SearchOptionsWidget::setActive(bool active)
 {
@@ -189,6 +159,7 @@ void SearchOptionsWidget::setCanReplace(bool can)
     ui->replace->setEnabled(can);
 }
 
+
 void SearchOptionsWidget::onFilterTextChanged() {
     if (!mActive || !mBrowser) {
         return;
@@ -214,6 +185,8 @@ void SearchOptionsWidget::onExpTextChanged() {
     emitTabTitle();
 }
 
+
+
 void SearchOptionsWidget::emitTabTitle() {
 
     QString include = ui->exp->value().include();
@@ -228,6 +201,7 @@ void SearchOptionsWidget::emitTabTitle() {
     }
     emit tabTitle(title, mBrowser->isExecuted());
 }
+
 
 void SearchOptionsWidget::onLinesAfterValueChanged() {
     /*if (!mActive || !mBrowser) {
@@ -250,6 +224,7 @@ void SearchOptionsWidget::onLinesBeforeValueChanged() {
     }*/
     mBrowser->setLinesBefore(ui->linesBefore->value());
 }
+
 
 void SearchOptionsWidget::select() {
     QString path = ui->path->text();
@@ -282,6 +257,7 @@ void SearchOptionsWidget::on_path_textChanged(QString path)
 {
     emit pathChanged(path);
 }
+
 
 void SearchOptionsWidget::onNotBinaryClicked(bool value) {
     /*if (!mActive || !mBrowser) {
@@ -334,3 +310,48 @@ void SearchOptionsWidget::on_onlyMatched_clicked(bool checked)
 {
     mBrowser->setOnlyMatched(checked);
 }
+#endif
+
+
+void SearchOptionsWidget::collect()
+{
+    RXCollector* collector = RXCollector::instance();
+    //mActive = false;
+    collector->collect(ui->search->value());
+    collector->collect(ui->filter->value());
+    collector->collect(ui->replacement->value());
+    //updateCollector();
+}
+
+
+QString SearchOptionsWidget::path() const
+{
+    return ui->path->text();
+}
+
+void SearchOptionsWidget::setPath(const QString &path)
+{
+    ui->path->setText(path);
+}
+
+void SearchOptionsWidget::updateCompletions() {
+    mActive = false;
+    RXCollector* collector = RXCollector::instance();
+    collector->load(ui->search);
+    collector->load(ui->filter);
+    collector->load(ui->replacement);
+    mActive = true;
+}
+
+
+bool SearchOptionsWidget::validate()
+{
+    QPalette palette = this->palette();
+
+    bool ok1 = ui->filter->validate(palette);
+    bool ok2 = ui->search->validate(palette);
+    //bool ok3 = mMode == ModeReplace ? ui->replacement->validate(palette) : true;
+    bool ok3 = true;
+    return ok1 && ok2 && ok3;
+}
+

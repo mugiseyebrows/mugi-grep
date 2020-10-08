@@ -1,6 +1,8 @@
 #include "searchbrowser.h"
 #include <QDebug>
 
+#if 0
+
 SearchBrowser::SearchBrowser(QWidget* parent)
     : QTextBrowser(parent), mSearchId(-1), mLinesBefore(0), mLinesAfter(0), mShowFileName(true),
       mShowLineNumber(true), mOnlyMatched(false), mNotBinary(true),
@@ -149,3 +151,5 @@ SearchParams SearchBrowser::params(int action, int id, const QString& path, bool
                         mLinesAfter, mShowFileName, mShowLineNumber, mOnlyMatched, mReplacement,
                         mPreserveCase);
 }
+
+#endif

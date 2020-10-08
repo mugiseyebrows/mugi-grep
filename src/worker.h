@@ -15,6 +15,8 @@
 #include "searchparams.h"
 
 #include "searchcache.h"
+#include "searchhits.h"
+
 class Worker : public QObject
 {
     Q_OBJECT
@@ -33,7 +35,7 @@ protected:
 
 signals:
     
-    void found(int,QString,int,int,int,QString);
+    void found(int,SearchHits);
 
     void count(int,int);
 

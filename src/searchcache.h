@@ -10,6 +10,7 @@
 #include "searchparams.h"
 #include "searchdata.h"
 #include "replacement.h"
+#include "searchhits.h"
 
 QStringList searchLines(const QStringList &mLines, const QString& mPath, const QString& mRelativePath,
                         const SearchParams &params);
@@ -30,7 +31,7 @@ public:
 
     void finish(int searchId);
 
-    void search(int searchId, QString& data, int* complete, int* total, int* filtered, QString& file);
+    bool search(int searchId, SearchHits& hits);
 
     //QMap<QString,int> fileSize() const;
 
@@ -39,7 +40,7 @@ public:
     static QStringList filterFiles(const QStringList &allFiles, RegExpPath filter, bool notBinary, int *filesFiltered, int *dirsFiltered);
     static void testTokenize();
 
-    bool isPreview(int searchId);
+    //bool isPreview(int searchId);
 
 protected:
 

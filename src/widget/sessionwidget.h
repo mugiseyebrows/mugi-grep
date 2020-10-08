@@ -5,6 +5,7 @@
 #include <QUrl>
 #include <QMetaType>
 #include <QMap>
+#include <QModelIndex>
 
 #include "regexp.h"
 #include "regexppath.h"
@@ -12,6 +13,9 @@
 #include "worker.h"
 #include "searchparams.h"
 #include "searchoptionswidget.h"
+#include "searchhit.h"
+
+#include "searchhits.h"
 
 namespace Ui {
 class SessionWidget;
@@ -22,7 +26,7 @@ class Worker;
 class SearchBrowser;
 class QTabWidget;
 class AnchorClickHandler;
-
+class SearchTab;
 
 /*
 Q_DECLARE_METATYPE(RegExp)
@@ -47,13 +51,13 @@ public:
 
     void serialize(QJsonObject &json) const;
     void deserialize(const QJsonObject &v);
-    SearchBrowser* find(int searchId);
-    SearchBrowser *tab(int index);
+    SearchTab* find(int searchId);
+    SearchTab *tab(int index);
     void countMatchedFiles();
-    SearchBrowser *currentTab();
+    SearchTab *currentTab();
     int oldestTabIndex();
     SearchOptionsWidget *options() const;
-    void setMode(SearchOptionsWidget::Mode mode);
+    //void setMode(SearchOptionsWidget::Mode mode);
 
     void select();
 
@@ -78,30 +82,43 @@ protected:
 
     QAction* mCacheFileList;
 
+    QStringList mFileList;
+
 signals:
 
+    //void search(SearchParams);
+    //void search(int action, int searchId, QString path, RegExpPath filter, bool notBinary, RegExp search, int linesBofore, int linesAfter, bool cacheFileList, QString);
+
     void search(SearchParams);
-    void search(int action, int searchId, QString path, RegExpPath filter, bool notBinary, RegExp search, int linesBofore, int linesAfter, bool cacheFileList, QString);
+
     void searchMore(int searchId);
-    void finishSearch(int searchId);
+
+    //void finishSearch(int searchId);
     //void collected();
     void collect();
     void replace(int);
 
     void canReplace(int);
+    void getAllFiles(QString);
 
 public slots:
     void onCanceled();
 
 protected slots:
 
+    void onCompleterActivated(QModelIndex);
+    void onAllFiles(QString, QStringList);
+
     void onCanReplace(int,bool);
 
     void on_saveText_clicked();
     void on_saveHtml_clicked();
     void on_results_currentChanged(int index);
-    void onFound(int, QString, int, int, int, QString path);
-    void onClone();
+    //void onFound(int, QString, int, int, int, QString path);
+
+    void onFound(int, SearchHits);
+
+    //void onClone();
     void onSearch();
     void onTabTitle(QString title, bool isExecuted);
     void onPathChanged(QString path);

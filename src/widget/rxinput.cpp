@@ -18,7 +18,7 @@ RXInput::RXInput(QWidget *parent) :
     QComboBox* input;
     foreach(input,mInputs) {
         connect(input->lineEdit(),SIGNAL(returnPressed()),this,SIGNAL(returnPressed()));
-        connect(input->lineEdit(),SIGNAL(textChanged(QString)),this,SIGNAL(textChanged()));
+        connect(input->lineEdit(),SIGNAL(textChanged(QString)),this,SLOT(onTextChanged()));
         connect(input->lineEdit(),SIGNAL(textChanged(QString)),this,SLOT(onClearValidation()));
         input->setMaximumWidth(maximumWidth);
     }
@@ -41,4 +41,8 @@ void RXInput::setValue(const RegExp &value) {
 
 void RXInput::onClearValidation() {
     RXBaseInput::clearValidation(palette());
+}
+
+void RXInput::onTextChanged() {
+    emit textChanged(value());
 }

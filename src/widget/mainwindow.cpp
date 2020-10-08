@@ -261,6 +261,7 @@ void MainWindow::on_removeAllSessions_triggered()
     }
 }
 
+#if 0
 void MainWindow::setCurrentTabMode(SearchOptionsWidget::Mode mode) {
     SessionWidget* tab = currentTab();
     if (!tab) {
@@ -268,15 +269,16 @@ void MainWindow::setCurrentTabMode(SearchOptionsWidget::Mode mode) {
     }
     tab->setMode(mode);
 }
+#endif
 
 void MainWindow::on_search_triggered()
 {
-    setCurrentTabMode(SearchOptionsWidget::ModeSearch);
+    //setCurrentTabMode(SearchOptionsWidget::ModeSearch);
 }
 
 void MainWindow::on_replace_triggered()
 {
-    setCurrentTabMode(SearchOptionsWidget::ModeReplace);
+    //setCurrentTabMode(SearchOptionsWidget::ModeReplace);
 }
 
 void MainWindow::on_select_triggered()
