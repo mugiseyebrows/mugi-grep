@@ -20,6 +20,8 @@
 #include "anchorclickhandler.h"
 #include "completermodelmanager.h"
 
+#define IS_DEBUG qApp->applicationDirPath().endsWith("debug")
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow), mMapper(new QSignalMapper(this)),
@@ -33,17 +35,21 @@ MainWindow::MainWindow(QWidget *parent) :
 
     setWindowTitle(QString("%1 %2").arg(qApp->applicationName()).arg(qApp->applicationVersion()));
 
-    QJsonArray sessions = Settings::instance()->sessions();
-
-    if (sessions.size() > 0) {
-        deserealizeSessions(sessions);
+    if (IS_DEBUG) {
+        QJsonObject obj;
+        obj["path"] = "D:\\w\\untitled1";
+        addSession(obj);
     } else {
-        addSession();
+        QJsonArray sessions = Settings::instance()->sessions();
+        if (sessions.size() > 0) {
+            deserealizeSessions(sessions);
+        } else {
+            addSession();
+        }
     }
 
     QJsonObject exps = Settings::instance()->exps();
     deserealizeExps(exps);
-
     connect(mMapper,SIGNAL(mapped(QWidget*)),this,SLOT(onReadStarted(QWidget*)));
 
 }
@@ -68,9 +74,13 @@ void MainWindow::closeEvent(QCloseEvent * e)
     QJsonObject exps;
     serializeExps(exps);
 
-    Settings::instance()->setSessions(sessions);
-    Settings::instance()->setExps(exps);
-    Settings::instance()->save();
+    if (IS_DEBUG) {
+
+    } else {
+        Settings::instance()->setSessions(sessions);
+        Settings::instance()->setExps(exps);
+        Settings::instance()->save();
+    }
 
     e->accept();
 }

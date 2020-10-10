@@ -15,9 +15,11 @@ public:
     void append(const SearchHits& hits);
     void append(const SearchHit& hit);
     int size() const;
+    bool isEmpty() const;
     SearchHit hit(int index) const;
     SearchHits mid(int index);
     void read(int before, int after);
+    void clear();
     RegExp pattern() const;
     void setPattern(const RegExp& value);
     QList<SearchHit> hits() const;

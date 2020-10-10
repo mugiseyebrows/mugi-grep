@@ -41,10 +41,20 @@ void Worker::onSearchMore(int id)
     /*QString data;
     QString file;*/
 
+
+
+    static int count = 0;
+
+    qDebug() << "search more" << id << count++;
+
+    if (mCache.isFinished(id)) {
+        return;
+    }
+
     SearchHits hits;
-    bool finish = mCache.search(id,hits);
+    mCache.search(id,hits);
     emit found(id,hits);
-    if (finish) {
+    if (mCache.isFinished(id)) {
         mCache.finish(id);
     }
 }

@@ -4,6 +4,7 @@
 #include <QTextBrowser>
 #include <QDir>
 #include "searchtab.h"
+#include <QDebug>
 
 SearchResultRenderer::SearchResultRenderer(QObject *parent) : QObject(parent)
 {
@@ -50,8 +51,8 @@ void SearchResultRenderer::append(const SearchHits& hits) {
 
     RegExp pattern = hits.pattern();
 
-    int before = 0;
-    int after = 0;
+    int before = mTab->displayOptions()->linesBefore();
+    int after = mTab->displayOptions()->linesAfter();
 
     //hits.read(before, after);
 
@@ -86,6 +87,9 @@ void SearchResultRenderer::append(const SearchHits& hits) {
                 QString line = lines[i];
 
                 QRegularExpression regexp = pattern.includeExp();
+
+                //qDebug() << pattern.includeExp().pattern();
+
                 QRegularExpressionMatchIterator it = regexp.globalMatch(line);
 
                 QString href = "file:///" + QDir::toNativeSeparators(mPath) +
@@ -118,7 +122,9 @@ void SearchResultRenderer::append(const SearchHits& hits) {
                         for (int j = 1; j <= jmax; j++) {
                             coloredLine.paintBackground(m.capturedStart(j), m.capturedEnd(j), j);
                         }
-                        coloredLine.paintForeground(m.capturedStart(), m.capturedEnd(), 1);
+                        int start = m.capturedStart();
+                        int end = m.capturedEnd();
+                        coloredLine.paintForeground(start, end, 1);
                     }
                     cols << toHtmlSpans(coloredLine, backgroundColors);
                     res << cols.join("");

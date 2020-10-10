@@ -3,11 +3,6 @@
 
 SearchParams::SearchParams() : mId(-1) {
 }
-SearchParams::SearchParams(int id, const QString& path, const RegExp& pattern,
-                           const RegExpPath& filter, bool cacheFileList, bool skipBinary)
-    : mId(id), mPath(path), mPattern(pattern), mFilter(filter), mCacheFileList(cacheFileList),
-      mSkipBinary(skipBinary) {
-}
 int SearchParams::id() const {
     return mId;
 }

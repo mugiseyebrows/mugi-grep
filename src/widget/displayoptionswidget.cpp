@@ -27,3 +27,8 @@ int DisplayOptionsWidget::linesAfter() const
 {
     return ui->linesAfter->value();
 }
+
+void DisplayOptionsWidget::trigChanged()
+{
+    emit optionsChanged();
+}

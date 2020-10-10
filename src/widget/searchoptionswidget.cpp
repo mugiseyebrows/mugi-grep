@@ -26,8 +26,10 @@ SearchOptionsWidget::SearchOptionsWidget(QWidget *parent) :
 
     connect(ui->pattern,SIGNAL(textChanged(RegExp)),this,SIGNAL(patternChanged(RegExp)));
     connect(ui->filter,SIGNAL(textChanged(RegExpPath)),this,SIGNAL(filterChanged(RegExpPath)));
+    connect(ui->path,SIGNAL(textChanged(QString)),this,SIGNAL(pathChanged(QString)));
     connect(ui->pattern,SIGNAL(returnPressed()),this,SIGNAL(search()));
     connect(ui->search,SIGNAL(clicked()),this,SIGNAL(search()));
+
 }
 
 SearchOptionsWidget::~SearchOptionsWidget()
@@ -237,14 +239,15 @@ void SearchOptionsWidget::select() {
         ui->filter->setValue(dialog.filter());
     }
 }
-
+#endif
 void SearchOptionsWidget::setCacheFileList(QAction *action)
 {
     mCacheFileList = action;
     ui->fileCount->setVisible(action->isChecked());
-    connect(action,SIGNAL(toggled(bool)),this,SLOT(onCacheToggled(bool)));
+    //connect(action,SIGNAL(toggled(bool)),this,SLOT(onCacheToggled(bool)));
 }
 
+#if 0
 void SearchOptionsWidget::onCacheToggled(bool checked) {
     ui->fileCount->setVisible(checked);
     if (checked && !ui->filter->value().isEmpty()) {

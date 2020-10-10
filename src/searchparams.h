@@ -10,8 +10,6 @@ class SearchParams {
 
 public:
     SearchParams();
-    SearchParams(int id, const QString& path, const RegExp& pattern, const RegExpPath& filter,
-                 bool cacheFileList, bool skipBinary);
     int id() const;
     void setId(int value);
     QString path() const;

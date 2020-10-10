@@ -463,6 +463,8 @@ void SearchCache::finish(int searchId) {
 
     QMutexLocker locked(&mMutex);
     mSearchData.remove(searchId);
+    mSearchParams.remove(searchId);
+    mReplacements.remove(searchId);
 }
 
 #if 0
@@ -472,13 +474,23 @@ bool SearchCache::isPreview(int searchId) {
 }
 #endif
 
-bool SearchCache::search(int searchId, SearchHits& hits) {
+bool SearchCache::isFinished(int searchId) {
+    QMutexLocker locked(&mMutex);
+    if (!mSearchParams.contains(searchId)) {
+        return true;
+    }
+    const SearchData& searchData = mSearchData[searchId];
+
+    return searchData.filesComplete() >= searchData.filesSize();
+}
+
+void SearchCache::search(int searchId, SearchHits& hits) {
 
     QMutexLocker locked(&mMutex);
 
     if (!mSearchParams.contains(searchId)) {
         qDebug() << "!mSearchData.contains(searchId)";
-        return true;
+        return;
     }
 
     SearchParams& searchParams = mSearchParams[searchId];
@@ -536,14 +548,12 @@ bool SearchCache::search(int searchId, SearchHits& hits) {
 
             hits.setComplete(searchData.filesComplete());
             hits.setTotal(searchData.filesSize());
-            return false;
+            return;
         }
     }
 
     hits.setComplete(searchData.filesComplete());
     hits.setTotal(searchData.filesSize());
-
-    return true;
 
     /*complete = searchData.filesComplete();
     total = searchData.filesSize();

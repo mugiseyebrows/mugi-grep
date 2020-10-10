@@ -85,6 +85,7 @@ SessionWidget::SessionWidget(QWidget *parent) :
 
     connect(ui->options,SIGNAL(patternChanged(RegExp)),this,SLOT(onPatternChanged(RegExp)));
     connect(ui->options,SIGNAL(filterChanged(RegExpPath)),this,SLOT(onFilterChanged(RegExpPath)));
+    connect(ui->options,SIGNAL(pathChanged(QString)),this,SLOT(onPathChanged(QString)));
     connect(ui->options,SIGNAL(search()),this,SLOT(onSearch()));
 
     mThread->start();
@@ -105,16 +106,23 @@ SessionWidget::SessionWidget(QWidget *parent) :
 
     ui->options->setMode(SearchOptionsWidget::ModeSearch);
 
-    SearchTab* tab = new SearchTab();
+    SearchTab* tab = createTab();
     ui->results->addTab(tab,"");
     mListenOptions = true;
 }
 
+SearchTab* SessionWidget::createTab() {
+    SearchTab* tab = new SearchTab();
+    mClickHandler->connectBrowser(tab->textBrowser());
+    return tab;
+}
+
 void SessionWidget::copyToNewTab() {
     SearchTab* tab = this->currentTab();
-    SearchTab* newTab = new SearchTab();
+    SearchTab* newTab = createTab();
     newTab->setParams(tab->params());
     newTab->setHits(tab->hits());
+    newTab->trigRerender();
     QString title = ui->results->tabText(ui->results->currentIndex());
     ui->results->addTab(newTab, title);
     tab->setParams(SearchParams());
@@ -166,7 +174,7 @@ SessionWidget::~SessionWidget()
 void SessionWidget::setCacheFileList(QAction *action)
 {
     mCacheFileList = action;
-    //ui->options->setCacheFileList(action);
+    ui->options->setCacheFileList(action);
 }
 
 #if 0
@@ -252,12 +260,14 @@ void SessionWidget::onSearch() {
     int searchId = SearchId::instance()->next();
 
     tab->params().setId(searchId);
+    tab->params().setPath(ui->options->path());
+    tab->hits().clear();
+    tab->trigRerender();
 
     updateTabText(ui->results->currentIndex());
 
-    /*SearchParams params = tab->params();
-    emit search(params);
-    ui->progress->started();*/
+    emit search(tab->params());
+    ui->progress->started();
 }
 
 void SessionWidget::updateTabText(int index) {
@@ -388,9 +398,10 @@ void SessionWidget::save(bool plain) {
 SearchTab* SessionWidget::find(int searchId) {
     int count = ui->results->count();
     for(int i=0;i<count;i++) {
-        SearchTab* browser = tab(i);
-        if (browser->id() == searchId) {
-            return browser;
+        SearchTab* tab = this->tab(i);
+        //qDebug() << "tabid" << tab->params().id();
+        if (tab->params().id() == searchId) {
+            return tab;
         }
     }
     return 0;
@@ -477,7 +488,11 @@ void SessionWidget::on_results_currentChanged(int index) {
 void SessionWidget::onFound(int searchId, SearchHits hits)
 {
     SearchTab* tab = find(searchId);
-    tab->hits().append(hits);
+    if (!tab) {
+        qDebug() << "onFound find(searchId) == 0";
+        return;
+    }
+    tab->append(hits);
     emit searchMore(searchId);
 }
 

@@ -87,6 +87,7 @@ protected:
 
     void copyToNewTab();
     void updateTabText(int index);
+    SearchTab *createTab();
 signals:
 
     //void search(SearchParams);

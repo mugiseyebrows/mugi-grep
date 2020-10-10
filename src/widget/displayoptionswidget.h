@@ -18,6 +18,8 @@ public:
     int linesBefore() const;
     int linesAfter() const;
 
+    void trigChanged();
+
 signals:
     void optionsChanged();
 

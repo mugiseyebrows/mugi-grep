@@ -77,12 +77,14 @@ function SearchHits() {
     c.constructor_('const RegExp& pattern, QList<SearchHit> hits')
 
     for (let k in m) {
-        c.member(mName(k), m[k])
+        c.member(mName(k), m[k], {total: -1, complete: -1}[k])
     }
     c.method('append', cpp.void, 'const SearchHits& hits',`mHits.append(hits.hits());`)
     c.method('append', cpp.void, 'const SearchHit& hit',`mHits.append(hit);`)
 
     c.method('size', cpp.int, '', 'return mHits.size();').const_()
+
+    c.method('isEmpty', cpp.bool, '', 'return mHits.isEmpty();').const_()
 
     c.method('hit', 'SearchHit', 'int index', 'return mHits[index];').const_()
 
@@ -92,6 +94,8 @@ function SearchHits() {
     `for(int i=0;i<mHits.size();i++) {
         mHits[i].read(before, after);
     }`)
+
+    c.method('clear',cpp.void,'','mHits.clear();')
 
     c.include('SearchHit')
     c.include('RegExp')
@@ -110,10 +114,10 @@ function SearchParams() {
         cacheFileList: cpp.bool,
         skipBinary: cpp.bool
     }
-    c.constructor_({},{mId:-1})
-    c.constructor_(m)
+    c.constructor_()
+    //c.constructor_(m)
     for (let k in m) {
-        c.member(mName(k), m[k])
+        c.member(mName(k), m[k], {id: -1}[k])
     }
 
     c.include('QMetaType', true, true)
@@ -127,7 +131,6 @@ function SearchTab() {
     let c = new CppClass('SearchTab')
     c.inherits('QWidget')
     let m = {
-        id: cpp.int,
         params: 'SearchParams',
         hits: 'SearchHits',
     }
@@ -138,6 +141,15 @@ function SearchTab() {
     `
     QVBoxLayout* layout = new QVBoxLayout();
     mTextBrowser = new QTextBrowser();
+    #ifdef Q_OS_LINUX
+        QFont font("Liberation Mono", 11, QFont::Normal);
+        mTextBrowser->setFont(font);
+    #endif
+    #ifdef Q_OS_WIN
+        QFont font("Courier New", 12, QFont::Normal);
+        mTextBrowser->setFont(font);
+    #endif
+    mTextBrowser->setOpenLinks(false);
     mDisplayOptions = new DisplayOptionsWidget();
     mRenderer = new SearchResultRenderer();
     layout->addWidget(mTextBrowser);
@@ -147,7 +159,10 @@ function SearchTab() {
     `)
 
     c.method('append',cpp.void, constRef('SearchHits','hits'),
-    `
+    `mHits.setPattern(hits.pattern());
+    if (hits.isEmpty()) {
+        return;
+    }
     int size = mHits.size();
     mHits.append(hits);
     read();
@@ -159,9 +174,11 @@ function SearchTab() {
     int linesAfter = mDisplayOptions->linesAfter();
     mHits.read(linesBefore, linesAfter);`)
 
+    c.method('trigRerender', cpp.void, '', 'mDisplayOptions->trigChanged();')
+
     //c.constructor_(m)
     for (let k in m) {
-        c.member(mName(k), m[k], undefined, {getter: ['params','hits'].indexOf(k) < 0})
+        c.member(mName(k), m[k], {id: -1}[k], {getter: ['params','hits'].indexOf(k) < 0})
     }
 
     c.member('mTextBrowser', 'QTextBrowser*')

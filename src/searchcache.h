@@ -31,7 +31,7 @@ public:
 
     void finish(int searchId);
 
-    bool search(int searchId, SearchHits& hits);
+    void search(int searchId, SearchHits& hits);
 
     //QMap<QString,int> fileSize() const;
 
@@ -42,6 +42,7 @@ public:
 
     //bool isPreview(int searchId);
 
+    bool isFinished(int searchId);
 protected:
 
     QMutex mMutex;

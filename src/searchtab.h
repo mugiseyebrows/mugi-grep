@@ -17,10 +17,9 @@ public:
     SearchTab(QWidget* parent = 0);
     void append(const SearchHits& hits);
     void read();
+    void trigRerender();
     SearchParams& params();
     SearchHits& hits();
-    int id() const;
-    void setId(int value);
     void setParams(const SearchParams& value);
     void setHits(const SearchHits& value);
     QTextBrowser* textBrowser() const;
@@ -31,7 +30,6 @@ public:
     void setRenderer(SearchResultRenderer* value);
 
 protected:
-    int mId;
     SearchParams mParams;
     SearchHits mHits;
     QTextBrowser* mTextBrowser;

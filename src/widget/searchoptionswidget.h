@@ -41,6 +41,8 @@ public:
     void setFiler(RegExpPath);
     void setPattern(RegExp);
 
+    void setCacheFileList(QAction* action);
+
 #if 0
     void setActive(bool active);
     void setBrowser(SearchBrowser* browser, bool setValues = true);
@@ -60,7 +62,7 @@ public:
     void setCanReplace(bool can);
 
     void select();
-    void setCacheFileList(QAction* action);
+
 signals:
     void search();
     void preview();
@@ -94,7 +96,7 @@ protected:
     Worker* mWorker;
     AnchorClickHandler* mClickHandler;
 
-    QAction* mCacheFileList;
+
 
 #endif
 
@@ -106,12 +108,14 @@ protected slots:
 signals:
     void patternChanged(RegExp);
     void filterChanged(RegExpPath);
+    void pathChanged(QString);
     void search();
 
 protected:
     Ui::SearchOptionsWidget *ui;
     bool mActive;
     Mode mMode;
+    QAction* mCacheFileList;
 };
 
 #endif // SEARCHOPTIONSWIDGET_H
