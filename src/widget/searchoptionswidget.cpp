@@ -22,13 +22,17 @@ SearchOptionsWidget::SearchOptionsWidget(QWidget *parent) :
     ui(new Ui::SearchOptionsWidget)
 {
     ui->setupUi(this);
-    //ui->search->setEnabled(false);
+    ui->replace->setEnabled(false);
 
     connect(ui->pattern,SIGNAL(textChanged(RegExp)),this,SIGNAL(patternChanged(RegExp)));
-    connect(ui->filter,SIGNAL(textChanged(RegExpPath)),this,SIGNAL(filterChanged(RegExpPath)));
+    connect(ui->filter,SIGNAL(valueChanged(RegExpPath)),this,SIGNAL(filterChanged(RegExpPath)));
     connect(ui->path,SIGNAL(textChanged(QString)),this,SIGNAL(pathChanged(QString)));
     connect(ui->pattern,SIGNAL(returnPressed()),this,SIGNAL(search()));
+
     connect(ui->search,SIGNAL(clicked()),this,SIGNAL(search()));
+
+    connect(ui->preview,SIGNAL(clicked()),this,SIGNAL(preview()));
+    connect(ui->replace,SIGNAL(clicked()),this,SIGNAL(replace()));
 
 }
 

@@ -4,7 +4,7 @@
 #include <QTextBrowser>
 #include <QVBoxLayout>
 
-SearchTab::SearchTab(QWidget* parent) : QWidget(parent) {
+SearchTab::SearchTab(QWidget* parent) : QWidget(parent), mMode(0) {
 
     QVBoxLayout* layout = new QVBoxLayout();
     mTextBrowser = new QTextBrowser();
@@ -17,12 +17,18 @@ SearchTab::SearchTab(QWidget* parent) : QWidget(parent) {
     mTextBrowser->setFont(font);
 #endif
     mTextBrowser->setOpenLinks(false);
-    mDisplayOptions = new DisplayOptionsWidget();
+    mDisplayOptionsWidget = new DisplayOptionsWidget();
     mRenderer = new SearchResultRenderer();
     layout->addWidget(mTextBrowser);
-    layout->addWidget(mDisplayOptions);
+    layout->addWidget(mDisplayOptionsWidget);
     setLayout(layout);
     mRenderer->setTab(this);
+}
+int SearchTab::mode() const {
+    return mMode;
+}
+void SearchTab::setMode(int value) {
+    mMode = value;
 }
 void SearchTab::setParams(const SearchParams& value) {
     mParams = value;
@@ -36,11 +42,11 @@ QTextBrowser* SearchTab::textBrowser() const {
 void SearchTab::setTextBrowser(QTextBrowser* value) {
     mTextBrowser = value;
 }
-DisplayOptionsWidget* SearchTab::displayOptions() const {
-    return mDisplayOptions;
+DisplayOptionsWidget* SearchTab::displayOptionsWidget() const {
+    return mDisplayOptionsWidget;
 }
-void SearchTab::setDisplayOptions(DisplayOptionsWidget* value) {
-    mDisplayOptions = value;
+void SearchTab::setDisplayOptionsWidget(DisplayOptionsWidget* value) {
+    mDisplayOptionsWidget = value;
 }
 SearchResultRenderer* SearchTab::renderer() const {
     return mRenderer;
@@ -58,16 +64,22 @@ void SearchTab::append(const SearchHits& hits) {
     mRenderer->append(mHits.mid(size));
 }
 void SearchTab::read() {
-    int linesBefore = mDisplayOptions->linesBefore();
-    int linesAfter = mDisplayOptions->linesAfter();
+    int linesBefore = mDisplayOptionsWidget->linesBefore();
+    int linesAfter = mDisplayOptionsWidget->linesAfter();
     mHits.read(linesBefore, linesAfter);
 }
 void SearchTab::trigRerender() {
-    mDisplayOptions->trigChanged();
+    mDisplayOptionsWidget->trigChanged();
 }
 SearchParams& SearchTab::params() {
     return mParams;
 }
 SearchHits& SearchTab::hits() {
     return mHits;
+}
+DisplayOptions SearchTab::displayOptions() const {
+    return mDisplayOptionsWidget->options();
+}
+void SearchTab::setDisplayOptions(const DisplayOptions& value) {
+    mDisplayOptionsWidget->setOptions(value);
 }

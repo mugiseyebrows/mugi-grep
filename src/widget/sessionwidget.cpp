@@ -88,6 +88,9 @@ SessionWidget::SessionWidget(QWidget *parent) :
     connect(ui->options,SIGNAL(pathChanged(QString)),this,SLOT(onPathChanged(QString)));
     connect(ui->options,SIGNAL(search()),this,SLOT(onSearch()));
 
+    connect(ui->options,SIGNAL(preview()),this,SLOT(onPreview()));
+    connect(ui->options,SIGNAL(replace()),this,SLOT(onReplace()));
+
     mThread->start();
 
     while(ui->results->count() > 0) {
@@ -122,6 +125,8 @@ void SessionWidget::copyToNewTab() {
     SearchTab* newTab = createTab();
     newTab->setParams(tab->params());
     newTab->setHits(tab->hits());
+    newTab->setMode(tab->mode());
+    newTab->setDisplayOptions(tab->displayOptions());
     newTab->trigRerender();
     QString title = ui->results->tabText(ui->results->currentIndex());
     ui->results->addTab(newTab, title);
@@ -204,11 +209,11 @@ void SessionWidget::onClone() {
 SearchOptionsWidget* SessionWidget::options() const{
     return ui->options;
 }
-/*
+
 void SessionWidget::setMode(SearchOptionsWidget::Mode mode)
 {
     ui->options->setMode(mode);
-}*/
+}
 
 void SessionWidget::select()
 {
@@ -281,7 +286,7 @@ void SessionWidget::updateTabText(int index) {
 }
 
 void SessionWidget::onPreview() {
-    searchOrReplace(Worker::Preview);
+
 }
 
 void SessionWidget::onReplace() {

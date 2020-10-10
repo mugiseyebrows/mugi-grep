@@ -17,6 +17,9 @@
 #include "searchcache.h"
 #include "searchhits.h"
 
+
+#include "replaceparams.h"
+
 class Worker : public QObject
 {
     Q_OBJECT
@@ -29,9 +32,12 @@ public:
 
     explicit Worker(QObject *parent = nullptr);
     
+
 protected:
 
     SearchCache mCache;
+
+    void onMore(int id, int mode);
 
 signals:
     
@@ -45,16 +51,23 @@ signals:
 
     void replaced(int,int,int,QStringList);
 
+    //void previewed(int, SearchHits);
+
 public slots:
 
     void onCanReplace(int);
-    void onReplace(int searchId);
-    void onSearchMore(int);
+
+
     void onFinishSearch(int);
     void onCountMatchedFiles(QString path, RegExpPath filter, bool notBinary);
     void onGetAllFiles(QString path);
     //void onSearch(int action, int searchId, QString path, RegExpPath filter, bool notBinary, RegExp search, int linesBefore, int linesAfter, bool cacheFileList, QString relpacement);
     void onSearch(SearchParams);
+    void onSearchMore(int);
+
+    void onPreviewMore(int id);
+    void onReplace(ReplaceParams params);
+    void onPreview(SearchParams params);
 };
 
 #endif // WORKER2_H

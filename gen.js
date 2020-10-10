@@ -66,21 +66,22 @@ function SearchHit() {
 function SearchHits() {
     let c = new CppClass('SearchHits')
     let m = {
+        mode: cpp.int,
         pattern: 'RegExp',
         hits: 'QList<SearchHit>',
         total: cpp.int,
         complete: cpp.int,
     }
     c.constructor_()
-    c.constructor_(m)
-
-    c.constructor_('const RegExp& pattern, QList<SearchHit> hits')
-    c.constructor_('const RegExp& pattern')
+    //c.constructor_(m)
+    //c.constructor_('int mode, const RegExp& pattern, QList<SearchHit> hits')
+    c.constructor_('int mode, const RegExp& pattern, QList<SearchHit> hits = QList<SearchHit>()')
+    //c.constructor_('const RegExp& pattern')
 
     for (let k in m) {
         c.member(mName(k), m[k], {total: -1, complete: -1}[k])
     }
-    c.method('append', cpp.void, 'const SearchHits& hits',`mPattern = hits.pattern(); mHits.append(hits.hits());`)
+    c.method('append', cpp.void, 'const SearchHits& hits',`mMode = hits.mode(); mPattern = hits.pattern(); mHits.append(hits.hits());`)
     c.method('append', cpp.void, 'const SearchHit& hit',`mHits.append(hit);`)
 
     c.method('size', cpp.int, '', 'return mHits.size();').const_()
@@ -89,7 +90,7 @@ function SearchHits() {
 
     c.method('hit', 'SearchHit', 'int index', 'return mHits[index];').const_()
 
-    c.method('mid','SearchHits', 'int index', 'return SearchHits(mPattern, mHits.mid(index));')
+    c.method('mid','SearchHits', 'int index', 'return SearchHits(mMode, mPattern, mHits.mid(index));')
 
     c.method('read',cpp.void, {before: cpp.int, after: cpp.int},
     `for(int i=0;i<mHits.size();i++) {
@@ -100,6 +101,7 @@ function SearchHits() {
 
     c.include('SearchHit')
     c.include('RegExp')
+    //c.include('RegExpReplacement')
     c.include('QMetaType', true, true)
     c.metatype()
     c.write(src)
@@ -109,9 +111,11 @@ function SearchParams() {
     let c = new CppClass('SearchParams')
     let m = {
         id: cpp.int,
+        mode: cpp.int,
         path: qt.QString,
         pattern: 'RegExp',
         filter: 'RegExpPath',
+        replacement: 'RegExpReplacement',
         cacheFileList: cpp.bool,
         skipBinary: cpp.bool
     }
@@ -124,6 +128,7 @@ function SearchParams() {
     c.include('QMetaType', true, true)
     c.include('RegExp')
     c.include('RegExpPath')
+    c.include('RegExpReplacement')
     c.metatype()
     c.write(src)
 }
@@ -132,6 +137,7 @@ function SearchTab() {
     let c = new CppClass('SearchTab')
     c.inherits('QWidget')
     let m = {
+        mode: cpp.int,
         params: 'SearchParams',
         hits: 'SearchHits',
     }
@@ -151,10 +157,10 @@ function SearchTab() {
         mTextBrowser->setFont(font);
     #endif
     mTextBrowser->setOpenLinks(false);
-    mDisplayOptions = new DisplayOptionsWidget();
+    mDisplayOptionsWidget = new DisplayOptionsWidget();
     mRenderer = new SearchResultRenderer();
     layout->addWidget(mTextBrowser);
-    layout->addWidget(mDisplayOptions);
+    layout->addWidget(mDisplayOptionsWidget);
     setLayout(layout);
     mRenderer->setTab(this);
     `)
@@ -170,23 +176,28 @@ function SearchTab() {
     `)
 
     c.method('read', cpp.void, '', 
-    `int linesBefore = mDisplayOptions->linesBefore();
-    int linesAfter = mDisplayOptions->linesAfter();
+    `int linesBefore = mDisplayOptionsWidget->linesBefore();
+    int linesAfter = mDisplayOptionsWidget->linesAfter();
     mHits.read(linesBefore, linesAfter);`)
 
-    c.method('trigRerender', cpp.void, '', 'mDisplayOptions->trigChanged();')
+    c.method('trigRerender', cpp.void, '', 'mDisplayOptionsWidget->trigChanged();')
 
     //c.constructor_(m)
     for (let k in m) {
-        c.member(mName(k), m[k], {id: -1}[k], {getter: ['params','hits'].indexOf(k) < 0})
+        c.member(mName(k), m[k], {id: -1, mode: 0}[k], {getter: ['params','hits'].indexOf(k) < 0})
     }
 
     c.member('mTextBrowser', 'QTextBrowser*')
-    c.member('mDisplayOptions','DisplayOptionsWidget*')
+    c.member('mDisplayOptionsWidget','DisplayOptionsWidget*')
     c.member('mRenderer','SearchResultRenderer*')
 
     c.method('params', 'SearchParams&', '', `return mParams;`)
     c.method('hits', 'SearchHits&','','return mHits;')
+
+    c.method('displayOptions', 'DisplayOptions', '', 'return mDisplayOptionsWidget->options();').const_()
+    c.method('setDisplayOptions', cpp.void, 'const DisplayOptions& value','mDisplayOptionsWidget->setOptions(value);')
+
+    //c.method('setPattern', cpp.void, 'const RegExp& value', 'mParams.setPattern(value);')
 
     c.include('SearchHits')
     c.include('SearchParams')
@@ -200,7 +211,104 @@ function SearchTab() {
     c.write(src)
 }
 
+function ReplaceItem() {
+    let c = new CppClass('ReplaceItem')
+
+    let m = {
+        line: cpp.int,
+        before: qt.QString,
+        after: qt.QString
+    }
+    
+    c.constructor_()
+    c.constructor_(m)
+    for (let k in m) {
+        c.member(mName(k), m[k])
+    }
+
+    c.include('QMetaType', true, true)
+    c.metatype()
+    c.write(src)
+}
+
+function ReplaceParams() {
+    let c = new CppClass('ReplaceParams')
+
+    let m = {
+        path: qt.QString,
+        items: 'QList<ReplaceItem>'
+    }
+
+    c.constructor_()
+    c.constructor_(m)
+    for (let k in m) {
+        c.member(mName(k), m[k])
+    }
+
+    c.include('QMetaType', true, true)
+    c.metatype()
+    c.write(src)
+}
+
+function SearchData() {
+    let c = new CppClass('SearchData')
+    let m = {
+        files: qt.QStringList,
+        filesFiltered: cpp.int,
+        dirsFiltered: cpp.int
+    }
+    c.constructor_()
+    c.constructor_(m)
+    for (let k in m) {
+        c.member(mName(k), m[k])
+    }
+    c.member('mFilesComplete',cpp.int, 0)
+    c.method('file',qt.QString,'int i','return mFiles[i];').const_()
+    c.method('filesSize',cpp.int,'','return mFiles.size();').const_()
+    c.write(src)
+}
+
+function RegExpReplacement() {
+    let c = new CppClass('RegExpReplacement')
+
+    let m = {
+        pattern: qt.QString,
+        preserveCase: cpp.bool
+    }
+    c.constructor_()
+    c.constructor_(m)
+    for (let k in m) {
+        c.member(mName(k), m[k], {preserveCase: 'false'}[k])
+    }
+
+    c.include('QMetaType', true, true)
+    c.metatype()
+    c.write(src)
+}
+
+function DisplayOptions() {
+    let c = new CppClass('DisplayOptions')
+    let m = {
+        linesBefore: cpp.int,
+        linesAfter: cpp.int
+    }
+    c.constructor_()
+    c.constructor_(m)
+    for (let k in m) {
+        c.member(mName(k), m[k], {linesBefore: 0, linesAfter: 0}[k])
+    }
+    c.write(src)
+}
+
+// todo mugicpp metatype: add include QMetaType
+// todo mugicpp incude class Foo if ref or pointer
+
 SearchHit()
 SearchHits()
 SearchParams()
+ReplaceItem()
+ReplaceParams()
 SearchTab()
+SearchData()
+RegExpReplacement()
+DisplayOptions()

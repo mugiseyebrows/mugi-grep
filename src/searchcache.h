@@ -12,6 +12,7 @@
 #include "replacement.h"
 #include "searchhits.h"
 
+
 QStringList searchLines(const QStringList &mLines, const QString& mPath, const QString& mRelativePath,
                         const SearchParams &params);
 
@@ -23,15 +24,16 @@ QStringList fileLines(const QString& path, bool skipBinary, bool* binary = nullp
 
 class SearchCache {
 public:
+
     SearchCache();
 
     void add(SearchParams params);
 
-    void replace(int searchId, int* filesChanged, int* linesChanged, QStringList& notChanged);
+    //void replace(int searchId, int* filesChanged, int* linesChanged, QStringList& notChanged);
 
     void finish(int searchId);
 
-    SearchHits search(int searchId);
+    SearchHits searchOrPreview(int searchId);
 
     //QMap<QString,int> fileSize() const;
 
@@ -43,13 +45,17 @@ public:
     //bool isPreview(int searchId);
 
     bool isFinished(int searchId);
+    bool isPreviewFinished(int searchId);
+
 protected:
 
     QMutex mMutex;
     QMap<int,SearchParams> mSearchParams;
+
     QMap<int,SearchData> mSearchData;
-    QMap<int,QList<Replacement> > mReplacements;
+
     QMap<QString, QStringList> mFileList;
+
 
 };
 

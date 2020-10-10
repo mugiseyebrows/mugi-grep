@@ -3,13 +3,14 @@
 
 SearchHits::SearchHits() : mTotal(-1), mComplete(-1) {
 }
-SearchHits::SearchHits(const RegExp& pattern, const QList<SearchHit>& hits, int total, int complete)
-    : mPattern(pattern), mHits(hits), mTotal(total), mComplete(complete) {
+SearchHits::SearchHits(int mode, const RegExp& pattern, const QList<SearchHit>& hits)
+    : mMode(mode), mPattern(pattern), mHits(hits), mTotal(-1), mComplete(-1) {
 }
-SearchHits::SearchHits(const RegExp& pattern, const QList<SearchHit>& hits)
-    : mPattern(pattern), mHits(hits), mTotal(-1), mComplete(-1) {
+int SearchHits::mode() const {
+    return mMode;
 }
-SearchHits::SearchHits(const RegExp& pattern) : mPattern(pattern), mTotal(-1), mComplete(-1) {
+void SearchHits::setMode(int value) {
+    mMode = value;
 }
 RegExp SearchHits::pattern() const {
     return mPattern;
@@ -36,6 +37,7 @@ void SearchHits::setComplete(int value) {
     mComplete = value;
 }
 void SearchHits::append(const SearchHits& hits) {
+    mMode = hits.mode();
     mPattern = hits.pattern();
     mHits.append(hits.hits());
 }
@@ -52,7 +54,7 @@ SearchHit SearchHits::hit(int index) const {
     return mHits[index];
 }
 SearchHits SearchHits::mid(int index) {
-    return SearchHits(mPattern, mHits.mid(index));
+    return SearchHits(mMode, mPattern, mHits.mid(index));
 }
 void SearchHits::read(int before, int after) {
     for (int i = 0; i < mHits.size(); i++) {

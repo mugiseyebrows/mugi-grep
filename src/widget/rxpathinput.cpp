@@ -22,11 +22,12 @@ RXPathInput::RXPathInput(QWidget *parent) :
     QComboBox* input;
     foreach(input,mInputs) {
         connect(input->lineEdit(),SIGNAL(returnPressed()),this,SIGNAL(returnPressed()));
-        connect(input->lineEdit(),SIGNAL(textChanged(QString)),this,SLOT(onTextChanged()));
+        connect(input->lineEdit(),SIGNAL(textChanged(QString)),this,SLOT(onValueChanged()));
         connect(input->lineEdit(),SIGNAL(textChanged(QString)),this,SLOT(onClearValidation()));
         input->setMaximumWidth(maximumWidth);
     }
-    connect(ui->matchCase,SIGNAL(clicked(bool)),this,SIGNAL(caseClicked(bool)));
+
+    connect(ui->matchCase,SIGNAL(clicked(bool)),this,SIGNAL(onValueChanged()));
 }
 
 RXPathInput::~RXPathInput()
@@ -72,6 +73,13 @@ void RXPathInput::onClearValidation() {
     RXBaseInput::clearValidation(palette());
 }
 
-void RXPathInput::onTextChanged() {
-    emit textChanged(value());
+void RXPathInput::onValueChanged() {
+    emit valueChanged(value());
 }
+
+#if 0
+void RXPathInput::onTextChanged() {
+    //emit textChanged(value());
+    emit valueChanged(value());
+}
+#endif

@@ -12,10 +12,10 @@ RXReplaceInput::RXReplaceInput(QWidget *parent) :
     QComboBox* input;
     foreach(input,mInputs) {
         connect(input->lineEdit(),SIGNAL(returnPressed()),this,SIGNAL(returnPressed()));
-        connect(input->lineEdit(),SIGNAL(textChanged(QString)),this,SIGNAL(textChanged(QString)));
+        connect(input->lineEdit(),SIGNAL(textChanged(QString)),this,SIGNAL(onValueChanged()));
         connect(input->lineEdit(),SIGNAL(textChanged(QString)),this,SLOT(onClearValidation()));
     }
-    connect(ui->preserveCase,SIGNAL(clicked(bool)),this,SIGNAL(preserveCaseClicked(bool)));
+    connect(ui->preserveCase,SIGNAL(clicked(bool)),this,SIGNAL(onValueChanged()));
 }
 
 RXReplaceInput::~RXReplaceInput()
@@ -23,17 +23,17 @@ RXReplaceInput::~RXReplaceInput()
     delete ui;
 }
 
-QString RXReplaceInput::value() const
+RegExpReplacement RXReplaceInput::value() const
 {
-    QStringList exps = this->exps();
-    return exps[0];
+    return RegExpReplacement(exps()[0], ui->preserveCase->isChecked());
 }
 
-void RXReplaceInput::setValue(const QString &value)
+void RXReplaceInput::setValue(const RegExpReplacement &value)
 {
     QStringList exps;
-    exps << value;
+    exps << value.pattern();
     setExps(exps);
+    ui->preserveCase->setChecked(value.preserveCase());
 }
 
 bool RXReplaceInput::preserveCase() const
@@ -54,4 +54,8 @@ bool RXReplaceInput::validate(const QPalette &palette)
 
 void RXReplaceInput::onClearValidation() {
     RXBaseInput::clearValidation(palette());
+}
+
+void RXReplaceInput::onValueChanged() {
+    emit valueChanged(value());
 }

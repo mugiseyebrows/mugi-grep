@@ -3,6 +3,8 @@
 
 #include <QWidget>
 
+#include "displayoptions.h"
+
 namespace Ui {
 class DisplayOptionsWidget;
 }
@@ -17,6 +19,9 @@ public:
 
     int linesBefore() const;
     int linesAfter() const;
+
+    DisplayOptions options() const;
+    void setOptions(const DisplayOptions& options);
 
     void trigChanged();
 

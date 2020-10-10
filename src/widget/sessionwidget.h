@@ -57,7 +57,7 @@ public:
     SearchTab *currentTab();
     int oldestTabIndex();
     SearchOptionsWidget *options() const;
-    //void setMode(SearchOptionsWidget::Mode mode);
+    void setMode(SearchOptionsWidget::Mode mode);
 
     void select();
 

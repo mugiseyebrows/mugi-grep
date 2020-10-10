@@ -2,6 +2,7 @@
 
 #include "searchhits.h"
 
+
 Worker::Worker(QObject *parent) :
     QObject(parent)
 {
@@ -10,17 +11,17 @@ Worker::Worker(QObject *parent) :
 void Worker::onSearch(SearchParams params)
 {
     mCache.add(params);
-    SearchHits hits(params.pattern());
+    SearchHits hits(params.mode(), params.pattern());
     emit found(params.id(), hits);
 }
 
-void Worker::onReplace(int searchId)
-{
-    int files,lines;
-    QStringList notChanged;
-    mCache.replace(searchId, &files, &lines, notChanged);
-    emit replaced(searchId, files, lines, notChanged);
+#if 0
+void Worker::onPreview(SearchParams params) {
+    mCache.add(params);
+    SearchHits hits(params.mode(), params.pattern(), params.replacement());
+    emit previewed(params.id(), hits);
 }
+#endif
 
 void Worker::onCountMatchedFiles(QString path, RegExpPath filter, bool notBinary) {
     QPair<int,int> fileCount = mCache.countMatchedFiles(path,filter,notBinary);

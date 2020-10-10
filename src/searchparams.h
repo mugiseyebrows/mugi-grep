@@ -3,6 +3,7 @@
 #define SEARCHPARAMS_H
 #include "regexp.h"
 #include "regexppath.h"
+#include "regexpreplacement.h"
 #include <QMetaType>
 #include <QString>
 
@@ -12,12 +13,16 @@ public:
     SearchParams();
     int id() const;
     void setId(int value);
+    int mode() const;
+    void setMode(int value);
     QString path() const;
     void setPath(const QString& value);
     RegExp pattern() const;
     void setPattern(const RegExp& value);
     RegExpPath filter() const;
     void setFilter(const RegExpPath& value);
+    RegExpReplacement replacement() const;
+    void setReplacement(const RegExpReplacement& value);
     bool cacheFileList() const;
     void setCacheFileList(bool value);
     bool skipBinary() const;
@@ -25,9 +30,11 @@ public:
 
 protected:
     int mId;
+    int mMode;
     QString mPath;
     RegExp mPattern;
     RegExpPath mFilter;
+    RegExpReplacement mReplacement;
     bool mCacheFileList;
     bool mSkipBinary;
 };

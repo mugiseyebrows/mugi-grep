@@ -28,6 +28,17 @@ int DisplayOptionsWidget::linesAfter() const
     return ui->linesAfter->value();
 }
 
+DisplayOptions DisplayOptionsWidget::options() const
+{
+    return DisplayOptions(ui->linesBefore->value(), ui->linesAfter->value());
+}
+
+void DisplayOptionsWidget::setOptions(const DisplayOptions &options)
+{
+    ui->linesBefore->setValue(options.linesBefore());
+    ui->linesAfter->setValue(options.linesAfter());
+}
+
 void DisplayOptionsWidget::trigChanged()
 {
     emit optionsChanged();

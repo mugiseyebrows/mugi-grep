@@ -9,6 +9,12 @@ int SearchParams::id() const {
 void SearchParams::setId(int value) {
     mId = value;
 }
+int SearchParams::mode() const {
+    return mMode;
+}
+void SearchParams::setMode(int value) {
+    mMode = value;
+}
 QString SearchParams::path() const {
     return mPath;
 }
@@ -26,6 +32,12 @@ RegExpPath SearchParams::filter() const {
 }
 void SearchParams::setFilter(const RegExpPath& value) {
     mFilter = value;
+}
+RegExpReplacement SearchParams::replacement() const {
+    return mReplacement;
+}
+void SearchParams::setReplacement(const RegExpReplacement& value) {
+    mReplacement = value;
 }
 bool SearchParams::cacheFileList() const {
     return mCacheFileList;

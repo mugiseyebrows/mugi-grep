@@ -20,20 +20,25 @@ public:
     void trigRerender();
     SearchParams& params();
     SearchHits& hits();
+    DisplayOptions displayOptions() const;
+    void setDisplayOptions(const DisplayOptions& value);
+    int mode() const;
+    void setMode(int value);
     void setParams(const SearchParams& value);
     void setHits(const SearchHits& value);
     QTextBrowser* textBrowser() const;
     void setTextBrowser(QTextBrowser* value);
-    DisplayOptionsWidget* displayOptions() const;
-    void setDisplayOptions(DisplayOptionsWidget* value);
+    DisplayOptionsWidget* displayOptionsWidget() const;
+    void setDisplayOptionsWidget(DisplayOptionsWidget* value);
     SearchResultRenderer* renderer() const;
     void setRenderer(SearchResultRenderer* value);
 
 protected:
+    int mMode;
     SearchParams mParams;
     SearchHits mHits;
     QTextBrowser* mTextBrowser;
-    DisplayOptionsWidget* mDisplayOptions;
+    DisplayOptionsWidget* mDisplayOptionsWidget;
     SearchResultRenderer* mRenderer;
 };
 

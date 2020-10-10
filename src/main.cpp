@@ -10,6 +10,7 @@
 #include "searchcache.h"
 #include "searchparams.h"
 #include "searchhits.h"
+#include "regexpreplacement.h"
 
 int main(int argc, char *argv[])
 {
@@ -17,6 +18,7 @@ int main(int argc, char *argv[])
 
     qRegisterMetaType<RegExp>();
     qRegisterMetaType<RegExpPath>();
+    qRegisterMetaType<RegExpReplacement>();
     qRegisterMetaType<SearchParams>();
     qRegisterMetaType<SearchHits>();
 

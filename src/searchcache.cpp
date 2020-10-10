@@ -64,92 +64,6 @@ QSet<int> getSiblings(const QList<int>& matched, int linesBefore, int linesAfter
 }
 
 
-void searchLines(const QStringList& lines, const QString& path, const QString& relativePath,
-                        const SearchParams& params, SearchHits& hits) {
-
-    QStringList res;
-    RegExp exp = params.pattern();
-    QList<int> matched = getMatched(lines, exp);
-    if (matched.isEmpty()) {
-        return;
-    }
-    SearchHit hit(path, relativePath, matched);
-    hits.append(hit);
-
-#if 0
-
-    QSet<int> siblings = getSiblings(matched, linesBefore, linesAfter);
-
-    static QStringList backgroundColors = {"#ffffff","#ffdfba","#baffc9","#bae1ff","#ffffba","#ffb3ba"};
-
-    bool onlyMatched = params.onlyMatched();
-    bool showFileName = params.showFileName();
-    bool showLineNumber = params.showLineNumber();
-
-    // pass 2
-    for(int i=0;i<lines.length();i++) {
-
-        if (matched.contains(i)) {
-
-            QString line = lines[i];
-
-            QRegularExpression regexp = exp.includeExp();
-            QRegularExpressionMatchIterator it = regexp.globalMatch(line);
-
-            QString href = "file:///" + QDir::toNativeSeparators(mPath) + "?line=" + QString::number(i+1);
-
-            if (onlyMatched) {
-                // each match on new line
-                while(it.hasNext()) {
-                    QStringList cols = fileNameLineNumber(showFileName, showLineNumber, mRelativePath, href, i+1);
-                    QRegularExpressionMatch m = it.next();
-                    ColoredLine coloredLine(line);
-                    int jmax = qMin(m.lastCapturedIndex(), backgroundColors.size() - 1);
-                    for(int j=1;j<=jmax;j++) {
-                        coloredLine.paintBackground(m.capturedStart(j), m.capturedEnd(j), j);
-                    }
-                    coloredLine.paintForeground(m.capturedStart(), m.capturedEnd(), 1);
-                    cols << toHtmlSpans(coloredLine.mid(m.capturedStart(),m.capturedLength()), backgroundColors);
-                    res << cols.join("");
-                }
-            } else {
-                // all matches on one line
-                QStringList cols = fileNameLineNumber(showFileName, showLineNumber, mRelativePath, href, i+1);
-                ColoredLine coloredLine(line);
-                while(it.hasNext()) {
-                    QRegularExpressionMatch m = it.next();
-                    int jmax = qMin(m.lastCapturedIndex(), backgroundColors.size() - 1);
-                    for(int j=1;j<=jmax;j++) {
-                        coloredLine.paintBackground(m.capturedStart(j), m.capturedEnd(j), j);
-                    }
-                    coloredLine.paintForeground(m.capturedStart(), m.capturedEnd(), 1);
-                }
-                cols << toHtmlSpans(coloredLine, backgroundColors);
-                res << cols.join("");
-            }
-
-        } else if (siblings.contains(i)) {
-
-            QString line = lines[i];
-            QString href = "file:///" + QDir::toNativeSeparators(mPath) + "?line=" + QString::number(i+1);
-            QStringList cols;
-            if (showFileName) {
-                cols << Html::anchor(mRelativePath, href, "violet")
-                     << Html::span("-", "blue");
-            }
-            if (showLineNumber) {
-                cols << Html::span(QString::number(i+1), "green")
-                     << Html::span("-", "blue");
-            }
-            cols << Html::span(line, "black");
-            res << cols.join("");
-        }
-    }
-
-
-    return res;
-#endif
-}
 
 int backreferenceLength(const QString& replacement, int pos) {
     if (replacement[pos] == '\\' && pos + 1 < replacement.size() && replacement[pos+1].isDigit()) {
@@ -338,6 +252,19 @@ QStringList searchBinary(const QStringList& lines, const QString& path, const QS
 }
 #endif
 
+
+void searchLines(const QStringList& lines, const QString& path, const QString& relativePath,
+                        const SearchParams& params, SearchHits& hits) {
+    QStringList res;
+    RegExp exp = params.pattern();
+    QList<int> matched = getMatched(lines, exp);
+    if (matched.isEmpty()) {
+        return;
+    }
+    SearchHit hit(path, relativePath, matched);
+    hits.append(hit);
+}
+
 void searchLines(const QByteArray& bytes, const QString& path, const QString& relativePath,
                         const SearchParams& params, SearchHits& hits, int* lineCount) {
 
@@ -436,6 +363,7 @@ QStringList SearchCache::filterFiles(const QStringList& allFiles, RegExpPath fil
     return files;
 }
 
+
 void SearchCache::add(SearchParams params) {
 
     QMutexLocker locked(&mMutex);
@@ -456,7 +384,7 @@ void SearchCache::add(SearchParams params) {
 
     mSearchParams.insert(searchId,params);
     mSearchData.insert(searchId,data);
-    mReplacements.insert(searchId,QList<Replacement>());
+    //mReplacements.insert(searchId,QList<Replacement>());
 }
 
 void SearchCache::finish(int searchId) {
@@ -464,7 +392,6 @@ void SearchCache::finish(int searchId) {
     QMutexLocker locked(&mMutex);
     mSearchData.remove(searchId);
     mSearchParams.remove(searchId);
-    mReplacements.remove(searchId);
 }
 
 #if 0
@@ -476,44 +403,41 @@ bool SearchCache::isPreview(int searchId) {
 
 bool SearchCache::isFinished(int searchId) {
     QMutexLocker locked(&mMutex);
-    if (!mSearchParams.contains(searchId)) {
+    if (!mSearchData.contains(searchId) || !mSearchParams.contains(searchId)) {
         return true;
     }
-    const SearchData& searchData = mSearchData[searchId];
-
-    return searchData.filesComplete() >= searchData.filesSize();
+    const SearchData& data = mSearchData[searchId];
+    return data.filesComplete() >= data.filesSize();
 }
 
 SearchHits SearchCache::search(int searchId) {
-
     QMutexLocker locked(&mMutex);
-
-    if (!mSearchParams.contains(searchId)) {
-        qDebug() << "!mSearchData.contains(searchId)";
+    if (!mSearchParams.contains(searchId) || !mSearchData.contains(searchId)) {
+        qDebug() << "!mSearchParams.contains(searchId) || !mSearchData.contains(searchId)";
         return SearchHits();
     }
 
-    SearchParams& searchParams = mSearchParams[searchId];
-    SearchData& searchData = mSearchData[searchId];
+    SearchParams& params = mSearchParams[searchId];
+    SearchData& data = mSearchData[searchId];
     //QList<Replacement>& replacements = mReplacements[searchId];
 
-    SearchHits hits(searchParams.pattern());
+    SearchHits hits(params.mode(), params.pattern());
 
     //int lim = qMin(sd.complete + 100, sd.files.size());
 
     int lineCount = 0;
     int fileCount = 0;
 
-    for (int i=searchData.filesComplete();i<searchData.filesSize();i++) {
-        QString path = searchData.file(i);
+    for (int i=data.filesComplete();i<data.filesSize();i++) {
+        QString path = data.file(i);
 
         bool binary;
         bool readOk;
         bool tooBig;
 
         //QByteArray fileData = FileCache::instance()->file(path,sd.notBinary,&binary,&readOk);
-        QByteArray fileData = FileReader::read(path,searchParams.skipBinary(),&binary,&readOk,&tooBig);
-        QString relPath = Utils::relPath(path,searchParams.path());
+        QByteArray fileData = FileReader::read(path,params.skipBinary(),&binary,&readOk,&tooBig);
+        QString relPath = Utils::relPath(path,params.path());
 
         bool ok = true;
 
@@ -532,13 +456,13 @@ SearchHits SearchCache::search(int searchId) {
             if (binary) {
                 //res << searchBinary(fileData, path, relPath, searchParams);
             } else {
-                searchLines(fileData, path, relPath, searchParams, hits, &fileLineCount);
+                searchLines(fileData, path, relPath, params, hits, &fileLineCount);
             }
         }
 
         lineCount += fileLineCount;
         fileCount += 1;
-        searchData.setFilesComplete(i + 1);
+        data.setFilesComplete(i + 1);
 
         if (lineCount > 4000 || fileCount > 50) {
 
@@ -546,17 +470,18 @@ SearchHits SearchCache::search(int searchId) {
             total = searchData.filesSize();
             filtered = searchData.filesFiltered();*/
 
-            hits.setComplete(searchData.filesComplete());
-            hits.setTotal(searchData.filesSize());
+            hits.setComplete(data.filesComplete());
+            hits.setTotal(data.filesSize());
             return hits;
         }
     }
 
-    hits.setComplete(searchData.filesComplete());
-    hits.setTotal(searchData.filesSize());
+    hits.setComplete(data.filesComplete());
+    hits.setTotal(data.filesSize());
     return hits;
 }
 
+#if 0
 void SearchCache::replace(int searchId, int* filesChanged, int* linesChanged, QStringList& notChanged) {
     QMutexLocker locked(&mMutex);
     if (!mReplacements.contains(searchId)) {
@@ -615,6 +540,7 @@ void SearchCache::replace(int searchId, int* filesChanged, int* linesChanged, QS
 
     mReplacements.remove(searchId);
 }
+#endif
 
 void SearchCache::testTokenize() {
 

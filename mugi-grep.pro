@@ -11,6 +11,9 @@ RC_FILE = src/mugi-grep.rc
 INCLUDEPATH += src src/widget src/model
 
 HEADERS += \
+    src/displayoptions.h \
+    src/regexpreplacement.h \
+    src/replaceparams.h \
     src/searchdata.h \
     src/searchhit.h \
     src/searchhits.h \
@@ -59,6 +62,9 @@ HEADERS += \
     src/hunk.h
 
 SOURCES += \
+    src/displayoptions.cpp \
+    src/regexpreplacement.cpp \
+    src/replaceparams.cpp \
     src/searchcache.cpp \
     src/searchhit.cpp \
     src/searchhits.cpp \
