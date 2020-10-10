@@ -49,7 +49,6 @@ void SearchTab::setRenderer(SearchResultRenderer* value) {
     mRenderer = value;
 }
 void SearchTab::append(const SearchHits& hits) {
-    mHits.setPattern(hits.pattern());
     if (hits.isEmpty()) {
         return;
     }

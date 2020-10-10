@@ -75,11 +75,12 @@ function SearchHits() {
     c.constructor_(m)
 
     c.constructor_('const RegExp& pattern, QList<SearchHit> hits')
+    c.constructor_('const RegExp& pattern')
 
     for (let k in m) {
         c.member(mName(k), m[k], {total: -1, complete: -1}[k])
     }
-    c.method('append', cpp.void, 'const SearchHits& hits',`mHits.append(hits.hits());`)
+    c.method('append', cpp.void, 'const SearchHits& hits',`mPattern = hits.pattern(); mHits.append(hits.hits());`)
     c.method('append', cpp.void, 'const SearchHit& hit',`mHits.append(hit);`)
 
     c.method('size', cpp.int, '', 'return mHits.size();').const_()
@@ -159,8 +160,7 @@ function SearchTab() {
     `)
 
     c.method('append',cpp.void, constRef('SearchHits','hits'),
-    `mHits.setPattern(hits.pattern());
-    if (hits.isEmpty()) {
+    `if (hits.isEmpty()) {
         return;
     }
     int size = mHits.size();

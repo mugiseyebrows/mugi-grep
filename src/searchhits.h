@@ -12,6 +12,7 @@ public:
     SearchHits();
     SearchHits(const RegExp& pattern, const QList<SearchHit>& hits, int total, int complete);
     SearchHits(const RegExp& pattern, const QList<SearchHit>& hits);
+    SearchHits(const RegExp& pattern);
     void append(const SearchHits& hits);
     void append(const SearchHit& hit);
     int size() const;

@@ -9,6 +9,8 @@ SearchHits::SearchHits(const RegExp& pattern, const QList<SearchHit>& hits, int 
 SearchHits::SearchHits(const RegExp& pattern, const QList<SearchHit>& hits)
     : mPattern(pattern), mHits(hits), mTotal(-1), mComplete(-1) {
 }
+SearchHits::SearchHits(const RegExp& pattern) : mPattern(pattern), mTotal(-1), mComplete(-1) {
+}
 RegExp SearchHits::pattern() const {
     return mPattern;
 }
@@ -34,6 +36,7 @@ void SearchHits::setComplete(int value) {
     mComplete = value;
 }
 void SearchHits::append(const SearchHits& hits) {
+    mPattern = hits.pattern();
     mHits.append(hits.hits());
 }
 void SearchHits::append(const SearchHit& hit) {

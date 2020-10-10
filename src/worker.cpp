@@ -10,8 +10,7 @@ Worker::Worker(QObject *parent) :
 void Worker::onSearch(SearchParams params)
 {
     mCache.add(params);
-    SearchHits hits = SearchHits();
-    hits.setPattern(params.pattern());
+    SearchHits hits(params.pattern());
     emit found(params.id(), hits);
 }
 
@@ -37,22 +36,12 @@ void Worker::onGetAllFiles(QString path)
 
 void Worker::onSearchMore(int id)
 {
-    //qDebug() << "Worker::onSearchMore";
-    /*QString data;
-    QString file;*/
-
-
-
     static int count = 0;
-
     qDebug() << "search more" << id << count++;
-
     if (mCache.isFinished(id)) {
         return;
     }
-
-    SearchHits hits;
-    mCache.search(id,hits);
+    SearchHits hits = mCache.search(id);
     emit found(id,hits);
     if (mCache.isFinished(id)) {
         mCache.finish(id);

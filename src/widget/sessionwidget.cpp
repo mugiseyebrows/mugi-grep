@@ -125,8 +125,9 @@ void SessionWidget::copyToNewTab() {
     newTab->trigRerender();
     QString title = ui->results->tabText(ui->results->currentIndex());
     ui->results->addTab(newTab, title);
-    tab->setParams(SearchParams());
+    tab->params().setId(-1);
     tab->setHits(SearchHits());
+    tab->trigRerender();
     updateTabText(ui->results->currentIndex());
 }
 

@@ -6,7 +6,7 @@
 #include "searchtab.h"
 #include <QDebug>
 
-SearchResultRenderer::SearchResultRenderer(QObject *parent) : QObject(parent)
+SearchResultRenderer::SearchResultRenderer(QObject *parent) : QObject(parent), mZebra(false)
 {
 
 }
@@ -45,6 +45,20 @@ QStringList SearchResultRenderer::fileNameLineNumber(bool showFileName, bool sho
     return cols;
 }
 
+QMap<int, bool> SearchResultRenderer::doZebra(int before, int after, const QList<int>& matched) {
+    QMap<int, bool> result;
+    for(int j=0;j<matched.size();j++) {
+        int match = matched[j];
+        for(int i=match-before;i<match+after+1;i++) {
+            result[i] = j % 2 ? mZebra : !mZebra;
+        }
+    }
+    if (matched.size() % 2) {
+        mZebra = !mZebra;
+    }
+    return result;
+}
+
 void SearchResultRenderer::append(const SearchHits& hits) {
 
     //SearchHits& hits_ = mTab->hits();
@@ -64,8 +78,15 @@ void SearchResultRenderer::append(const SearchHits& hits) {
         QSet<int> siblings = hit.siblings(before, after);
         QList<int> matched = hit.hits();
 
+        QMap<int, bool> zebra = doZebra(before, after, matched);
+
         static QStringList backgroundColors = {"#ffffff", "#ffdfba", "#baffc9",
                                                "#bae1ff", "#ffffba", "#ffb3ba"};
+
+        static QStringList grayZebraColors = {"#E6E6E6", "#F0F0F0"};
+
+        int zebraColor1 = backgroundColors.size();
+        int zebraColor2 = zebraColor1 + 1;
 
         bool onlyMatched = false;
         bool showFileName = true;
@@ -108,7 +129,7 @@ void SearchResultRenderer::append(const SearchHits& hits) {
                         }
                         coloredLine.paintForeground(m.capturedStart(), m.capturedEnd(), 1);
                         cols << toHtmlSpans(coloredLine.mid(m.capturedStart(), m.capturedLength()),
-                                            backgroundColors);
+                                            backgroundColors + grayZebraColors);
                         res << cols.join("");
                     }
                 } else {
@@ -116,6 +137,11 @@ void SearchResultRenderer::append(const SearchHits& hits) {
                     QStringList cols = fileNameLineNumber(showFileName, showLineNumber,
                                                           mRelativePath, href, i + 1);
                     ColoredLine coloredLine(line);
+
+                    if (before > 0 || after > 0) {
+                        coloredLine.paintBackground(zebra[i] ? zebraColor1 : zebraColor2);
+                    }
+
                     while (it.hasNext()) {
                         QRegularExpressionMatch m = it.next();
                         int jmax = qMin(m.lastCapturedIndex(), backgroundColors.size() - 1);
@@ -126,7 +152,7 @@ void SearchResultRenderer::append(const SearchHits& hits) {
                         int end = m.capturedEnd();
                         coloredLine.paintForeground(start, end, 1);
                     }
-                    cols << toHtmlSpans(coloredLine, backgroundColors);
+                    cols << toHtmlSpans(coloredLine, backgroundColors + grayZebraColors);
                     res << cols.join("");
                 }
 
@@ -142,7 +168,16 @@ void SearchResultRenderer::append(const SearchHits& hits) {
                 if (showLineNumber) {
                     cols << Html::span(QString::number(i + 1), "green") << Html::span("-", "blue");
                 }
-                cols << Html::span(line, "black");
+
+                ColoredLine coloredLine(line);
+
+                if (before > 0 || after > 0) {
+                    coloredLine.paintBackground(zebra[i] ? zebraColor1 : zebraColor2);
+                }
+
+                cols << toHtmlSpans(coloredLine, backgroundColors + grayZebraColors);
+
+                //cols << Html::span(line, "black");
                 res << cols.join("");
             }
         }

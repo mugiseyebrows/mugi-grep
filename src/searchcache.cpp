@@ -484,20 +484,20 @@ bool SearchCache::isFinished(int searchId) {
     return searchData.filesComplete() >= searchData.filesSize();
 }
 
-void SearchCache::search(int searchId, SearchHits& hits) {
+SearchHits SearchCache::search(int searchId) {
 
     QMutexLocker locked(&mMutex);
 
     if (!mSearchParams.contains(searchId)) {
         qDebug() << "!mSearchData.contains(searchId)";
-        return;
+        return SearchHits();
     }
 
     SearchParams& searchParams = mSearchParams[searchId];
     SearchData& searchData = mSearchData[searchId];
     //QList<Replacement>& replacements = mReplacements[searchId];
 
-    hits.setPattern(searchParams.pattern());
+    SearchHits hits(searchParams.pattern());
 
     //int lim = qMin(sd.complete + 100, sd.files.size());
 
@@ -548,17 +548,13 @@ void SearchCache::search(int searchId, SearchHits& hits) {
 
             hits.setComplete(searchData.filesComplete());
             hits.setTotal(searchData.filesSize());
-            return;
+            return hits;
         }
     }
 
     hits.setComplete(searchData.filesComplete());
     hits.setTotal(searchData.filesSize());
-
-    /*complete = searchData.filesComplete();
-    total = searchData.filesSize();
-    filtered = searchData.filesFiltered();
-    file = QString();*/
+    return hits;
 }
 
 void SearchCache::replace(int searchId, int* filesChanged, int* linesChanged, QStringList& notChanged) {

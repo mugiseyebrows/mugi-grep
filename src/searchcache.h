@@ -31,7 +31,7 @@ public:
 
     void finish(int searchId);
 
-    void search(int searchId, SearchHits& hits);
+    SearchHits search(int searchId);
 
     //QMap<QString,int> fileSize() const;
 
