@@ -3,9 +3,9 @@
 
 SearchParams::SearchParams() : mId(-1) {
 }
-SearchParams::SearchParams(int id, const QString& path, const RegExp& search,
+SearchParams::SearchParams(int id, const QString& path, const RegExp& pattern,
                            const RegExpPath& filter, bool cacheFileList, bool skipBinary)
-    : mId(id), mPath(path), mSearch(search), mFilter(filter), mCacheFileList(cacheFileList),
+    : mId(id), mPath(path), mPattern(pattern), mFilter(filter), mCacheFileList(cacheFileList),
       mSkipBinary(skipBinary) {
 }
 int SearchParams::id() const {
@@ -20,11 +20,11 @@ QString SearchParams::path() const {
 void SearchParams::setPath(const QString& value) {
     mPath = value;
 }
-RegExp SearchParams::search() const {
-    return mSearch;
+RegExp SearchParams::pattern() const {
+    return mPattern;
 }
-void SearchParams::setSearch(const RegExp& value) {
-    mSearch = value;
+void SearchParams::setPattern(const RegExp& value) {
+    mPattern = value;
 }
 RegExpPath SearchParams::filter() const {
     return mFilter;

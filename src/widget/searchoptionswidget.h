@@ -20,12 +20,12 @@ class SearchOptionsWidget : public QWidget
     Q_OBJECT
 
 public:
-#if 0
+
     enum Mode {
         ModeSearch,
         ModeReplace
     };
-#endif
+
     explicit SearchOptionsWidget(QWidget *parent = nullptr);
     ~SearchOptionsWidget();
 
@@ -37,6 +37,9 @@ public:
     void updateCompletions();
 
     bool validate();
+
+    void setFiler(RegExpPath);
+    void setPattern(RegExp);
 
 #if 0
     void setActive(bool active);
@@ -90,19 +93,25 @@ protected:
     SearchBrowser* mBrowser;
     Worker* mWorker;
     AnchorClickHandler* mClickHandler;
-    Mode mMode;
+
     QAction* mCacheFileList;
 
 #endif
 
+    void setMode(SearchOptionsWidget::Mode mode);
+
+protected slots:
+    //void on_doSearch_clicked();
+
 signals:
-    void onSearchChanged(RegExp);
-    void onFilterChanged(RegExpPath);
+    void patternChanged(RegExp);
+    void filterChanged(RegExpPath);
     void search();
 
 protected:
     Ui::SearchOptionsWidget *ui;
-bool mActive;
+    bool mActive;
+    Mode mMode;
 };
 
 #endif // SEARCHOPTIONSWIDGET_H

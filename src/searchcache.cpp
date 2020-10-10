@@ -68,7 +68,7 @@ void searchLines(const QStringList& lines, const QString& path, const QString& r
                         const SearchParams& params, SearchHits& hits) {
 
     QStringList res;
-    RegExp exp = params.search();
+    RegExp exp = params.pattern();
     QList<int> matched = getMatched(lines, exp);
     if (matched.isEmpty()) {
         return;
@@ -485,7 +485,7 @@ bool SearchCache::search(int searchId, SearchHits& hits) {
     SearchData& searchData = mSearchData[searchId];
     //QList<Replacement>& replacements = mReplacements[searchId];
 
-    hits.setSearch(searchParams.search());
+    hits.setPattern(searchParams.pattern());
 
     //int lim = qMin(sd.complete + 100, sd.files.size());
 

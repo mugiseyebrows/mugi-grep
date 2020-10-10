@@ -24,9 +24,10 @@ SearchOptionsWidget::SearchOptionsWidget(QWidget *parent) :
     ui->setupUi(this);
     //ui->search->setEnabled(false);
 
-    connect(ui->search,SIGNAL(textChanged(RegExp)),this,SIGNAL(onSearchChanged(RegExp)));
-    connect(ui->filter,SIGNAL(textChanged(RegExpPath)),this,SIGNAL(onFilterChanged(RegExpPath)));
-    connect(ui->search,SIGNAL(returnPressed()),this,SIGNAL(search()));
+    connect(ui->pattern,SIGNAL(textChanged(RegExp)),this,SIGNAL(patternChanged(RegExp)));
+    connect(ui->filter,SIGNAL(textChanged(RegExpPath)),this,SIGNAL(filterChanged(RegExpPath)));
+    connect(ui->pattern,SIGNAL(returnPressed()),this,SIGNAL(search()));
+    connect(ui->search,SIGNAL(clicked()),this,SIGNAL(search()));
 }
 
 SearchOptionsWidget::~SearchOptionsWidget()
@@ -59,6 +60,8 @@ void SearchOptionsWidget::setBrowser(SearchBrowser *browser, bool setValues)
     mActive = true;
 }
 
+#endif
+
 void SearchOptionsWidget::setMode(SearchOptionsWidget::Mode mode)
 {
     mMode = mode;
@@ -70,6 +73,7 @@ void SearchOptionsWidget::setMode(SearchOptionsWidget::Mode mode)
     ui->search->setVisible(mode == ModeSearch);
 }
 
+#if 0
 
 void SearchOptionsWidget::init(Worker *worker, AnchorClickHandler* clickHandler) {
 
@@ -315,12 +319,14 @@ void SearchOptionsWidget::on_onlyMatched_clicked(bool checked)
 
 void SearchOptionsWidget::collect()
 {
+#if 0
     RXCollector* collector = RXCollector::instance();
     //mActive = false;
-    collector->collect(ui->search->value());
+    collector->collect(ui->pattern->value());
     collector->collect(ui->filter->value());
     collector->collect(ui->replacement->value());
     //updateCollector();
+#endif
 }
 
 
@@ -335,12 +341,14 @@ void SearchOptionsWidget::setPath(const QString &path)
 }
 
 void SearchOptionsWidget::updateCompletions() {
+#if 0
     mActive = false;
     RXCollector* collector = RXCollector::instance();
-    collector->load(ui->search);
+    collector->load(ui->pattern);
     collector->load(ui->filter);
     collector->load(ui->replacement);
     mActive = true;
+#endif
 }
 
 
@@ -349,9 +357,19 @@ bool SearchOptionsWidget::validate()
     QPalette palette = this->palette();
 
     bool ok1 = ui->filter->validate(palette);
-    bool ok2 = ui->search->validate(palette);
+    bool ok2 = ui->pattern->validate(palette);
     //bool ok3 = mMode == ModeReplace ? ui->replacement->validate(palette) : true;
     bool ok3 = true;
     return ok1 && ok2 && ok3;
+}
+
+void SearchOptionsWidget::setFiler(RegExpPath value)
+{
+    ui->filter->setValue(value);
+}
+
+void SearchOptionsWidget::setPattern(RegExp value)
+{
+    ui->pattern->setValue(value);
 }
 

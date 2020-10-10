@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>660</width>
-    <height>150</height>
+    <height>152</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -29,7 +29,7 @@
    <item>
     <layout class="QGridLayout" name="gridLayout">
      <item row="3" column="1">
-      <widget class="RXInput" name="search" native="true"/>
+      <widget class="RXInput" name="pattern" native="true"/>
      </item>
      <item row="0" column="2">
       <widget class="QPushButton" name="selectPath">
@@ -107,6 +107,13 @@
       <widget class="QLabel" name="label">
        <property name="text">
         <string>Path</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="2">
+      <widget class="QPushButton" name="search">
+       <property name="text">
+        <string>search</string>
        </property>
       </widget>
      </item>

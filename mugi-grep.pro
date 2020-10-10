@@ -16,7 +16,9 @@ HEADERS += \
     src/searchhits.h \
     src/searchparams.h \
     src/searchcache.h \
+    src/searchresultrenderer.h \
     src/searchtab.h \
+    src/widget/displayoptionswidget.h \
     src/worker.h \
     src/utils.h \
     src/replacementline.h \
@@ -62,7 +64,9 @@ SOURCES += \
     src/searchhits.cpp \
     src/searchparams.cpp \
     src/searchdata.cpp \
+    src/searchresultrenderer.cpp \
     src/searchtab.cpp \
+    src/widget/displayoptionswidget.cpp \
     src/worker.cpp \
     src/utils.cpp \
     src/filereader.cpp \
@@ -103,6 +107,7 @@ SOURCES += \
     src/hunk.cpp
 
 FORMS += \
+    src/widget/displayoptionswidget.ui \
     src/widget/sessionwidget.ui \
     src/widget/searchoptionswidget.ui \
     src/widget/mainwindow.ui \

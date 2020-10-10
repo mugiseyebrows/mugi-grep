@@ -11,7 +11,7 @@ void Worker::onSearch(SearchParams params)
 {
     mCache.add(params);
     SearchHits hits = SearchHits();
-    hits.setSearch(params.search());
+    hits.setPattern(params.pattern());
     emit found(params.id(), hits);
 }
 

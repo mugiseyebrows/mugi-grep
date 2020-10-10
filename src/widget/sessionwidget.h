@@ -61,6 +61,7 @@ public:
 
     void select();
 
+    QString tabTitle(QString title, bool isExecuted) const;
 protected:
 
     Worker* mWorker;
@@ -84,6 +85,8 @@ protected:
 
     QStringList mFileList;
 
+    void copyToNewTab();
+    void updateTabText(int index);
 signals:
 
     //void search(SearchParams);
@@ -120,13 +123,15 @@ protected slots:
 
     //void onClone();
     void onSearch();
-    void onTabTitle(QString title, bool isExecuted);
     void onPathChanged(QString path);
     void onPreview();
     void onReplace();
     void onReplaced(int, int, int, QStringList);
+    void onPatternChanged(RegExp);
+    void onFilterChanged(RegExpPath);
 private:
     Ui::SessionWidget *ui;
+    bool mListenOptions;
 };
 
 #endif // SESSIONWIDGET_H

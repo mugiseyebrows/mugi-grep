@@ -37,6 +37,7 @@ SessionWidget::SessionWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::SessionWidget),
     mClickHandler(new AnchorClickHandler()),
+    mListenOptions(false),
     mCacheFileList(0)//,
     //mListenResultCurrentChanged(true),
     //mSetValues(true)
@@ -82,6 +83,10 @@ SessionWidget::SessionWidget(QWidget *parent) :
     connect(this,SIGNAL(searchMore(int)),mWorker,SLOT(onSearchMore(int)));
     connect(mWorker,SIGNAL(found(int,SearchHits)),this,SLOT(onFound(int,SearchHits)));
 
+    connect(ui->options,SIGNAL(patternChanged(RegExp)),this,SLOT(onPatternChanged(RegExp)));
+    connect(ui->options,SIGNAL(filterChanged(RegExpPath)),this,SLOT(onFilterChanged(RegExpPath)));
+    connect(ui->options,SIGNAL(search()),this,SLOT(onSearch()));
+
     mThread->start();
 
     while(ui->results->count() > 0) {
@@ -94,10 +99,56 @@ SessionWidget::SessionWidget(QWidget *parent) :
     /*SearchBrowser* browser_ = new SearchBrowser();
     mClickHandler->connectBrowser(browser_);
     ui->results->addTab(browser_,QString());*/
-
     //connect(ui->options,SIGNAL())
 
     ui->statusGroup->hide();
+
+    ui->options->setMode(SearchOptionsWidget::ModeSearch);
+
+    SearchTab* tab = new SearchTab();
+    ui->results->addTab(tab,"");
+    mListenOptions = true;
+}
+
+void SessionWidget::copyToNewTab() {
+    SearchTab* tab = this->currentTab();
+    SearchTab* newTab = new SearchTab();
+    newTab->setParams(tab->params());
+    newTab->setHits(tab->hits());
+    QString title = ui->results->tabText(ui->results->currentIndex());
+    ui->results->addTab(newTab, title);
+    tab->setParams(SearchParams());
+    tab->setHits(SearchHits());
+    updateTabText(ui->results->currentIndex());
+}
+
+void SessionWidget::onPatternChanged(RegExp value) {
+    if (!mListenOptions) {
+        return;
+    }
+    SearchTab* tab = this->currentTab();
+    if (!tab) {
+        return;
+    }
+    if (tab->params().id() > -1) {
+        copyToNewTab();
+    }
+    tab->params().setPattern(value);
+    updateTabText(ui->results->currentIndex());
+}
+
+void SessionWidget::onFilterChanged(RegExpPath value) {
+    if (!mListenOptions) {
+        return;
+    }
+    SearchTab* tab = this->currentTab();
+    if (!tab) {
+        return;
+    }
+    if (tab->params().id() > -1) {
+        copyToNewTab();
+    }
+    tab->params().setFilter(value);
 }
 
 SessionWidget::~SessionWidget()
@@ -187,9 +238,10 @@ void SessionWidget::onSearch() {
     //searchOrReplace(Worker::Search);
 
     SearchTab* tab = currentTab();
-    if (tab->params().search().isEmpty()) {
+    if (tab->params().pattern().isEmpty()) {
         return;
     }
+
     bool valid = ui->options->validate();
     if (!valid) {
         return;
@@ -200,10 +252,21 @@ void SessionWidget::onSearch() {
     int searchId = SearchId::instance()->next();
 
     tab->params().setId(searchId);
-    SearchParams params = tab->params();
 
+    updateTabText(ui->results->currentIndex());
+
+    /*SearchParams params = tab->params();
     emit search(params);
-    ui->progress->started();
+    ui->progress->started();*/
+}
+
+void SessionWidget::updateTabText(int index) {
+
+    SearchTab* tab = this->tab(index);
+    if (!tab) {
+        return;
+    }
+    ui->results->setTabText(index, tabTitle(tab->params().pattern().include(), tab->params().id() > -1));
 }
 
 void SessionWidget::onPreview() {
@@ -239,13 +302,13 @@ int SessionWidget::oldestTabIndex() { // todo test me
     return -1;
 }
 
-void SessionWidget::onTabTitle(QString title, bool isExecuted) {
+QString SessionWidget::tabTitle(QString title, bool isExecuted) const {
     if (!isExecuted) {
         title = title + "*";
     }
     QFontMetrics fm(font());
     title = fm.elidedText(title,Qt::ElideMiddle,200);
-    ui->results->setTabText(ui->results->currentIndex(),title);
+    return title;
 }
 
 QString SessionWidget::path() const
@@ -375,6 +438,19 @@ SearchTab* SessionWidget::tab(int index) {
 }
 
 void SessionWidget::on_results_currentChanged(int index) {
+
+    if (index < 0) {
+        return;
+    }
+    SearchTab* tab = this->tab(index);
+    if (!tab) {
+        return;
+    }
+    mListenOptions = false;
+    ui->options->setPattern(tab->params().pattern());
+    ui->options->setFiler(tab->params().filter());
+    mListenOptions = true;
+
 #if 0
     /*if (!mListenResultCurrentChanged) {
         return;
