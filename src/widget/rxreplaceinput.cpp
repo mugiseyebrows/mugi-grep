@@ -12,10 +12,10 @@ RXReplaceInput::RXReplaceInput(QWidget *parent) :
     QComboBox* input;
     foreach(input,mInputs) {
         connect(input->lineEdit(),SIGNAL(returnPressed()),this,SIGNAL(returnPressed()));
-        connect(input->lineEdit(),SIGNAL(textChanged(QString)),this,SIGNAL(onValueChanged()));
+        connect(input->lineEdit(),SIGNAL(textChanged(QString)),this,SLOT(onValueChanged()));
         connect(input->lineEdit(),SIGNAL(textChanged(QString)),this,SLOT(onClearValidation()));
     }
-    connect(ui->preserveCase,SIGNAL(clicked(bool)),this,SIGNAL(onValueChanged()));
+    connect(ui->preserveCase,SIGNAL(clicked(bool)),this,SLOT(onValueChanged()));
 }
 
 RXReplaceInput::~RXReplaceInput()

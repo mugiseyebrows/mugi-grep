@@ -12,7 +12,10 @@ INCLUDEPATH += src src/widget src/model
 
 HEADERS += \
     src/displayoptions.h \
+    src/mode.h \
     src/regexpreplacement.h \
+    src/replacefile.h \
+    src/replaceitem.h \
     src/replaceparams.h \
     src/searchdata.h \
     src/searchhit.h \
@@ -63,7 +66,10 @@ HEADERS += \
 
 SOURCES += \
     src/displayoptions.cpp \
+    src/mode.cpp \
     src/regexpreplacement.cpp \
+    src/replacefile.cpp \
+    src/replaceitem.cpp \
     src/replaceparams.cpp \
     src/searchcache.cpp \
     src/searchhit.cpp \

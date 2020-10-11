@@ -6,6 +6,7 @@ class QTextBrowser;
 #include "coloredline.h"
 #include "displayoptionswidget.h"
 #include "html.h"
+#include "mode.h"
 #include "searchhits.h"
 #include "searchparams.h"
 #include "searchresultrenderer.h"
@@ -18,12 +19,13 @@ public:
     void append(const SearchHits& hits);
     void read();
     void trigRerender();
+    void setMode(Mode value);
     SearchParams& params();
     SearchHits& hits();
     DisplayOptions displayOptions() const;
     void setDisplayOptions(const DisplayOptions& value);
-    int mode() const;
-    void setMode(int value);
+    ReplaceParams replaceParams();
+    Mode mode() const;
     void setParams(const SearchParams& value);
     void setHits(const SearchHits& value);
     QTextBrowser* textBrowser() const;
@@ -34,7 +36,7 @@ public:
     void setRenderer(SearchResultRenderer* value);
 
 protected:
-    int mMode;
+    Mode mMode;
     SearchParams mParams;
     SearchHits mHits;
     QTextBrowser* mTextBrowser;

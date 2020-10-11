@@ -1,6 +1,7 @@
 #ifndef SESSIONWIDGET_H
 #define SESSIONWIDGET_H
 
+#include "mode.h"
 #include <QWidget>
 #include <QUrl>
 #include <QMetaType>
@@ -57,7 +58,10 @@ public:
     SearchTab *currentTab();
     int oldestTabIndex();
     SearchOptionsWidget *options() const;
-    void setMode(SearchOptionsWidget::Mode mode);
+    void setMode(Mode mode);
+
+
+    void updateReplaceButton();
 
     void select();
 
@@ -130,6 +134,7 @@ protected slots:
     void onReplaced(int, int, int, QStringList);
     void onPatternChanged(RegExp);
     void onFilterChanged(RegExpPath);
+    void onReplacementChanged(RegExpReplacement value);
 private:
     Ui::SessionWidget *ui;
     bool mListenOptions;

@@ -4,7 +4,7 @@
 #include <QTextBrowser>
 #include <QVBoxLayout>
 
-SearchTab::SearchTab(QWidget* parent) : QWidget(parent), mMode(0) {
+SearchTab::SearchTab(QWidget* parent) : QWidget(parent), mMode(Mode::Search) {
 
     QVBoxLayout* layout = new QVBoxLayout();
     mTextBrowser = new QTextBrowser();
@@ -24,11 +24,8 @@ SearchTab::SearchTab(QWidget* parent) : QWidget(parent), mMode(0) {
     setLayout(layout);
     mRenderer->setTab(this);
 }
-int SearchTab::mode() const {
+Mode SearchTab::mode() const {
     return mMode;
-}
-void SearchTab::setMode(int value) {
-    mMode = value;
 }
 void SearchTab::setParams(const SearchParams& value) {
     mParams = value;
@@ -71,6 +68,13 @@ void SearchTab::read() {
 void SearchTab::trigRerender() {
     mDisplayOptionsWidget->trigChanged();
 }
+void SearchTab::setMode(Mode value) {
+    if (mMode == value) {
+        return;
+    }
+    mMode = value;
+    trigRerender();
+}
 SearchParams& SearchTab::params() {
     return mParams;
 }
@@ -82,4 +86,7 @@ DisplayOptions SearchTab::displayOptions() const {
 }
 void SearchTab::setDisplayOptions(const DisplayOptions& value) {
     mDisplayOptionsWidget->setOptions(value);
+}
+ReplaceParams SearchTab::replaceParams() {
+    return mRenderer->replaceParams();
 }

@@ -13,8 +13,6 @@ public:
     SearchParams();
     int id() const;
     void setId(int value);
-    int mode() const;
-    void setMode(int value);
     QString path() const;
     void setPath(const QString& value);
     RegExp pattern() const;
@@ -30,7 +28,6 @@ public:
 
 protected:
     int mId;
-    int mMode;
     QString mPath;
     RegExp mPattern;
     RegExpPath mFilter;

@@ -32,7 +32,7 @@
       <widget class="RXInput" name="pattern" native="true"/>
      </item>
      <item row="0" column="2">
-      <widget class="QPushButton" name="selectPath">
+      <widget class="QPushButton" name="select">
        <property name="text">
         <string>select</string>
        </property>

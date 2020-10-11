@@ -24,15 +24,20 @@ SearchOptionsWidget::SearchOptionsWidget(QWidget *parent) :
     ui->setupUi(this);
     ui->replace->setEnabled(false);
 
-    connect(ui->pattern,SIGNAL(textChanged(RegExp)),this,SIGNAL(patternChanged(RegExp)));
+    connect(ui->pattern,SIGNAL(valueChanged(RegExp)),this,SIGNAL(patternChanged(RegExp)));
     connect(ui->filter,SIGNAL(valueChanged(RegExpPath)),this,SIGNAL(filterChanged(RegExpPath)));
     connect(ui->path,SIGNAL(textChanged(QString)),this,SIGNAL(pathChanged(QString)));
+    connect(ui->replacement,SIGNAL(valueChanged(RegExpReplacement)),this,SIGNAL(replacementChanged(RegExpReplacement)));
+
     connect(ui->pattern,SIGNAL(returnPressed()),this,SIGNAL(search()));
+    connect(ui->filter,SIGNAL(returnPressed()),this,SIGNAL(search()));
 
     connect(ui->search,SIGNAL(clicked()),this,SIGNAL(search()));
-
     connect(ui->preview,SIGNAL(clicked()),this,SIGNAL(preview()));
     connect(ui->replace,SIGNAL(clicked()),this,SIGNAL(replace()));
+    //connect(ui->select,SIGNAL(clicked()),this,SIGNAL(select()));
+
+
 
 }
 
@@ -68,15 +73,16 @@ void SearchOptionsWidget::setBrowser(SearchBrowser *browser, bool setValues)
 
 #endif
 
-void SearchOptionsWidget::setMode(SearchOptionsWidget::Mode mode)
+
+void SearchOptionsWidget::setMode(Mode mode)
 {
     mMode = mode;
     QWidgetList widgets;
     widgets << ui->replaceLabel << ui->replace << ui->preview << ui->replacement;
     foreach(QWidget* widget, widgets) {
-        widget->setVisible(mode == ModeReplace);
+        widget->setVisible(mode == Mode::Replace);
     }
-    ui->search->setVisible(mode == ModeSearch);
+    ui->search->setVisible(mode == Mode::Search);
 }
 
 #if 0
@@ -130,8 +136,9 @@ void SearchOptionsWidget::setActive(bool active)
 {
     mActive = active;
 }
+#endif
 
-void SearchOptionsWidget::on_selectPath_clicked()
+void SearchOptionsWidget::on_select_clicked()
 {
     QString path = QFileDialog::getExistingDirectory(this, QString(), ui->path->text());
     if (path.isEmpty()) {
@@ -140,6 +147,7 @@ void SearchOptionsWidget::on_selectPath_clicked()
     ui->path->setText(QDir::toNativeSeparators(path));
 }
 
+#if 0
 void SearchOptionsWidget::on_search_clicked()
 {
     emit search();
@@ -249,6 +257,11 @@ void SearchOptionsWidget::setCacheFileList(QAction *action)
     mCacheFileList = action;
     ui->fileCount->setVisible(action->isChecked());
     //connect(action,SIGNAL(toggled(bool)),this,SLOT(onCacheToggled(bool)));
+}
+
+void SearchOptionsWidget::setReplaceEnabled(bool enabled)
+{
+    ui->replace->setEnabled(enabled);
 }
 
 #if 0
@@ -370,13 +383,16 @@ bool SearchOptionsWidget::validate()
     return ok1 && ok2 && ok3;
 }
 
-void SearchOptionsWidget::setFiler(RegExpPath value)
+void SearchOptionsWidget::setFiler(const RegExpPath& value)
 {
     ui->filter->setValue(value);
 }
 
-void SearchOptionsWidget::setPattern(RegExp value)
+void SearchOptionsWidget::setPattern(const RegExp& value)
 {
     ui->pattern->setValue(value);
 }
 
+void SearchOptionsWidget::setReplacement(const RegExpReplacement& value) {
+
+}

@@ -6,6 +6,7 @@
 #include <QMetaType>
 #include <QJsonObject>
 #include "searchoptionswidget.h"
+#include "mode.h"
 
 class SessionWidget;
 class QSignalMapper;
@@ -36,7 +37,7 @@ public:
     void serializeExps(QJsonObject &json) const;
     void deserealizeExps(const QJsonObject &exps);
     void serializeSessions(QJsonArray &json) const;
-    void setCurrentTabMode(SearchOptionsWidget::Mode mode);
+    void setCurrentTabMode(Mode mode);
 
 protected:
 

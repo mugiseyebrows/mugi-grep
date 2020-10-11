@@ -10,7 +10,7 @@ class SearchHits {
 
 public:
     SearchHits();
-    SearchHits(int mode, const RegExp& pattern, const QList<SearchHit>& hits = QList<SearchHit>());
+    SearchHits(const RegExp& pattern, const QList<SearchHit>& hits = QList<SearchHit>());
     void append(const SearchHits& hits);
     void append(const SearchHit& hit);
     int size() const;
@@ -19,8 +19,6 @@ public:
     SearchHits mid(int index);
     void read(int before, int after);
     void clear();
-    int mode() const;
-    void setMode(int value);
     RegExp pattern() const;
     void setPattern(const RegExp& value);
     QList<SearchHit> hits() const;
@@ -31,7 +29,6 @@ public:
     void setComplete(int value);
 
 protected:
-    int mMode;
     RegExp mPattern;
     QList<SearchHit> mHits;
     int mTotal;

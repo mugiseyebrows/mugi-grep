@@ -3,18 +3,17 @@
 
 ReplaceParams::ReplaceParams() {
 }
-ReplaceParams::ReplaceParams(const QString& path, const QList<ReplaceItem>& items)
-    : mPath(path), mItems(items) {
+ReplaceParams::ReplaceParams(const QList<ReplaceFile>& files) : mFiles(files) {
 }
-QString ReplaceParams::path() const {
-    return mPath;
+QList<ReplaceFile> ReplaceParams::files() const {
+    return mFiles;
 }
-void ReplaceParams::setPath(const QString& value) {
-    mPath = value;
+void ReplaceParams::setFiles(const QList<ReplaceFile>& value) {
+    mFiles = value;
 }
-QList<ReplaceItem> ReplaceParams::items() const {
-    return mItems;
+void ReplaceParams::append(const ReplaceFile& file) {
+    mFiles.append(file);
 }
-void ReplaceParams::setItems(const QList<ReplaceItem>& value) {
-    mItems = value;
+int ReplaceParams::size() const {
+    return mFiles.size();
 }

@@ -7,6 +7,7 @@
 
 #include "searchhits.h"
 #include "regexpreplacement.h"
+#include "replaceparams.h"
 
 class ColoredLine;
 
@@ -16,24 +17,17 @@ class SearchResultRenderer : public QObject
 {
     Q_OBJECT
 public:
-    enum Mode {
-        Search,
-        Preview
-    };
 
     explicit SearchResultRenderer(QObject *parent = nullptr);
     void setTab(SearchTab* tab);
     void append(const SearchHits &hits);
-    void setMode(Mode mode);
 
-    void setReplacement(const RegExpReplacement& value);
+    ReplaceParams replaceParams();
 
-
+    static void testTokenize();
 protected:
     SearchTab* mTab;
     bool mZebra;
-    Mode mMode;
-    RegExpReplacement mReplacement;
 
     QStringList toHtmlSpans(const ColoredLine &coloredLine, const QStringList &backgroundColors);
     QStringList fileNameLineNumber(bool showFileName, bool showLineNumber, const QString &relativePath, const QString &href, int lineNumber);

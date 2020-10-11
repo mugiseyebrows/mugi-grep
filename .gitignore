@@ -16,3 +16,5 @@ mugi-grep
 .vscode/
 bundle.cpp
 node_modules/
+*.cpp-*
+*.h-*

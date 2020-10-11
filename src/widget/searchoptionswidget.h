@@ -4,6 +4,8 @@
 #include <QWidget>
 #include "regexppath.h"
 #include "regexp.h"
+#include "regexpreplacement.h"
+#include "mode.h"
 
 class SearchBrowser;
 class Worker;
@@ -21,11 +23,6 @@ class SearchOptionsWidget : public QWidget
 
 public:
 
-    enum Mode {
-        ModeSearch,
-        ModeReplace
-    };
-
     explicit SearchOptionsWidget(QWidget *parent = nullptr);
     ~SearchOptionsWidget();
 
@@ -38,10 +35,13 @@ public:
 
     bool validate();
 
-    void setFiler(RegExpPath);
-    void setPattern(RegExp);
+    void setFiler(const RegExpPath &);
+    void setPattern(const RegExp &);
+    void setReplacement(const RegExpReplacement &value);
 
     void setCacheFileList(QAction* action);
+
+    void setReplaceEnabled(bool enabled);
 
 #if 0
     void setActive(bool active);
@@ -100,16 +100,23 @@ protected:
 
 #endif
 
-    void setMode(SearchOptionsWidget::Mode mode);
+    void setMode(Mode mode);
 
+
+public slots:
+    void on_select_clicked();
 protected slots:
     //void on_doSearch_clicked();
 
 signals:
     void patternChanged(RegExp);
     void filterChanged(RegExpPath);
+    void replacementChanged(RegExpReplacement);
     void pathChanged(QString);
     void search();
+    void preview();
+    void replace();
+    //void select();
 
 protected:
     Ui::SearchOptionsWidget *ui;

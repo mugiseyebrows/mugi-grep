@@ -33,7 +33,7 @@ public:
 
     void finish(int searchId);
 
-    SearchHits searchOrPreview(int searchId);
+    SearchHits search(int searchId);
 
     //QMap<QString,int> fileSize() const;
 

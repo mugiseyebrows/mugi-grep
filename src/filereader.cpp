@@ -12,6 +12,21 @@ FileReader::FileReader()
 
 }
 
+#include <QTextCodec>
+#include <QFile>
+
+QStringList FileReader::readLines(const QString& path) {
+
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly)) {
+        return QStringList();
+    }
+    QByteArray bytes = file.readAll();
+    QTextCodec* codec = QTextCodec::codecForName("UTF-8");
+    QStringList lines = codec->toUnicode(bytes).split("\n");
+    return lines;
+}
+
 QByteArray FileReader::read(const QString &path, bool skipBinary, bool *binary, bool *readOk, bool* tooBig)
 {
     QFile file(path);

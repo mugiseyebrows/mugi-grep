@@ -11,17 +11,9 @@ Worker::Worker(QObject *parent) :
 void Worker::onSearch(SearchParams params)
 {
     mCache.add(params);
-    SearchHits hits(params.mode(), params.pattern());
+    SearchHits hits(params.pattern());
     emit found(params.id(), hits);
 }
-
-#if 0
-void Worker::onPreview(SearchParams params) {
-    mCache.add(params);
-    SearchHits hits(params.mode(), params.pattern(), params.replacement());
-    emit previewed(params.id(), hits);
-}
-#endif
 
 void Worker::onCountMatchedFiles(QString path, RegExpPath filter, bool notBinary) {
     QPair<int,int> fileCount = mCache.countMatchedFiles(path,filter,notBinary);
@@ -47,6 +39,23 @@ void Worker::onSearchMore(int id)
     if (mCache.isFinished(id)) {
         mCache.finish(id);
     }
+}
+
+#include "filereader.h"
+
+void Worker::onReplace(ReplaceParams params)
+{
+    QList<ReplaceFile> files = params.files();
+    foreach(const ReplaceFile& file, files) {
+
+        bool binary;
+        bool readOk;
+        bool tooBig;
+
+        QByteArray fileData = FileReader::read(file.path(),false,&binary,&readOk,&tooBig);
+
+    }
+
 }
 
 void Worker::onFinishSearch(int id) {

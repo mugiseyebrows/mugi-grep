@@ -15,6 +15,7 @@
 #include <QAction>
 
 #include "widget/searchbrowser.h"
+#include "mode.h"
 
 #include "worker.h"
 #include "rxcollector.h"
@@ -85,11 +86,14 @@ SessionWidget::SessionWidget(QWidget *parent) :
 
     connect(ui->options,SIGNAL(patternChanged(RegExp)),this,SLOT(onPatternChanged(RegExp)));
     connect(ui->options,SIGNAL(filterChanged(RegExpPath)),this,SLOT(onFilterChanged(RegExpPath)));
+    connect(ui->options,SIGNAL(replacementChanged(RegExpReplacement)),this,SLOT(onReplacementChanged(RegExpReplacement)));
     connect(ui->options,SIGNAL(pathChanged(QString)),this,SLOT(onPathChanged(QString)));
     connect(ui->options,SIGNAL(search()),this,SLOT(onSearch()));
 
     connect(ui->options,SIGNAL(preview()),this,SLOT(onPreview()));
     connect(ui->options,SIGNAL(replace()),this,SLOT(onReplace()));
+
+    connect(this,SIGNAL(replace(ReplaceParams)),mWorker,SLOT(onReplace(ReplaceParams)));
 
     mThread->start();
 
@@ -107,7 +111,7 @@ SessionWidget::SessionWidget(QWidget *parent) :
 
     ui->statusGroup->hide();
 
-    ui->options->setMode(SearchOptionsWidget::ModeSearch);
+    ui->options->setMode(Mode::Search);
 
     SearchTab* tab = createTab();
     ui->results->addTab(tab,"");
@@ -165,6 +169,17 @@ void SessionWidget::onFilterChanged(RegExpPath value) {
     tab->params().setFilter(value);
 }
 
+void SessionWidget::onReplacementChanged(RegExpReplacement value) {
+    if (!mListenOptions) {
+        return;
+    }
+    SearchTab* tab = this->currentTab();
+    if (!tab) {
+        return;
+    }
+    tab->params().setReplacement(value);
+}
+
 SessionWidget::~SessionWidget()
 {
     mCancel = true;
@@ -210,9 +225,21 @@ SearchOptionsWidget* SessionWidget::options() const{
     return ui->options;
 }
 
-void SessionWidget::setMode(SearchOptionsWidget::Mode mode)
+void SessionWidget::setMode(Mode mode)
 {
     ui->options->setMode(mode);
+    SearchTab* tab = currentTab();
+    if (!tab) {
+        return;
+    }
+    tab->setMode(mode);
+}
+
+void SessionWidget::updateReplaceButton()
+{
+    SearchTab* tab = currentTab();
+    bool enabled = tab && !tab->hits().isEmpty();
+    ui->options->setReplaceEnabled(enabled);
 }
 
 void SessionWidget::select()
@@ -286,15 +313,31 @@ void SessionWidget::updateTabText(int index) {
 }
 
 void SessionWidget::onPreview() {
-
+    SearchTab* tab = currentTab();
+    if (!tab) {
+        return;
+    }
+    tab->setMode(Mode::Replace);
+    if (tab->params().id() < 0) {
+        onSearch();
+    } else {
+        tab->trigRerender();
+    }
 }
 
 void SessionWidget::onReplace() {
-#if 0
-    SearchBrowser* browser = currentTab();
-    int searchId = browser->searchId();
-    emit replace(searchId);
-#endif
+    SearchTab* tab = currentTab();
+    if (!tab) {
+        return;
+    }
+    ReplaceParams params = tab->replaceParams();
+
+    int i = 0;
+
+    qDebug() << params.size();
+
+    emit replace(params);
+
 }
 
 int SessionWidget::oldestTabIndex() { // todo test me
@@ -466,7 +509,11 @@ void SessionWidget::on_results_currentChanged(int index) {
     mListenOptions = false;
     ui->options->setPattern(tab->params().pattern());
     ui->options->setFiler(tab->params().filter());
+    ui->options->setReplacement(tab->params().replacement());
+    ui->options->setMode(tab->mode());
     mListenOptions = true;
+
+    updateReplaceButton();
 
 #if 0
     /*if (!mListenResultCurrentChanged) {
@@ -500,6 +547,7 @@ void SessionWidget::onFound(int searchId, SearchHits hits)
     }
     tab->append(hits);
     emit searchMore(searchId);
+    updateReplaceButton();
 }
 
 void SessionWidget::onPathChanged(QString path)

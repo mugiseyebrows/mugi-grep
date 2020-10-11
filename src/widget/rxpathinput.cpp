@@ -27,7 +27,7 @@ RXPathInput::RXPathInput(QWidget *parent) :
         input->setMaximumWidth(maximumWidth);
     }
 
-    connect(ui->matchCase,SIGNAL(clicked(bool)),this,SIGNAL(onValueChanged()));
+    connect(ui->matchCase,SIGNAL(clicked(bool)),this,SLOT(onValueChanged()));
 }
 
 RXPathInput::~RXPathInput()

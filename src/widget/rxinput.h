@@ -29,6 +29,7 @@ signals:
     void returnPressed();
     //void textChanged(RegExp);
     //void caseClicked(bool);
+    void valueChanged(RegExp);
 
 protected slots:
     void onClearValidation();

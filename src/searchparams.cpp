@@ -9,12 +9,6 @@ int SearchParams::id() const {
 void SearchParams::setId(int value) {
     mId = value;
 }
-int SearchParams::mode() const {
-    return mMode;
-}
-void SearchParams::setMode(int value) {
-    mMode = value;
-}
 QString SearchParams::path() const {
     return mPath;
 }

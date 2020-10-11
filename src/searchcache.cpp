@@ -65,78 +65,6 @@ QSet<int> getSiblings(const QList<int>& matched, int linesBefore, int linesAfter
 
 
 
-int backreferenceLength(const QString& replacement, int pos) {
-    if (replacement[pos] == '\\' && pos + 1 < replacement.size() && replacement[pos+1].isDigit()) {
-        int len = 1;
-        while(++pos < replacement.size()) {
-            if (!replacement[pos].isDigit()) {
-                break;
-            }
-            len++;
-        }
-        return len;
-    }
-    return -1;
-}
-
-QVariantList tokenize(const QString& replacement) {
-    QVariantList result;
-    int prev = 0;
-    int i = 0;
-    while (i < replacement.size()) {
-        int len = backreferenceLength(replacement, i);
-        if (len > 0) {
-            if (i - prev > 0) {
-                QString part = replacement.mid(prev,i - prev);
-                result.append(part);
-            }
-            QString ref = replacement.mid(i+1,len-1);
-            result.append(ref.toInt());
-            prev = i + len;
-            i += len;
-        } else {
-            i++;
-        }
-    }
-    if (prev < replacement.size()) {
-        QString part = replacement.mid(prev);
-        result.append(part);
-    }
-    return result;
-}
-
-void compare(const QVariantList& e, const QVariantList& a) {
-    if (e == a) {
-        return;
-    }
-    QString e_ = "{" + Utils::toStringList(e).join("|") + "}";
-    QString a_ = "{" + Utils::toStringList(a).join("|") + "}";
-    qDebug() << "not equal, expected: " << e_.toStdString().c_str() << ", actual " << a_.toStdString().c_str();
-}
-
-QString sameCase(const QString& repl, const QString& orig) {
-    if (orig.toLower() == orig) {
-        return repl.toLower();
-    } else if (orig.toUpper() == orig) {
-        return repl.toUpper();
-    }
-    return repl;
-}
-
-QString withBackreferences(const QRegularExpressionMatch& m, const QVariantList& replacement, bool preserveCase) {
-    QStringList result;
-    foreach(const QVariant& v, replacement) {
-        if (v.type() == QVariant::Int) {
-            result.append(m.captured(v.toInt()));
-        } else if (v.type() == QVariant::String) {
-            result.append(v.toString());
-        } else {
-            qDebug() << "withBackreferences error:" << v;
-        }
-    }
-    QString result_ = result.join("");
-    return preserveCase ? sameCase(result_, m.captured(0)) : result_;
-}
 
 #if 0
 QStringList replacePreview(const QStringList& lines, const QString& path, const QString& mRelativePath,
@@ -421,7 +349,7 @@ SearchHits SearchCache::search(int searchId) {
     SearchData& data = mSearchData[searchId];
     //QList<Replacement>& replacements = mReplacements[searchId];
 
-    SearchHits hits(params.mode(), params.pattern());
+    SearchHits hits(params.pattern());
 
     //int lim = qMin(sd.complete + 100, sd.files.size());
 
@@ -541,39 +469,4 @@ void SearchCache::replace(int searchId, int* filesChanged, int* linesChanged, QS
     mReplacements.remove(searchId);
 }
 #endif
-
-void SearchCache::testTokenize() {
-
-    qDebug() << "testTokenize() started";
-
-    QString t;
-    QVariantList a,e;
-
-    t = "foo\\1bar\\2baz";
-    e = {"foo",1,"bar",2,"baz"};
-    a = tokenize(t);
-    compare(e,a);
-
-    t = "foo\\1bar\\2baz\\3";
-    e = {"foo",1,"bar",2,"baz",3};
-    a = tokenize(t);
-    compare(e,a);
-
-    t = "foo\\1bar\\2baz\\3a";
-    e = {"foo",1,"bar",2,"baz",3,"a"};
-    a = tokenize(t);
-    compare(e,a);
-
-    t = "\\1bar\\2baz\\3";
-    e = {1,"bar",2,"baz",3};
-    a = tokenize(t);
-    compare(e,a);
-
-    t = "\\1bar\\2\\3baz\\52";
-    e = {1,"bar",2,3,"baz",52};
-    a = tokenize(t);
-    compare(e,a);
-
-    qDebug() << "testTokenize() finished";
-}
 

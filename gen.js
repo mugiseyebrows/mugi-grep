@@ -66,7 +66,6 @@ function SearchHit() {
 function SearchHits() {
     let c = new CppClass('SearchHits')
     let m = {
-        mode: cpp.int,
         pattern: 'RegExp',
         hits: 'QList<SearchHit>',
         total: cpp.int,
@@ -75,13 +74,13 @@ function SearchHits() {
     c.constructor_()
     //c.constructor_(m)
     //c.constructor_('int mode, const RegExp& pattern, QList<SearchHit> hits')
-    c.constructor_('int mode, const RegExp& pattern, QList<SearchHit> hits = QList<SearchHit>()')
+    c.constructor_('const RegExp& pattern, QList<SearchHit> hits = QList<SearchHit>()')
     //c.constructor_('const RegExp& pattern')
 
     for (let k in m) {
         c.member(mName(k), m[k], {total: -1, complete: -1}[k])
     }
-    c.method('append', cpp.void, 'const SearchHits& hits',`mMode = hits.mode(); mPattern = hits.pattern(); mHits.append(hits.hits());`)
+    c.method('append', cpp.void, 'const SearchHits& hits',`mPattern = hits.pattern(); mHits.append(hits.hits());`)
     c.method('append', cpp.void, 'const SearchHit& hit',`mHits.append(hit);`)
 
     c.method('size', cpp.int, '', 'return mHits.size();').const_()
@@ -90,7 +89,7 @@ function SearchHits() {
 
     c.method('hit', 'SearchHit', 'int index', 'return mHits[index];').const_()
 
-    c.method('mid','SearchHits', 'int index', 'return SearchHits(mMode, mPattern, mHits.mid(index));')
+    c.method('mid','SearchHits', 'int index', 'return SearchHits(mPattern, mHits.mid(index));')
 
     c.method('read',cpp.void, {before: cpp.int, after: cpp.int},
     `for(int i=0;i<mHits.size();i++) {
@@ -111,7 +110,6 @@ function SearchParams() {
     let c = new CppClass('SearchParams')
     let m = {
         id: cpp.int,
-        mode: cpp.int,
         path: qt.QString,
         pattern: 'RegExp',
         filter: 'RegExpPath',
@@ -137,7 +135,7 @@ function SearchTab() {
     let c = new CppClass('SearchTab')
     c.inherits('QWidget')
     let m = {
-        mode: cpp.int,
+        mode: 'Mode',
         params: 'SearchParams',
         hits: 'SearchHits',
     }
@@ -184,8 +182,14 @@ function SearchTab() {
 
     //c.constructor_(m)
     for (let k in m) {
-        c.member(mName(k), m[k], {id: -1, mode: 0}[k], {getter: ['params','hits'].indexOf(k) < 0})
+        c.member(mName(k), m[k], {id: -1, mode: 'Mode::Search'}[k], {
+                getter: ['params','hits'].indexOf(k) < 0, 
+                setter: ['mode'].indexOf(k) < 0,
+                simpleTypes:['Mode']
+        })
     }
+
+    c.method('setMode',cpp.void,'Mode value','if (mMode == value) {return;} mMode = value; trigRerender();')
 
     c.member('mTextBrowser', 'QTextBrowser*')
     c.member('mDisplayOptionsWidget','DisplayOptionsWidget*')
@@ -199,11 +203,14 @@ function SearchTab() {
 
     //c.method('setPattern', cpp.void, 'const RegExp& value', 'mParams.setPattern(value);')
 
+    c.method('replaceParams', 'ReplaceParams', '', 'return mRenderer->replaceParams();')
+
     c.include('SearchHits')
     c.include('SearchParams')
     c.include('Utils')
     c.include('Html')
     c.include('ColoredLine')
+    c.include('Mode')
     c.include('DisplayOptionsWidget')
     c.include('SearchResultRenderer')
 
@@ -226,6 +233,30 @@ function ReplaceItem() {
         c.member(mName(k), m[k])
     }
 
+    
+
+    c.include('QMetaType', true, true)
+    c.metatype()
+    c.write(src)
+}
+
+function ReplaceFile() {
+    let c = new CppClass('ReplaceFile')
+    let m = {
+        path: qt.QString,
+        items: 'QList<ReplaceItem>'
+    }
+    c.constructor_()
+    c.constructor_('const QString& path')
+    for (let k in m) {
+        c.member(mName(k), m[k])
+    }
+
+    c.method('append',cpp.void,'const ReplaceItem& item', 'mItems.append(item);')
+
+    c.method('size', cpp.int, '', 'return mItems.size();').const_()
+
+    c.include('ReplaceItem')
     c.include('QMetaType', true, true)
     c.metatype()
     c.write(src)
@@ -235,8 +266,7 @@ function ReplaceParams() {
     let c = new CppClass('ReplaceParams')
 
     let m = {
-        path: qt.QString,
-        items: 'QList<ReplaceItem>'
+        files: 'QList<ReplaceFile>'
     }
 
     c.constructor_()
@@ -245,6 +275,11 @@ function ReplaceParams() {
         c.member(mName(k), m[k])
     }
 
+    c.method('append', cpp.void, 'const ReplaceFile& file', 'mFiles.append(file);')
+
+    c.method('size', cpp.int, '', 'return mFiles.size();').const_()
+
+    c.include('ReplaceFile')
     c.include('QMetaType', true, true)
     c.metatype()
     c.write(src)
@@ -312,3 +347,4 @@ SearchTab()
 SearchData()
 RegExpReplacement()
 DisplayOptions()
+ReplaceFile()

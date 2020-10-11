@@ -57,7 +57,6 @@ public slots:
 
     void onCanReplace(int);
 
-
     void onFinishSearch(int);
     void onCountMatchedFiles(QString path, RegExpPath filter, bool notBinary);
     void onGetAllFiles(QString path);
@@ -65,9 +64,7 @@ public slots:
     void onSearch(SearchParams);
     void onSearchMore(int);
 
-    void onPreviewMore(int id);
     void onReplace(ReplaceParams params);
-    void onPreview(SearchParams params);
 };
 
 #endif // WORKER2_H
