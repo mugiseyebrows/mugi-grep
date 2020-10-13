@@ -104,6 +104,7 @@ protected:
 
     QList<CountFilesParams> mCountFiles;
 
+    QPair<int, int> findCountFiles();
 signals:
 
     //void search(SearchParams);
