@@ -47,20 +47,95 @@ QStringList SearchResultRenderer::toHtmlSpans(const ColoredLine& coloredLine,
     return cols;
 }
 
+enum class TextCase {
+    Lower,
+    Upper,
+    Capitalized,
+    Mixed
+};
+
+TextCase textCase(const QString& text) {
+
+    if (text.isEmpty()) {
+        return TextCase::Lower;
+    }
+    bool firstUpper = text[0].isLetter() && text[0].isUpper();
+    bool restLower = true;
+    for(int i=1;i<text.size();i++) {
+        if (text[i].isLetter() && text[i].isUpper()) {
+            restLower = false;
+            break;
+        }
+    }
+    if (firstUpper && restLower) {
+        return TextCase::Capitalized;
+    }
+    bool lower = false;
+    bool upper = false;
+    for(int i=0;i<text.size();i++) {
+        if (text[i].isLetter()) {
+            if (text[i].isLower()) {
+                lower = true;
+            } else if (text[i].isUpper()){
+                upper = true;
+            }
+        }
+    }
+    if (lower && upper) {
+        return TextCase::Mixed;
+    }
+    if (lower && !upper) {
+        return TextCase::Lower;
+    }
+    if (!lower && upper) {
+        return TextCase::Upper;
+    }
+
+    return TextCase::Lower;
+}
+
+QString toTextCase(const QString& text, TextCase textCase) {
+    if (textCase == TextCase::Capitalized) {
+        if (text.isEmpty()) {
+            return QString();
+        }
+        return text.mid(0,1).toUpper() + text.mid(1).toLower();
+    } else if (textCase == TextCase::Upper) {
+        return text.toUpper();
+    } else if (textCase == TextCase::Lower) {
+        return text.toLower();
+    }
+    return text;
+}
+
 
 QString withBackreferences(const QRegularExpressionMatch& m, const QVariantList& replacement, bool preserveCase) {
     QStringList result;
+
+    TextCase case1 = textCase(m.captured(0));
+
     foreach(const QVariant& v, replacement) {
         if (v.type() == QVariant::Int) {
-            result.append(m.captured(v.toInt()));
+            QString captured = m.captured(v.toInt());
+            if (preserveCase) {
+                //if (case1 == TextCase::Lower || case1 == TextCase::Upper || case1 == TextCase::Capitalized) {
+                    captured = toTextCase(captured, case1);
+                //}
+            }
+            result.append(captured);
         } else if (v.type() == QVariant::String) {
-            result.append(v.toString());
+            QString text = v.toString();
+            if (preserveCase) {
+                //if (case1 == TextCase::Lower || case1 == TextCase::Upper || case1 == TextCase::Capitalized) {
+                    text = toTextCase(text, case1);
+                //}
+            }
+            result.append(text);
         } else {
             qDebug() << "withBackreferences error:" << v;
         }
     }
-    QString result_ = result.join("");
-    return preserveCase ? sameCase(result_, m.captured(0)) : result_;
+    return result.join("");
 }
 
 QStringList SearchResultRenderer::fileNameLineNumber(bool showFileName, bool showLineNumber,

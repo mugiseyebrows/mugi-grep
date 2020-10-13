@@ -17,6 +17,7 @@
 #include "searchhit.h"
 #include "replaceparams.h"
 #include "searchhits.h"
+#include "countfilesparams.h"
 
 namespace Ui {
 class SessionWidget;
@@ -28,6 +29,7 @@ class SearchBrowser;
 class QTabWidget;
 class AnchorClickHandler;
 class SearchTab;
+class CallOnce;
 
 #include "format.h"
 
@@ -75,6 +77,8 @@ protected:
 
     Worker* mWorker;
     QThread* mThread;
+    CallOnce* mReplacementChanged;
+    CallOnce* mFilterChanged;
 
     bool mCancel;
 
@@ -97,6 +101,9 @@ protected:
     void copyToNewTab();
     void updateTabText(int index);
     SearchTab *createTab();
+
+    QList<CountFilesParams> mCountFiles;
+
 signals:
 
     //void search(SearchParams);
@@ -110,6 +117,7 @@ signals:
     //void collected();
     void collect();
     void replace(ReplaceParams);
+    void countFiles(CountFilesParams);
 
     void canReplace(int);
     void getAllFiles(QString);
@@ -117,6 +125,7 @@ signals:
 public slots:
     void onCanceled();
 
+    void onCountFiles();
 protected slots:
 
     void onCompleterActivated(QModelIndex);

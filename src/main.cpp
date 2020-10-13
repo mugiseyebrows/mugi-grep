@@ -12,6 +12,7 @@
 #include "searchhits.h"
 #include "regexpreplacement.h"
 #include "replaceparams.h"
+#include "countfilesparams.h"
 
 #include <QStyleFactory>
 
@@ -25,6 +26,7 @@ int main(int argc, char *argv[])
     qRegisterMetaType<SearchParams>();
     qRegisterMetaType<ReplaceParams>();
     qRegisterMetaType<SearchHits>();
+    qRegisterMetaType<CountFilesParams>();
 
     QApplication a(argc, argv);
     a.setApplicationName(APP_NAME);

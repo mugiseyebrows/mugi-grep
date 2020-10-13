@@ -11,6 +11,7 @@ RC_FILE = src/mugi-grep.rc
 INCLUDEPATH += src src/widget src/model
 
 HEADERS += \
+    src/countfilesparams.h \
     src/displayoptions.h \
     src/fileio.h \
     src/format.h \
@@ -66,6 +67,7 @@ HEADERS += \
     src/hunk.h
 
 SOURCES += \
+    src/countfilesparams.cpp \
     src/displayoptions.cpp \
     src/fileio.cpp \
     src/format.cpp \

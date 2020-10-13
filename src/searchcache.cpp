@@ -228,13 +228,13 @@ SearchCache::SearchCache() {
 
 }
 
-QPair<int,int> SearchCache::countMatchedFiles(QString path, RegExpPath filter, bool notBinary) {
+QPair<int,int> SearchCache::countMatchedFiles(QString path, RegExpPath filter, bool cacheFileList, bool notBinary) {
 
     QMutexLocker locked(&mMutex);
 
     //qDebug() << filter << notBinary;
 
-    QStringList allFiles = getAllFiles(path, true);
+    QStringList allFiles = getAllFiles(path, cacheFileList);
     int filesFiltered;
     int dirsFiltered;
     // todo optimize

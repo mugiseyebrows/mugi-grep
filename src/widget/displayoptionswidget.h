@@ -33,6 +33,7 @@ protected:
     bool mActive;
 protected slots:
     void onChanged();
+    void on_reset_clicked();
 };
 
 #endif // DISPLAYOPTIONSWIDGET_H

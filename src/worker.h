@@ -16,7 +16,7 @@
 
 #include "searchcache.h"
 #include "searchhits.h"
-
+#include "countfilesparams.h"
 
 #include "replaceparams.h"
 
@@ -51,6 +51,8 @@ signals:
 
     void replaced(int,int);
 
+    void filesCounted(CountFilesParams);
+
     //void previewed(int, SearchHits);
 
 public slots:
@@ -65,6 +67,7 @@ public slots:
     void onSearchMore(int);
 
     void onReplace(ReplaceParams params);
+    void onCountFiles(CountFilesParams params);
 };
 
 #endif // WORKER2_H

@@ -40,7 +40,7 @@ RegExpPath RXPathInput::value() const {
 }
 
 void RXPathInput::setValue(const RegExpPath &value) {
-    setExps(value.exps());
+    setExps(value.patterns());
     ui->matchCase->setChecked(value.case_());
 }
 

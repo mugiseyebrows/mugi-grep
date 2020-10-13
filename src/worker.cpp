@@ -17,8 +17,17 @@ void Worker::onSearch(SearchParams params)
 }
 
 void Worker::onCountMatchedFiles(QString path, RegExpPath filter, bool notBinary) {
-    QPair<int,int> fileCount = mCache.countMatchedFiles(path,filter,notBinary);
+    QPair<int,int> fileCount = mCache.countMatchedFiles(path,filter,true,notBinary);
     emit count(fileCount.first, fileCount.second);
+}
+
+#include "countfilesparams.h"
+
+void Worker::onCountFiles(CountFilesParams params) {
+    QPair<int,int> count = mCache.countMatchedFiles(params.path(),params.filter(),params.cacheFileList(), params.notBinary());
+    params.setFiltered(count.first);
+    params.setTotal(count.second);
+    emit filesCounted(params);
 }
 
 void Worker::onGetAllFiles(QString path)

@@ -32,6 +32,7 @@
 #include <QTreeView>
 #include "searchtab.h"
 #include "fileio.h"
+#include "callonce.h"
 
 #define RESULT_TAB_LIMIT 10
 
@@ -40,9 +41,9 @@ SessionWidget::SessionWidget(QWidget *parent) :
     ui(new Ui::SessionWidget),
     mClickHandler(new AnchorClickHandler()),
     mListenOptions(false),
-    mCacheFileList(0)//,
-    //mListenResultCurrentChanged(true),
-    //mSetValues(true)
+    mCacheFileList(0),
+    mReplacementChanged(new CallOnce("mReplacementChanged", 500, this)),
+    mFilterChanged(new CallOnce("mFilterChanged", 500, this))
 {
     ui->setupUi(this);
 
@@ -91,12 +92,18 @@ SessionWidget::SessionWidget(QWidget *parent) :
     connect(ui->options,SIGNAL(pathChanged(QString)),this,SLOT(onPathChanged(QString)));
     connect(ui->options,SIGNAL(search()),this,SLOT(onSearch()));
 
+    connect(this,SIGNAL(countFiles(CountFilesParams)),mWorker,SLOT(onCountFiles(CountFilesParams)));
+    connect(mWorker,SIGNAL(filesCounted(CountFilesParams)),this,SLOT(onFilesCounted(CountFilesParams)));
+
     connect(ui->options,SIGNAL(preview()),this,SLOT(onPreview()));
     connect(ui->options,SIGNAL(replace()),this,SLOT(onReplace()));
     connect(ui->progress,SIGNAL(canceled()),this,SLOT(onCancel()));
 
     connect(this,SIGNAL(replace(ReplaceParams)),mWorker,SLOT(onReplace(ReplaceParams)));
     connect(mWorker,SIGNAL(replaced(int,int)),this,SLOT(onReplaced(int,int)));
+
+    connect(mReplacementChanged,SIGNAL(call()),this,SLOT(onPreview()));
+    connect(mFilterChanged,SIGNAL(call()),this,SLOT(onCountFiles()));
 
     mThread->start();
 
@@ -174,6 +181,38 @@ void SessionWidget::onFilterChanged(RegExpPath value) {
         copyToNewTab();
     }
     tab->params().setFilter(value);
+    mFilterChanged->onPost();
+}
+
+QPair<int,int> SessionWidget::findCountFiles() {
+    SearchTab* tab = this->currentTab();
+    if (!tab) {
+        return {-1,-1};
+    }
+    for(int i=0;i<mCountFiles.size();i++) {
+        const CountFilesParams& params = mCountFiles[i];
+        if (params.filter() == tab->params().filter() && params.path() == tab->params().path()) {
+            return {params.filtered(), params.total()};
+        }
+    }
+    return {-1,-1};
+}
+
+void SessionWidget::onCountFiles() {
+    QPair<int,int> count = findCountFiles();
+    SearchTab* tab = this->currentTab();
+    if (!tab) {
+        return;
+    }
+    if (count.first < 0) {
+        CountFilesParams params(tab->params().path(), tab->params().filter(), tab->params().skipBinary());
+        mCountFiles.append(params);
+        emit countFiles(params);
+    }
+}
+
+void SessionWidget::onFilesCounted(CountFilesParams) {
+
 }
 
 void SessionWidget::onReplacementChanged(RegExpReplacement value) {
@@ -185,6 +224,9 @@ void SessionWidget::onReplacementChanged(RegExpReplacement value) {
         return;
     }
     tab->params().setReplacement(value);
+    if (tab->mode() == Mode::Preview && !tab->hits().isEmpty()) {
+        mReplacementChanged->onPost();
+    }
 }
 
 SessionWidget::~SessionWidget()
@@ -305,6 +347,7 @@ void SessionWidget::onSearch() {
 
     tab->params().setId(searchId);
     tab->params().setPath(ui->options->path());
+    tab->params().setCacheFileList(mCacheFileList->isChecked());
     tab->hits().clear();
     tab->trigRerender();
 
@@ -329,8 +372,15 @@ void SessionWidget::onPreview() {
     if (!tab) {
         return;
     }
+    if (tab->mode() == Mode::Replace) {
+        // already replaced
+        return;
+    }
     tab->setMode(Mode::Preview);
     if (tab->params().id() < 0) {
+        if (tab->params().pattern().isEmpty()) {
+            return;
+        }
         onSearch();
     } else {
         tab->trigRerender();
@@ -343,13 +393,7 @@ void SessionWidget::onReplace() {
         return;
     }
     ReplaceParams params = tab->replaceParams();
-
-    int i = 0;
-
-    qDebug() << params.size();
-
-    ui->options->collect(Mode::Preview);
-
+    ui->options->collect(Mode::Replace);
     emit replace(params);
 }
 

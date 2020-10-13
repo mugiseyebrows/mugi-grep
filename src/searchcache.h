@@ -37,7 +37,8 @@ public:
 
     //QMap<QString,int> fileSize() const;
 
-    QPair<int, int> countMatchedFiles(QString path, RegExpPath filter, bool notBinary);
+    QPair<int, int> countMatchedFiles(QString path, RegExpPath filter, bool cacheFileList, bool notBinary);
+
     QStringList getAllFiles(QString path, bool cacheFileList);
     static QStringList filterFiles(const QStringList &allFiles, RegExpPath filter, bool notBinary, int *filesFiltered, int *dirsFiltered);
     static void testTokenize();
@@ -55,6 +56,7 @@ protected:
     QMap<int,SearchData> mSearchData;
 
     QMap<QString, QStringList> mFileList;
+
 
 
 };

@@ -41,6 +41,16 @@ RegExpPath::RegExpPath(const QVariantMap &data)
     deserealize(data);
 }
 
+bool RegExpPath::operator ==(const RegExpPath &other) const
+{
+    return other.patterns() == patterns() && other.case_() == case_();
+}
+
+bool RegExpPath::operator !=(const RegExpPath &other) const
+{
+    return !(*this == other);
+}
+
 bool RegExpPath::isEmpty() const
 {
     return mPatterns[PathInclude].isEmpty() &&
@@ -82,7 +92,7 @@ QString RegExpPath::getExt(const QString& path) {
 }
 
 
-QStringList RegExpPath::exps() const
+QStringList RegExpPath::patterns() const
 {
     return mPatterns;
 }
@@ -122,6 +132,6 @@ void RegExpPath::test()
 
 QDebug operator <<(QDebug debug, const RegExpPath &path)
 {
-    debug.space() << "RegExpPath(" << path.exps() << path.case_() << ")";
+    debug.space() << "RegExpPath(" << path.patterns() << path.case_() << ")";
     return debug.space();
 }

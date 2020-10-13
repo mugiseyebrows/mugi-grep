@@ -19,11 +19,15 @@ public:
     RegExpPath(const QStringList& regExps, bool case_);
     RegExpPath(const QVariantMap& data);
 
+    bool operator == (const RegExpPath& other) const;
+
+    bool operator != (const RegExpPath& other) const;
+
     bool isEmpty() const;
 
     bool match(const QString& path) const;
 
-    QStringList exps() const;
+    QStringList patterns() const;
     bool case_() const;
 
     static void test();

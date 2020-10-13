@@ -26,7 +26,7 @@ RXCollector *RXCollector::instance()
 
 void RXCollector::collect(const RegExpPath &exp)
 {
-    mPathPatterns = prependModels(mPathPatterns, exp.exps());
+    mPathPatterns = prependModels(mPathPatterns, exp.patterns());
 }
 
 void RXCollector::collect(const RegExp &exp)

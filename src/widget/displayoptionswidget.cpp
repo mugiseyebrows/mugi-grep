@@ -14,6 +14,10 @@ DisplayOptionsWidget::DisplayOptionsWidget(QWidget *parent) :
     connect(ui->linesAfter,SIGNAL(valueChanged(int)),this,SLOT(onChanged()));
 }
 
+void DisplayOptionsWidget::on_reset_clicked() {
+    setOptions(DisplayOptions());
+}
+
 void DisplayOptionsWidget::onChanged() {
     if (!mActive) {
         return;

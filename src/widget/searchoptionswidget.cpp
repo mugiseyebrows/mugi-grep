@@ -38,7 +38,7 @@ SearchOptionsWidget::SearchOptionsWidget(QWidget *parent) :
     connect(ui->replace,SIGNAL(clicked()),this,SIGNAL(replace()));
     //connect(ui->select,SIGNAL(clicked()),this,SIGNAL(select()));
 
-
+    connect(ui->replacement,SIGNAL(returnPressed()),this,SIGNAL(preview()));
 
 }
 
