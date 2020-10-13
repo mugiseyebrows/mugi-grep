@@ -14,21 +14,21 @@ void RegExpPath::init(const QStringList &regExps, bool case_)
     while(regExps_.size() < 4) {
         regExps_ << QString();
     }
-    mRegExps = regExps_;
+    mPatterns = regExps_;
     mCase = case_;
-    for (int i=0;i<mRegExps.size();i++) {
+    for (int i=0;i<mPatterns.size();i++) {
         QRegularExpression::PatternOption opt = mCase ? QRegularExpression::NoPatternOption : QRegularExpression::CaseInsensitiveOption;
         if (i % 2 == 1) {
-            mRegExps_ << QRegularExpression("^(" + mRegExps[i] + ")$", opt);
+            mPatterns_ << QRegularExpression("^(" + mPatterns[i] + ")$", opt);
         } else {
-            mRegExps_ << QRegularExpression(mRegExps[i], opt);
+            mPatterns_ << QRegularExpression(mPatterns[i], opt);
         }
     }
 }
 
 void RegExpPath::deserealize(const QVariantMap &data)
 {
-    init(data.value("exps").toStringList(),data.value("case").toBool());
+    init(data.value("pattern").toStringList(),data.value("case").toBool());
 }
 
 RegExpPath::RegExpPath(const QStringList& regExps, bool case_)
@@ -43,16 +43,16 @@ RegExpPath::RegExpPath(const QVariantMap &data)
 
 bool RegExpPath::isEmpty() const
 {
-    return mRegExps[PathInclude].isEmpty() &&
-            mRegExps[ExtInclude].isEmpty() &&
-            mRegExps[PathExclude].isEmpty() &&
-            mRegExps[ExtExclude].isEmpty();
+    return mPatterns[PathInclude].isEmpty() &&
+            mPatterns[ExtInclude].isEmpty() &&
+            mPatterns[PathExclude].isEmpty() &&
+            mPatterns[ExtExclude].isEmpty();
 }
 
 QVariantMap RegExpPath::serialize() const
 {
     QVariantMap res;
-    res["exps"] = mRegExps;
+    res["pattern"] = mPatterns;
     res["case"] = mCase;
     return res;
 }
@@ -61,10 +61,10 @@ bool RegExpPath::match(const QString &path) const
 {
     QString ext = getExt(path);
 
-    return (mRegExps[PathInclude].isEmpty() || mRegExps_[PathInclude].match(path).hasMatch()) &&
-            (mRegExps[ExtInclude].isEmpty() || mRegExps_[ExtInclude].match(ext).hasMatch()) &&
-            (mRegExps[PathExclude].isEmpty() || !mRegExps_[PathExclude].match(path).hasMatch()) &&
-            (mRegExps[ExtExclude].isEmpty() || !mRegExps_[ExtExclude].match(ext).hasMatch());
+    return (mPatterns[PathInclude].isEmpty() || mPatterns_[PathInclude].match(path).hasMatch()) &&
+            (mPatterns[ExtInclude].isEmpty() || mPatterns_[ExtInclude].match(ext).hasMatch()) &&
+            (mPatterns[PathExclude].isEmpty() || !mPatterns_[PathExclude].match(path).hasMatch()) &&
+            (mPatterns[ExtExclude].isEmpty() || !mPatterns_[ExtExclude].match(ext).hasMatch());
 }
 
 QString RegExpPath::getExt(const QString& path) {
@@ -84,7 +84,7 @@ QString RegExpPath::getExt(const QString& path) {
 
 QStringList RegExpPath::exps() const
 {
-    return mRegExps;
+    return mPatterns;
 }
 
 bool RegExpPath::case_() const

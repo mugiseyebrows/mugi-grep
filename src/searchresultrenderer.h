@@ -34,6 +34,7 @@ protected:
     QMap<int, bool> doZebra(int before, int after, const QList<int> &matched);
     void appendSearch(const SearchHits &hits);
     void appendPreview(const SearchHits &hits);
+    void appendReplace(const SearchHits &hits);
 signals:
 
 protected slots:

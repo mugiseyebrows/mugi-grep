@@ -3,8 +3,10 @@
 
 DisplayOptions::DisplayOptions() : mLinesBefore(0), mLinesAfter(0) {
 }
-DisplayOptions::DisplayOptions(int linesBefore, int linesAfter)
-    : mLinesBefore(linesBefore), mLinesAfter(linesAfter) {
+DisplayOptions::DisplayOptions(int linesBefore, int linesAfter, bool fileName, bool lineNumber,
+                               bool wholeLine)
+    : mLinesBefore(linesBefore), mLinesAfter(linesAfter), mFileName(fileName),
+      mLineNumber(lineNumber), mWholeLine(wholeLine) {
 }
 int DisplayOptions::linesBefore() const {
     return mLinesBefore;
@@ -17,4 +19,22 @@ int DisplayOptions::linesAfter() const {
 }
 void DisplayOptions::setLinesAfter(int value) {
     mLinesAfter = value;
+}
+bool DisplayOptions::fileName() const {
+    return mFileName;
+}
+void DisplayOptions::setFileName(bool value) {
+    mFileName = value;
+}
+bool DisplayOptions::lineNumber() const {
+    return mLineNumber;
+}
+void DisplayOptions::setLineNumber(bool value) {
+    mLineNumber = value;
+}
+bool DisplayOptions::wholeLine() const {
+    return mWholeLine;
+}
+void DisplayOptions::setWholeLine(bool value) {
+    mWholeLine = value;
 }

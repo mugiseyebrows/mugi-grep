@@ -49,7 +49,7 @@ signals:
 
     void canReplace(int, bool);
 
-    void replaced(int,int,int,QStringList);
+    void replaced(int,int);
 
     //void previewed(int, SearchHits);
 

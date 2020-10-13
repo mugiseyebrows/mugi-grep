@@ -15,7 +15,7 @@
 #include "searchparams.h"
 #include "searchoptionswidget.h"
 #include "searchhit.h"
-
+#include "replaceparams.h"
 #include "searchhits.h"
 
 namespace Ui {
@@ -28,6 +28,8 @@ class SearchBrowser;
 class QTabWidget;
 class AnchorClickHandler;
 class SearchTab;
+
+#include "format.h"
 
 /*
 Q_DECLARE_METATYPE(RegExp)
@@ -48,7 +50,7 @@ public:
 
     QString path() const;
 
-    void updateCompletions();
+    void loadCollected();
 
     void serialize(QJsonObject &json) const;
     void deserialize(const QJsonObject &v);
@@ -66,14 +68,17 @@ public:
     void select();
 
     QString tabTitle(QString title, bool isExecuted) const;
+
+    void save(Format format);
+
 protected:
 
     Worker* mWorker;
     QThread* mThread;
 
-    static void save(const QString& path, const QString& text);
-
     bool mCancel;
+
+    QSet<int> mCanceled;
 
     QTabWidget* mTabWidget;
 
@@ -82,7 +87,7 @@ protected:
     SearchBrowser *createTab(const QString &name, SearchBrowser *browser = 0, bool append = true, bool select = true);
 
     bool mSetValues;
-    void save(bool plain);
+
     void searchOrReplace(Worker::Action action);
 
     QAction* mCacheFileList;
@@ -104,7 +109,7 @@ signals:
     //void finishSearch(int searchId);
     //void collected();
     void collect();
-    void replace(int);
+    void replace(ReplaceParams);
 
     void canReplace(int);
     void getAllFiles(QString);
@@ -119,8 +124,6 @@ protected slots:
 
     void onCanReplace(int,bool);
 
-    void on_saveText_clicked();
-    void on_saveHtml_clicked();
     void on_results_currentChanged(int index);
     //void onFound(int, QString, int, int, int, QString path);
 
@@ -131,10 +134,12 @@ protected slots:
     void onPathChanged(QString path);
     void onPreview();
     void onReplace();
-    void onReplaced(int, int, int, QStringList);
+    //void onReplaced(int, int, int, QStringList);
     void onPatternChanged(RegExp);
     void onFilterChanged(RegExpPath);
     void onReplacementChanged(RegExpReplacement value);
+    void onReplaced(int, int);
+    void onCancel();
 private:
     Ui::SessionWidget *ui;
     bool mListenOptions;

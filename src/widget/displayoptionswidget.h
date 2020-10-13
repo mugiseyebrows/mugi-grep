@@ -17,8 +17,8 @@ public:
     explicit DisplayOptionsWidget(QWidget *parent = nullptr);
     ~DisplayOptionsWidget();
 
-    int linesBefore() const;
-    int linesAfter() const;
+    /*int linesBefore() const;
+    int linesAfter() const;*/
 
     DisplayOptions options() const;
     void setOptions(const DisplayOptions& options);
@@ -28,8 +28,11 @@ public:
 signals:
     void optionsChanged();
 
-private:
+protected:
     Ui::DisplayOptionsWidget *ui;
+    bool mActive;
+protected slots:
+    void onChanged();
 };
 
 #endif // DISPLAYOPTIONSWIDGET_H

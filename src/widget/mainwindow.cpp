@@ -20,7 +20,7 @@
 #include "anchorclickhandler.h"
 #include "completermodelmanager.h"
 
-#define IS_DEBUG qApp->applicationDirPath().endsWith("debug")
+#define IS_DEBUG true
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -37,7 +37,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     if (IS_DEBUG) {
         QJsonObject obj;
-        obj["path"] = "D:\\w\\untitled1";
+        QString path = "D:\\w\\untitled1";
+        //path = "C:\\Qt\\5.15.1\\Src\\qtbase";
+        obj["path"] = path;
         addSession(obj);
     } else {
         QJsonArray sessions = Settings::instance()->sessions();
@@ -103,10 +105,10 @@ void MainWindow::addSession(const QJsonObject &v) {
     if (!v.isEmpty()) {
         session->deserialize(v);
     }
-    session->updateCompletions();
-    connect(session,&SessionWidget::collect,[=](){
+    session->loadCollected();
+    /*connect(session,&SessionWidget::collect,[=](){
         mCompleterModelManager->onCollect(session->options(), ui->tabs);
-    });
+    });*/
 }
 
 void MainWindow::removeSession() {
@@ -254,14 +256,14 @@ void MainWindow::onReadStarted(QWidget* w) {
     ui->tabs->setTabText(index,name);
 }
 
-void MainWindow::on_tabs_currentChanged(int)
+void MainWindow::on_tabs_currentChanged(int index)
 {
-    /*SessionWidget* widget = tab(index);
+    SessionWidget* widget = tab(index);
     if (!widget) {
         qDebug() << "not SessionWidget at index" << index << ui->tabs->widget(index);
         return;
     }
-    widget->updateCompletions();*/
+    widget->loadCollected();
 }
 
 void MainWindow::on_removeAllSessions_triggered()
@@ -288,7 +290,7 @@ void MainWindow::on_search_triggered()
 
 void MainWindow::on_replace_triggered()
 {
-    setCurrentTabMode(Mode::Replace);
+    setCurrentTabMode(Mode::Preview);
 }
 
 void MainWindow::on_select_triggered()
@@ -317,4 +319,22 @@ void MainWindow::dropEvent(QDropEvent *event) {
     data["path"] = fileName;
     addSession(data);
     ui->tabs->setCurrentIndex(ui->tabs->count()-1);
+}
+
+void MainWindow::onSave(Format format) {
+    SessionWidget* tab = currentTab();
+    if (!tab) {
+        return;
+    }
+    tab->save(format);
+}
+
+void MainWindow::on_saveAsText_triggered()
+{
+    onSave(Format::Text);
+}
+
+void MainWindow::on_saveAsHtml_triggered()
+{
+    onSave(Format::Html);
 }

@@ -12,6 +12,8 @@ INCLUDEPATH += src src/widget src/model
 
 HEADERS += \
     src/displayoptions.h \
+    src/fileio.h \
+    src/format.h \
     src/mode.h \
     src/regexpreplacement.h \
     src/replacefile.h \
@@ -38,7 +40,6 @@ HEADERS += \
     src/version.h \
     src/settings.h \
     src/searchid.h \
-    src/filereader.h \
     src/anchorclickhandler.h \
     src/jsonhelper.h \
     src/fileutils.h \
@@ -66,6 +67,8 @@ HEADERS += \
 
 SOURCES += \
     src/displayoptions.cpp \
+    src/fileio.cpp \
+    src/format.cpp \
     src/mode.cpp \
     src/regexpreplacement.cpp \
     src/replacefile.cpp \
@@ -81,7 +84,6 @@ SOURCES += \
     src/widget/displayoptionswidget.cpp \
     src/worker.cpp \
     src/utils.cpp \
-    src/filereader.cpp \
     src/replacementline.cpp \
     src/replacement.cpp \
     src/regexppath.cpp \

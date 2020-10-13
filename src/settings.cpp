@@ -52,7 +52,7 @@ void Settings::load()
     QJsonObject settings = doc.object();
 
     mSessions = settings.value("sessions").toArray();
-    mExps = settings.value("exps").toObject();
+    mPatterns = settings.value("pattern").toObject();
 
     QJsonArray editors = settings.value("editors").toArray();
 
@@ -77,7 +77,7 @@ QJsonArray Settings::sessions() const
 }
 
 QJsonObject Settings::exps() const {
-    return mExps;
+    return mPatterns;
 }
 
 void Settings::setSessions(const QJsonArray &value)
@@ -87,7 +87,7 @@ void Settings::setSessions(const QJsonArray &value)
 
 void Settings::setExps(const QJsonObject &value)
 {
-    mExps = value;
+    mPatterns = value;
 }
 
 void Settings::save()
@@ -103,7 +103,7 @@ void Settings::save()
     }
     settings["editors"] = editors;
     settings["sessions"] = mSessions;
-    settings["exps"] = mExps;
+    settings["pattern"] = mPatterns;
 
     QString path = this->settingsPath();
     saveJson(path, settings);

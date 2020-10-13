@@ -2,6 +2,7 @@
 
 #include "searchhits.h"
 
+#include <QTimer>
 
 Worker::Worker(QObject *parent) :
     QObject(parent)
@@ -41,21 +42,46 @@ void Worker::onSearchMore(int id)
     }
 }
 
-#include "filereader.h"
+#include "fileio.h"
 
 void Worker::onReplace(ReplaceParams params)
 {
     QList<ReplaceFile> files = params.files();
+    int countLines = 0;
+    int countFiles = 0;
+    int countErrors = 0;
     foreach(const ReplaceFile& file, files) {
-
-        bool binary;
-        bool readOk;
-        bool tooBig;
-
-        QByteArray fileData = FileReader::read(file.path(),false,&binary,&readOk,&tooBig);
-
+        QString path = file.path();
+        QList<ReplaceItem> items = file.items();
+        QStringList lines = FileIO::readLines(path);
+        bool ok = true;
+        foreach(const ReplaceItem& item, items) {
+            if (lines.size() <= item.line()) {
+                qDebug() << "lines.size() <= item.line()";
+                ok = false;
+                break;
+            }
+            if (lines[item.line()] != item.before()) {
+                ok = false;
+                qDebug() << "lines[item.line()] != item.before()";
+                qDebug() << lines[item.line()] << item.before();
+                break;
+            }
+            lines[item.line()] = item.after();
+        }
+        if (ok) {
+            ok = FileIO::writeLines(file.path(), lines);
+            if (ok) {
+                countFiles++;
+                countLines += items.size();
+            } else {
+                countErrors++;
+            }
+        } else {
+            countErrors++;
+        }
     }
-
+    emit replaced(countFiles, countLines);
 }
 
 void Worker::onFinishSearch(int id) {

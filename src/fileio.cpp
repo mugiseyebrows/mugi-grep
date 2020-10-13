@@ -1,21 +1,21 @@
-#include "filereader.h"
+#include "fileio.h"
 
 #include <QIODevice>
 #include <QFile>
+#include <QTextCodec>
+#include <QFile>
 #include "utils.h"
+#include <QRegularExpression>
 
 #define FILESIZE_TOOBIG (128*1024*1024)
 #define DATASAMPLE_SIZE (2*1024)
 
-FileReader::FileReader()
+FileIO::FileIO()
 {
 
 }
 
-#include <QTextCodec>
-#include <QFile>
-
-QStringList FileReader::readLines(const QString& path) {
+QStringList FileIO::readLines(const QString& path) {
 
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly)) {
@@ -23,11 +23,32 @@ QStringList FileReader::readLines(const QString& path) {
     }
     QByteArray bytes = file.readAll();
     QTextCodec* codec = QTextCodec::codecForName("UTF-8");
-    QStringList lines = codec->toUnicode(bytes).split("\n");
+    QStringList lines = codec->toUnicode(bytes).split(QRegularExpression("\\r?\\n"));
     return lines;
+
+    /*bool binary, readOk, tooBig;
+    QByteArray bytes = read(path, false, &binary, &readOk, &tooBig);
+    QTextCodec* codec = QTextCodec::codecForName("UTF-8");
+    QStringList lines = codec->toUnicode(bytes).split("\n");
+    return lines;*/
 }
 
-QByteArray FileReader::read(const QString &path, bool skipBinary, bool *binary, bool *readOk, bool* tooBig)
+bool FileIO::writeLines(const QString& path, const QString& line) {
+    return writeLines(path, {line});
+}
+
+bool FileIO::writeLines(const QString& path, const QStringList& lines) {
+    QFile file(path);
+    if (!file.open(QIODevice::WriteOnly)) {
+        return false;
+    }
+    QTextCodec* codec = QTextCodec::codecForName("UTF-8");
+    QByteArray data = codec->fromUnicode(lines.join("\n"));
+    file.write(data);
+    return true;
+}
+
+QByteArray FileIO::read(const QString &path, bool skipBinary, bool *binary, bool *readOk, bool* tooBig)
 {
     QFile file(path);
     *readOk = true;
@@ -49,7 +70,7 @@ QByteArray FileReader::read(const QString &path, bool skipBinary, bool *binary, 
         return QByteArray();
     }
 
-    if (file.size() > DATASAMPLE_SIZE && skipBinary) {
+    if (skipBinary && file.size() > DATASAMPLE_SIZE) {
         QByteArray dataSample = file.read(DATASAMPLE_SIZE);
         if (dataSample.indexOf('\0') > -1) {
             *binary = true;

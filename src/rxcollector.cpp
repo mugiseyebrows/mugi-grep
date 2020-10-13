@@ -26,12 +26,12 @@ RXCollector *RXCollector::instance()
 
 void RXCollector::collect(const RegExpPath &exp)
 {
-    mPathExps = prependModels(mPathExps, exp.exps());
+    mPathPatterns = prependModels(mPathPatterns, exp.exps());
 }
 
 void RXCollector::collect(const RegExp &exp)
 {
-    mExps = prependModels(mExps, exp.exps());
+    mPatterns = prependModels(mPatterns, exp.exps());
 }
 
 void RXCollector::collect(const QString& exp) {
@@ -65,22 +65,24 @@ QList<QStringListModel *> RXCollector::prependModels(const QList<QStringListMode
 
 void RXCollector::load(RXPathInput *input)
 {
-    for(int i=0;i<mPathExps.size();i++) {
+    for(int i=0;i<mPathPatterns.size();i++) {
         QComboBox* combo = input->input(i);
-        QStringListModel* model = mPathExps[i];
+        QStringListModel* model = mPathPatterns[i];
         QString text = combo->currentText();
         combo->setModel(model);
         combo->setCurrentText(text);
+        combo->setCompleter(nullptr);
     }
 }
 
 void RXCollector::load(RXInput *input) {
-    for(int i=0;i<mExps.size();i++) {
+    for(int i=0;i<mPatterns.size();i++) {
         QComboBox* combo = input->input(i);
-        QStringListModel* model = mExps[i];
+        QStringListModel* model = mPatterns[i];
         QString text = combo->currentText();
         combo->setModel(model);
         combo->setCurrentText(text);
+        combo->setCompleter(nullptr);
     }
 }
 
@@ -91,6 +93,7 @@ void RXCollector::load(RXReplaceInput *input) {
         QString text = combo->currentText();
         combo->setModel(model);
         combo->setCurrentText(text);
+        combo->setCompleter(nullptr);
     }
 }
 
@@ -103,13 +106,13 @@ void arrayOfArraysOfString(const QVariantList& src, QJsonArray& dst) {
 void RXCollector::serialize(QJsonObject &j)
 {
     QJsonArray pathexps;
-    arrayOfArraysOfString(modelsLists(mPathExps), pathexps);
+    arrayOfArraysOfString(modelsLists(mPathPatterns), pathexps);
     QJsonArray exps;
-    arrayOfArraysOfString(modelsLists(mExps),exps);
+    arrayOfArraysOfString(modelsLists(mPatterns),exps);
     QJsonArray replacements;
     arrayOfArraysOfString(modelsLists(mReplacements),replacements);
     j["pathexps"] = pathexps;
-    j["exps"] = exps;
+    j["pattern"] = exps;
     j["replacements"] = replacements;
 }
 
@@ -139,25 +142,25 @@ void RXCollector::deserialize(const QList<QStringListModel *> &models, const QJs
 
 void RXCollector::deserialize(const QJsonObject &j)
 {
-    deserialize(mPathExps,j.value("pathexps").toArray());
-    deserialize(mExps,j.value("exps").toArray());
+    deserialize(mPathPatterns,j.value("pathexps").toArray());
+    deserialize(mPatterns,j.value("pattern").toArray());
     deserialize(mReplacements,j.value("replacements").toArray());
 }
 
 QList<QStringListModel *> RXCollector::models()
 {
     QList<QStringListModel *> result;
-    result << mPathExps << mExps;
+    result << mPathPatterns << mPatterns;
     return result;
 }
 
 RXCollector::RXCollector()
 {
     for(int i=0;i<4;i++) {
-        mPathExps << new QStringListModel();
+        mPathPatterns << new QStringListModel();
     }
     for(int i=0;i<2;i++) {
-        mExps << new QStringListModel();
+        mPatterns << new QStringListModel();
     }
     mReplacements << new QStringListModel();
 }

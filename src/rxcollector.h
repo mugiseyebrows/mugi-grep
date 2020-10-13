@@ -37,8 +37,8 @@ protected:
     RXCollector();
     static RXCollector* mInstance;
 
-    QList<QStringListModel*> mPathExps;
-    QList<QStringListModel*> mExps;
+    QList<QStringListModel*> mPathPatterns;
+    QList<QStringListModel*> mPatterns;
     QList<QStringListModel*> mReplacements;
 };
 

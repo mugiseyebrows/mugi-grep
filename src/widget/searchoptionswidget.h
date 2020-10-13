@@ -26,12 +26,12 @@ public:
     explicit SearchOptionsWidget(QWidget *parent = nullptr);
     ~SearchOptionsWidget();
 
-    void collect();
+    void collect(Mode mode);
 
     QString path() const;
     void setPath(const QString& path);
 
-    void updateCompletions();
+    void loadCollected();
 
     bool validate();
 
@@ -103,6 +103,7 @@ protected:
     void setMode(Mode mode);
 
 
+    void setPreviewEnabled(bool enabled);
 public slots:
     void on_select_clicked();
 protected slots:
@@ -120,7 +121,7 @@ signals:
 
 protected:
     Ui::SearchOptionsWidget *ui;
-    bool mActive;
+    //bool mActive;
     Mode mMode;
     QAction* mCacheFileList;
 };

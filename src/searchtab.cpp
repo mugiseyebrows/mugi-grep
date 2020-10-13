@@ -21,6 +21,8 @@ SearchTab::SearchTab(QWidget* parent) : QWidget(parent), mMode(Mode::Search) {
     mRenderer = new SearchResultRenderer();
     layout->addWidget(mTextBrowser);
     layout->addWidget(mDisplayOptionsWidget);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
     setLayout(layout);
     mRenderer->setTab(this);
 }
@@ -61,9 +63,8 @@ void SearchTab::append(const SearchHits& hits) {
     mRenderer->append(mHits.mid(size));
 }
 void SearchTab::read() {
-    int linesBefore = mDisplayOptionsWidget->linesBefore();
-    int linesAfter = mDisplayOptionsWidget->linesAfter();
-    mHits.read(linesBefore, linesAfter);
+    DisplayOptions options = mDisplayOptionsWidget->options();
+    mHits.read(options.linesBefore(), options.linesAfter());
 }
 void SearchTab::trigRerender() {
     mDisplayOptionsWidget->trigChanged();
@@ -89,4 +90,10 @@ void SearchTab::setDisplayOptions(const DisplayOptions& value) {
 }
 ReplaceParams SearchTab::replaceParams() {
     return mRenderer->replaceParams();
+}
+QString SearchTab::toPlainText() const {
+    return mTextBrowser->toPlainText();
+}
+QString SearchTab::toHtml() const {
+    return mTextBrowser->toHtml();
 }

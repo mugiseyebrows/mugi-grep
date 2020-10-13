@@ -10,11 +10,12 @@
 #include "anchorclickhandler.h"
 #include "selectfilesdialog.h"
 #include <QAction>
+#include "regexpreplacement.h"
 
 SearchOptionsWidget::SearchOptionsWidget(QWidget *parent) :
     QWidget(parent),
-    mActive(true),
-    /*mBrowser(0),
+    /*mActive(true),
+    mBrowser(0),
     mWorker(0),
     mClickHandler(0),
     mMode(ModeSearch),
@@ -73,14 +74,13 @@ void SearchOptionsWidget::setBrowser(SearchBrowser *browser, bool setValues)
 
 #endif
 
-
 void SearchOptionsWidget::setMode(Mode mode)
 {
     mMode = mode;
     QWidgetList widgets;
     widgets << ui->replaceLabel << ui->replace << ui->preview << ui->replacement;
     foreach(QWidget* widget, widgets) {
-        widget->setVisible(mode == Mode::Replace);
+        widget->setVisible(mode == Mode::Preview || mode == Mode::Replace);
     }
     ui->search->setVisible(mode == Mode::Search);
 }
@@ -264,6 +264,10 @@ void SearchOptionsWidget::setReplaceEnabled(bool enabled)
     ui->replace->setEnabled(enabled);
 }
 
+void SearchOptionsWidget::setPreviewEnabled(bool enabled) {
+    ui->preview->setEnabled(enabled);
+}
+
 #if 0
 void SearchOptionsWidget::onCacheToggled(bool checked) {
     ui->fileCount->setVisible(checked);
@@ -336,19 +340,22 @@ void SearchOptionsWidget::on_onlyMatched_clicked(bool checked)
 }
 #endif
 
-
-void SearchOptionsWidget::collect()
+void SearchOptionsWidget::collect(Mode mode)
 {
-#if 0
+
     RXCollector* collector = RXCollector::instance();
     //mActive = false;
-    collector->collect(ui->pattern->value());
-    collector->collect(ui->filter->value());
-    collector->collect(ui->replacement->value());
-    //updateCollector();
-#endif
-}
 
+    if (mode == Mode::Search) {
+        collector->collect(ui->pattern->value());
+        collector->collect(ui->filter->value());
+    } else {
+        collector->collect(ui->replacement->value().pattern());
+    }
+
+    //updateCollector();
+
+}
 
 QString SearchOptionsWidget::path() const
 {
@@ -360,17 +367,12 @@ void SearchOptionsWidget::setPath(const QString &path)
     ui->path->setText(path);
 }
 
-void SearchOptionsWidget::updateCompletions() {
-#if 0
-    mActive = false;
+void SearchOptionsWidget::loadCollected() {
     RXCollector* collector = RXCollector::instance();
     collector->load(ui->pattern);
     collector->load(ui->filter);
     collector->load(ui->replacement);
-    mActive = true;
-#endif
 }
-
 
 bool SearchOptionsWidget::validate()
 {
@@ -394,5 +396,5 @@ void SearchOptionsWidget::setPattern(const RegExp& value)
 }
 
 void SearchOptionsWidget::setReplacement(const RegExpReplacement& value) {
-
+    ui->replacement->setValue(value);
 }

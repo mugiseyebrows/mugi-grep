@@ -48,6 +48,9 @@ QSet<int> SearchHit::siblings(int before, int after) const {
     }
     return result;
 }
+void SearchHit::clearCache() {
+    mCache = QMap<int, QString>();
+}
 void SearchHit::read(int before, int after) {
 
     QSet<int> keys = mCache.keys().toSet();

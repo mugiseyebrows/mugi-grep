@@ -14,6 +14,7 @@ public:
     SearchHit(const QString& path, const QString& relativePath, const QList<int>& hits,
               const QMap<int, QString>& cache = QMap<int, QString>());
     QSet<int> siblings(int before, int after) const;
+    void clearCache();
     void read(int before, int after);
     QString path() const;
     void setPath(const QString& value);

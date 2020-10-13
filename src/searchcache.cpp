@@ -5,13 +5,14 @@
 #include <QDebug>
 
 #include "html.h"
-#include "filereader.h"
+#include "fileio.h"
 #include "lit.h"
 #include "worker.h"
 #include "utils.h"
 #include "coloredline.h"
 #include "hunk.h"
 
+#if 0
 QStringList bytesToLines(const QByteArray& bytes) {
     QTextCodec* codec = QTextCodec::codecForName("UTF-8");
     QStringList lines = codec->toUnicode(bytes).split("\n");
@@ -22,6 +23,7 @@ QByteArray linesToBytes(const QStringList& lines) {
     QTextCodec* codec = QTextCodec::codecForName("UTF-8");
     return codec->fromUnicode(lines.join("\n"));
 }
+#endif
 
 QStringList fileNameLineNumber(bool showFileName, bool showLineNumber, const QString& relativePath, const QString& href, int lineNumber) {
     QStringList cols;
@@ -197,7 +199,7 @@ void searchLines(const QByteArray& bytes, const QString& path, const QString& re
                         const SearchParams& params, SearchHits& hits, int* lineCount) {
 
     QTextCodec* codec = QTextCodec::codecForName("UTF-8");
-    QStringList lines = codec->toUnicode(bytes).split("\n");
+    QStringList lines = codec->toUnicode(bytes).split(QRegularExpression("\\r?\\n"));
     *lineCount = lines.size();
     return searchLines(lines, path, relativePath, params, hits);
 }
@@ -350,6 +352,7 @@ SearchHits SearchCache::search(int searchId) {
     //QList<Replacement>& replacements = mReplacements[searchId];
 
     SearchHits hits(params.pattern());
+    hits.setFiltered(data.filesFiltered());
 
     //int lim = qMin(sd.complete + 100, sd.files.size());
 
@@ -364,7 +367,7 @@ SearchHits SearchCache::search(int searchId) {
         bool tooBig;
 
         //QByteArray fileData = FileCache::instance()->file(path,sd.notBinary,&binary,&readOk);
-        QByteArray fileData = FileReader::read(path,params.skipBinary(),&binary,&readOk,&tooBig);
+        QByteArray fileData = FileIO::read(path,params.skipBinary(),&binary,&readOk,&tooBig);
         QString relPath = Utils::relPath(path,params.path());
 
         bool ok = true;
@@ -385,12 +388,14 @@ SearchHits SearchCache::search(int searchId) {
                 //res << searchBinary(fileData, path, relPath, searchParams);
             } else {
                 searchLines(fileData, path, relPath, params, hits, &fileLineCount);
+                hits.setLast(relPath);
             }
         }
 
         lineCount += fileLineCount;
         fileCount += 1;
         data.setFilesComplete(i + 1);
+
 
         if (lineCount > 4000 || fileCount > 50) {
 

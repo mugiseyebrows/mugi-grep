@@ -5,6 +5,7 @@
 #include "searchhit.h"
 #include <QList>
 #include <QMetaType>
+#include <QString>
 
 class SearchHits {
 
@@ -18,6 +19,7 @@ public:
     SearchHit hit(int index) const;
     SearchHits mid(int index);
     void read(int before, int after);
+    void clearCache();
     void clear();
     RegExp pattern() const;
     void setPattern(const RegExp& value);
@@ -27,12 +29,18 @@ public:
     void setTotal(int value);
     int complete() const;
     void setComplete(int value);
+    int filtered() const;
+    void setFiltered(int value);
+    QString last() const;
+    void setLast(const QString& value);
 
 protected:
     RegExp mPattern;
     QList<SearchHit> mHits;
     int mTotal;
     int mComplete;
+    int mFiltered;
+    QString mLast;
 };
 
 Q_DECLARE_METATYPE(SearchHits)

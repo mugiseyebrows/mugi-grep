@@ -41,7 +41,7 @@ protected:
     QString mError;
 
     QJsonArray mSessions;
-    QJsonObject mExps;
+    QJsonObject mPatterns;
     QString mDir;
 
     Settings();

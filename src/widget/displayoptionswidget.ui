@@ -27,7 +27,7 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QCheckBox" name="filename">
+    <widget class="QCheckBox" name="fileName">
      <property name="text">
       <string>filename</string>
      </property>

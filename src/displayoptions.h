@@ -6,15 +6,24 @@ class DisplayOptions {
 
 public:
     DisplayOptions();
-    DisplayOptions(int linesBefore, int linesAfter);
+    DisplayOptions(int linesBefore, int linesAfter, bool fileName, bool lineNumber, bool wholeLine);
     int linesBefore() const;
     void setLinesBefore(int value);
     int linesAfter() const;
     void setLinesAfter(int value);
+    bool fileName() const;
+    void setFileName(bool value);
+    bool lineNumber() const;
+    void setLineNumber(bool value);
+    bool wholeLine() const;
+    void setWholeLine(bool value);
 
 protected:
     int mLinesBefore;
     int mLinesAfter;
+    bool mFileName;
+    bool mLineNumber;
+    bool mWholeLine;
 };
 
 #endif // DISPLAYOPTIONS_H

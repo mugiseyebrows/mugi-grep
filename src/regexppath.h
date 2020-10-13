@@ -35,8 +35,8 @@ public:
 
     static QString getExt(const QString &path);
 protected:
-    QStringList mRegExps;
-    QList<QRegularExpression> mRegExps_;
+    QStringList mPatterns;
+    QList<QRegularExpression> mPatterns_;
     bool mCase;
 };
 

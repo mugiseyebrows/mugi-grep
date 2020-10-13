@@ -98,6 +98,9 @@ void SearchResultRenderer::appendSearch(const SearchHits& hits) {
 
     int linesBefore = options.linesBefore();
     int linesAfter = options.linesAfter();
+    bool onlyMatched = !options.wholeLine();
+    bool showFileName = options.fileName();
+    bool showLineNumber = options.lineNumber();
 
     //hits.read(before, after);
 
@@ -118,10 +121,6 @@ void SearchResultRenderer::appendSearch(const SearchHits& hits) {
 
         int zebraColor1 = backgroundColors.size();
         int zebraColor2 = zebraColor1 + 1;
-
-        bool onlyMatched = false;
-        bool showFileName = true;
-        bool showLineNumber = true;
 
         int max1 = *std::max_element(matched.begin(), matched.end());
         int max2 = siblings.isEmpty() ? 0 : *std::max_element(siblings.begin(), siblings.end());
@@ -268,6 +267,91 @@ void renderHunk(QStringList& res, const QString& path, Hunk& hunk) {
         << value;
 }
 
+void SearchResultRenderer::appendReplace(const SearchHits& hits) {
+
+
+    DisplayOptions options = mTab->displayOptions();
+
+    int linesBefore = options.linesBefore();
+    int linesAfter = options.linesAfter();
+    //bool onlyMatched = !options.wholeLine();
+    bool showFileName = options.fileName();
+    bool showLineNumber = options.lineNumber();
+
+    //hits.read(before, after);
+
+    QStringList res;
+
+    for (int j = 0; j < hits.size(); j++) {
+
+        SearchHit hit = hits.hit(j);
+        QSet<int> siblings = hit.siblings(linesBefore, linesAfter);
+        QList<int> matched = hit.hits();
+
+        QMap<int, bool> zebra = doZebra(linesBefore, linesAfter, matched);
+
+        static QStringList backgroundColors = {"#ffffff", "#ffdfba", "#baffc9",
+                                               "#bae1ff", "#ffffba", "#ffb3ba"};
+
+        static QStringList grayZebraColors = {"#E6E6E6", "#F0F0F0"};
+
+        int zebraColor1 = backgroundColors.size();
+        int zebraColor2 = zebraColor1 + 1;
+
+        int max1 = *std::max_element(matched.begin(), matched.end());
+        int max2 = siblings.isEmpty() ? 0 : *std::max_element(siblings.begin(), siblings.end());
+        int max_ = qMax(max1, max2);
+
+        QMap<int, QString> lines = hit.cache();
+
+        QString mPath = hit.path();
+        QString mRelativePath = hit.relativePath();
+
+        for (int i = 0; i <= max_; i++) {
+
+            if (matched.contains(i)) {
+
+                QString line = lines[i];
+
+                //qDebug() << pattern.includeExp().pattern();
+
+                QStringList cols = fileNameLineNumber(showFileName, showLineNumber,
+                                                      mRelativePath, fileHref(mPath, i), i + 1);
+                ColoredLine coloredLine(line);
+
+                if (linesBefore > 0 || linesAfter > 0) {
+                    coloredLine.paintBackground(zebra[i] ? zebraColor1 : zebraColor2);
+                }
+
+                cols << toHtmlSpans(coloredLine, backgroundColors + grayZebraColors);
+                res << cols.join("");
+
+            } else if (siblings.contains(i)) {
+
+                QString line = lines[i];
+                QStringList cols;
+                if (showFileName) {
+                    cols << Html::anchor(mRelativePath, fileHref(mPath, i), "violet") << Html::span("-", "blue");
+                }
+                if (showLineNumber) {
+                    cols << Html::span(QString::number(i + 1), "green") << Html::span("-", "blue");
+                }
+
+                ColoredLine coloredLine(line);
+
+                if (linesBefore > 0 || linesAfter > 0) {
+                    coloredLine.paintBackground(zebra[i] ? zebraColor1 : zebraColor2);
+                }
+
+                cols << toHtmlSpans(coloredLine, backgroundColors + grayZebraColors);
+
+                res << cols.join("");
+            }
+        }
+    }
+    mTab->textBrowser()->append(res.join("<br/>"));
+}
+
 void SearchResultRenderer::appendPreview(const SearchHits& hits) {
 
     QStringList res;
@@ -378,13 +462,13 @@ void SearchResultRenderer::appendPreview(const SearchHits& hits) {
 
 
 void SearchResultRenderer::append(const SearchHits& hits) {
-
     if (mTab->mode() == Mode::Search) {
         appendSearch(hits);
-    } else {
+    } else if (mTab->mode() == Mode::Preview){
         appendPreview(hits);
+    } else if (mTab->mode() == Mode::Replace) {
+        appendReplace(hits);
     }
-
 }
 
 ReplaceParams SearchResultRenderer::replaceParams()

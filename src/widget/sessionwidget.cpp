@@ -31,6 +31,7 @@
 #include <QHeaderView>
 #include <QTreeView>
 #include "searchtab.h"
+#include "fileio.h"
 
 #define RESULT_TAB_LIMIT 10
 
@@ -92,8 +93,10 @@ SessionWidget::SessionWidget(QWidget *parent) :
 
     connect(ui->options,SIGNAL(preview()),this,SLOT(onPreview()));
     connect(ui->options,SIGNAL(replace()),this,SLOT(onReplace()));
+    connect(ui->progress,SIGNAL(canceled()),this,SLOT(onCancel()));
 
     connect(this,SIGNAL(replace(ReplaceParams)),mWorker,SLOT(onReplace(ReplaceParams)));
+    connect(mWorker,SIGNAL(replaced(int,int)),this,SLOT(onReplaced(int,int)));
 
     mThread->start();
 
@@ -109,7 +112,7 @@ SessionWidget::SessionWidget(QWidget *parent) :
     ui->results->addTab(browser_,QString());*/
     //connect(ui->options,SIGNAL())
 
-    ui->statusGroup->hide();
+    ui->progressGroup->hide();
 
     ui->options->setMode(Mode::Search);
 
@@ -136,8 +139,12 @@ void SessionWidget::copyToNewTab() {
     ui->results->addTab(newTab, title);
     tab->params().setId(-1);
     tab->setHits(SearchHits());
+    if (tab->mode() == Mode::Replace) {
+        tab->setMode(Mode::Preview);
+    }
     tab->trigRerender();
     updateTabText(ui->results->currentIndex());
+    updateReplaceButton();
 }
 
 void SessionWidget::onPatternChanged(RegExp value) {
@@ -233,13 +240,15 @@ void SessionWidget::setMode(Mode mode)
         return;
     }
     tab->setMode(mode);
+    updateReplaceButton();
 }
 
 void SessionWidget::updateReplaceButton()
 {
     SearchTab* tab = currentTab();
-    bool enabled = tab && !tab->hits().isEmpty();
+    bool enabled = tab && !tab->hits().isEmpty() && tab->mode() == Mode::Preview;
     ui->options->setReplaceEnabled(enabled);
+    ui->options->setPreviewEnabled(tab->mode() == Mode::Preview);
 }
 
 void SessionWidget::select()
@@ -288,6 +297,8 @@ void SessionWidget::onSearch() {
         return;
     }
 
+    ui->options->collect(Mode::Search);
+
     mCancel = false;
     //emit collect();
     int searchId = SearchId::instance()->next();
@@ -300,6 +311,7 @@ void SessionWidget::onSearch() {
     updateTabText(ui->results->currentIndex());
 
     emit search(tab->params());
+    ui->progressGroup->show();
     ui->progress->started();
 }
 
@@ -317,7 +329,7 @@ void SessionWidget::onPreview() {
     if (!tab) {
         return;
     }
-    tab->setMode(Mode::Replace);
+    tab->setMode(Mode::Preview);
     if (tab->params().id() < 0) {
         onSearch();
     } else {
@@ -336,8 +348,20 @@ void SessionWidget::onReplace() {
 
     qDebug() << params.size();
 
-    emit replace(params);
+    ui->options->collect(Mode::Preview);
 
+    emit replace(params);
+}
+
+void SessionWidget::onCancel() {
+    SearchTab* tab = currentTab();
+    if (!tab) {
+        return;
+    }
+    int id = tab->params().id();
+    if (id > -1) {
+        mCanceled.insert(id);
+    }
 }
 
 int SessionWidget::oldestTabIndex() { // todo test me
@@ -385,20 +409,11 @@ void SessionWidget::deserialize(const QJsonObject &v)
     ui->options->setPath(v.value("path").toString());
 }
 
-void SessionWidget::updateCompletions()
+void SessionWidget::loadCollected()
 {
-    ui->options->updateCompletions();
-}
-
-void SessionWidget::save(const QString &path, const QString &text)
-{
-    QFile file(path);
-    file.open(QIODevice::WriteOnly);
-    QTextStream stream(&file);
-    stream.setCodec(QTextCodec::codecForName("UTF-8"));
-    stream << text;
-    stream.flush();
-    file.close();
+    mListenOptions = false;
+    ui->options->loadCollected();
+    mListenOptions = true;
 }
 
 void SessionWidget::onCanceled() {
@@ -419,29 +434,22 @@ void SessionWidget::onCanReplace(int searchId, bool can)
 #endif
 }
 
-void SessionWidget::on_saveText_clicked()
-{
-    save(true);
-}
+void SessionWidget::save(Format format) {
 
-void SessionWidget::on_saveHtml_clicked()
-{
-    save(false);
-}
-
-void SessionWidget::save(bool plain) {
-#if 0
-    SearchBrowser* browser = currentTab();
-    if (!browser) {
+    SearchTab* tab = currentTab();
+    if (!tab) {
         return;
     }
-    QString filter = plain ? "Text (*.txt)" : "Html (*.html)";
+
+    QString filter = format == Format::Text ? "Text (*.txt)" : "Html (*.html)";
     QString path = QFileDialog::getSaveFileName(this,QString(),QString(),filter);
     if (path.isEmpty()) {
         return;
     }
-    save(path,plain ? browser->toPlainText() : browser->toHtml());
-#endif
+
+    QString text = format == Format::Text ? tab->toPlainText() : tab->toHtml();
+
+    FileIO::writeLines(path, text);
 }
 
 SearchTab* SessionWidget::find(int searchId) {
@@ -473,7 +481,7 @@ void SessionWidget::onFound(int searchId, QString res, int i, int t, int s, QStr
         browser->append(res);
     }
 
-    ui->statusGroup->show();
+    ui->progressGroup->show();
 
     ui->progress->progress(i,t,s,path);
 
@@ -546,7 +554,19 @@ void SessionWidget::onFound(int searchId, SearchHits hits)
         return;
     }
     tab->append(hits);
-    emit searchMore(searchId);
+
+    ui->progressGroup->show();
+
+    if (hits.complete() > -1) {
+        ui->progress->progress(hits.complete(),hits.total(),hits.filtered(),hits.last());
+    }
+
+    if (!mCanceled.contains(searchId)) {
+        emit searchMore(searchId);
+    } else {
+        ui->progressGroup->hide();
+    }
+
     updateReplaceButton();
 }
 
@@ -564,12 +584,12 @@ void SessionWidget::onPathChanged(QString path)
         //qDebug() << "getAllFiles" << path;
         emit getAllFiles(path);
     }
-    mTabWidget->setTabText(mTabWidget->indexOf(this),QFileInfo(path).fileName());
 #endif
+    mTabWidget->setTabText(mTabWidget->indexOf(this),QFileInfo(path).fileName());
 }
-
-void SessionWidget::onReplaced(int searchId,int files,int lines,QStringList notChanged) {
 #if 0
+void SessionWidget::onReplaced(int searchId,int files,int lines,QStringList notChanged) {
+
     SearchBrowser* browser = currentTab();
     if (browser->searchId() != searchId) {
         return;
@@ -580,7 +600,19 @@ void SessionWidget::onReplaced(int searchId,int files,int lines,QStringList notC
         return;
     }
     QMessageBox::critical(this,"Error",QString("Failed to replace text in files:\n%1").arg(notChanged.join("\n")));
+
+}
 #endif
+
+void SessionWidget::onReplaced(int files,int lines) {
+    ui->progressGroup->show();
+    ui->progress->replaced(files, lines);
+
+    SearchTab* tab = currentTab();
+    tab->hits().clearCache();
+
+    setMode(Mode::Replace);
+    updateReplaceButton();
 }
 
 QString nameFromPath(const QString& path) {

@@ -11,6 +11,9 @@
 #include "searchparams.h"
 #include "searchhits.h"
 #include "regexpreplacement.h"
+#include "replaceparams.h"
+
+#include <QStyleFactory>
 
 int main(int argc, char *argv[])
 {
@@ -20,11 +23,15 @@ int main(int argc, char *argv[])
     qRegisterMetaType<RegExpPath>();
     qRegisterMetaType<RegExpReplacement>();
     qRegisterMetaType<SearchParams>();
+    qRegisterMetaType<ReplaceParams>();
     qRegisterMetaType<SearchHits>();
 
     QApplication a(argc, argv);
     a.setApplicationName(APP_NAME);
     a.setApplicationVersion(APP_VERSION);
+    /*a.setStyle("Windows");
+    QStringList keys = QStyleFactory::keys();
+    qDebug() << keys[0];*/
 
     //RegExpPath::test();
     //RegExp::test();

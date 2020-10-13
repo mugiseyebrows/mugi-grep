@@ -3,6 +3,7 @@
 
 enum class Mode {
     Search,
+    Preview,
     Replace
 };
 

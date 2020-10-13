@@ -32,6 +32,8 @@ function SearchHit() {
     return result;
     `).const_()
 
+    c.method('clearCache', cpp.void, '', 'mCache = QMap<int, QString>();')
+
     c.method('read', cpp.void, {before: cpp.int, after: cpp.int}, `
     QSet<int> keys = mCache.keys().toSet();
 
@@ -70,6 +72,8 @@ function SearchHits() {
         hits: 'QList<SearchHit>',
         total: cpp.int,
         complete: cpp.int,
+        filtered: cpp.int,
+        last: qt.QString
     }
     c.constructor_()
     //c.constructor_(m)
@@ -78,7 +82,7 @@ function SearchHits() {
     //c.constructor_('const RegExp& pattern')
 
     for (let k in m) {
-        c.member(mName(k), m[k], {total: -1, complete: -1}[k])
+        c.member(mName(k), m[k], {total: -1, complete: -1, filtered: -1}[k])
     }
     c.method('append', cpp.void, 'const SearchHits& hits',`mPattern = hits.pattern(); mHits.append(hits.hits());`)
     c.method('append', cpp.void, 'const SearchHit& hit',`mHits.append(hit);`)
@@ -95,6 +99,12 @@ function SearchHits() {
     `for(int i=0;i<mHits.size();i++) {
         mHits[i].read(before, after);
     }`)
+
+    c.method('clearCache', cpp.void, '', 
+    `for(int i=0;i<mHits.size();i++) {
+        mHits[i].clearCache();
+    }
+    `)
 
     c.method('clear',cpp.void,'','mHits.clear();')
 
@@ -159,6 +169,8 @@ function SearchTab() {
     mRenderer = new SearchResultRenderer();
     layout->addWidget(mTextBrowser);
     layout->addWidget(mDisplayOptionsWidget);
+    layout->setContentsMargins(0,0,0,0);
+    layout->setSpacing(0);
     setLayout(layout);
     mRenderer->setTab(this);
     `)
@@ -174,9 +186,8 @@ function SearchTab() {
     `)
 
     c.method('read', cpp.void, '', 
-    `int linesBefore = mDisplayOptionsWidget->linesBefore();
-    int linesAfter = mDisplayOptionsWidget->linesAfter();
-    mHits.read(linesBefore, linesAfter);`)
+    `DisplayOptions options = mDisplayOptionsWidget->options();
+    mHits.read(options.linesBefore(), options.linesAfter());`)
 
     c.method('trigRerender', cpp.void, '', 'mDisplayOptionsWidget->trigChanged();')
 
@@ -204,6 +215,9 @@ function SearchTab() {
     //c.method('setPattern', cpp.void, 'const RegExp& value', 'mParams.setPattern(value);')
 
     c.method('replaceParams', 'ReplaceParams', '', 'return mRenderer->replaceParams();')
+
+    c.method('toPlainText', qt.QString, '', 'return mTextBrowser->toPlainText();').const_()
+    c.method('toHtml', qt.QString, '', 'return mTextBrowser->toHtml();').const_()
 
     c.include('SearchHits')
     c.include('SearchParams')
@@ -325,7 +339,10 @@ function DisplayOptions() {
     let c = new CppClass('DisplayOptions')
     let m = {
         linesBefore: cpp.int,
-        linesAfter: cpp.int
+        linesAfter: cpp.int,
+        fileName: cpp.bool,
+        lineNumber: cpp.bool,
+        wholeLine: cpp.bool
     }
     c.constructor_()
     c.constructor_(m)

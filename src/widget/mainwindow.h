@@ -7,6 +7,7 @@
 #include <QJsonObject>
 #include "searchoptionswidget.h"
 #include "mode.h"
+#include "format.h"
 
 class SessionWidget;
 class QSignalMapper;
@@ -74,6 +75,10 @@ protected:
     void dragEnterEvent(QDragEnterEvent *event);
     void dropEvent(QDropEvent *event);
 
+    void onSave(Format format);
+private slots:
+    void on_saveAsText_triggered();
+    void on_saveAsHtml_triggered();
 };
 
 #endif // MAINWINDOW_H

@@ -1,17 +1,19 @@
-#ifndef FILEREADER_H
-#define FILEREADER_H
+#ifndef FILEIO_H
+#define FILEIO_H
 
 #include <QByteArray>
 #include <QStringList>
 
-class FileReader
+class FileIO
 {
 public:
-    FileReader();
+    FileIO();
 
     static QByteArray read(const QString& path, bool skipBinary, bool* binary, bool* readOk, bool *tooBig);
 
     static QStringList readLines(const QString &path);
+    static bool writeLines(const QString &path, const QStringList &lines);
+    static bool writeLines(const QString &path, const QString &lines);
 };
 
-#endif // FILEREADER_H
+#endif // FILEIO_H
