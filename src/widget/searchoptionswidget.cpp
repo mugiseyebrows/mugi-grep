@@ -40,11 +40,19 @@ SearchOptionsWidget::SearchOptionsWidget(QWidget *parent) :
 
     connect(ui->replacement,SIGNAL(returnPressed()),this,SIGNAL(preview()));
 
+    ui->fileCount->setVisible(false);
+    ui->path->checkBox()->setText("cache file list");
 }
 
 SearchOptionsWidget::~SearchOptionsWidget()
 {
     delete ui;
+}
+
+void SearchOptionsWidget::fixLayout() {
+
+    QRect rect = ui->filter->matchCaseCheckBox()->geometry();
+    ui->path->checkBox()->setFixedWidth(rect.width());
 }
 
 #if 0
@@ -252,12 +260,13 @@ void SearchOptionsWidget::select() {
     }
 }
 #endif
+
+#if 0
 void SearchOptionsWidget::setCacheFileList(QAction *action)
 {
-    mCacheFileList = action;
     ui->fileCount->setVisible(action->isChecked());
-    //connect(action,SIGNAL(toggled(bool)),this,SLOT(onCacheToggled(bool)));
 }
+#endif
 
 void SearchOptionsWidget::setReplaceEnabled(bool enabled)
 {
@@ -266,6 +275,11 @@ void SearchOptionsWidget::setReplaceEnabled(bool enabled)
 
 void SearchOptionsWidget::setPreviewEnabled(bool enabled) {
     ui->preview->setEnabled(enabled);
+}
+
+bool SearchOptionsWidget::cacheFileList() const
+{
+    return ui->path->isChecked();
 }
 
 #if 0

@@ -69,6 +69,11 @@ void RXPathInput::setExpludeExtValue(const QString &value)
     ui->extExclude->lineEdit()->setText(value);
 }
 
+QCheckBox *RXPathInput::matchCaseCheckBox() const
+{
+    return ui->matchCase;
+}
+
 void RXPathInput::onClearValidation() {
     RXBaseInput::clearValidation(palette());
 }

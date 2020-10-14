@@ -1,6 +1,7 @@
 #include "widget/mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QTimer>
 #include <QCloseEvent>
 #include <QFileInfo>
 #include <QSignalMapper>
@@ -61,6 +62,9 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+
+
+
 void MainWindow::closeEvent(QCloseEvent * e)
 {
 
@@ -89,7 +93,7 @@ void MainWindow::closeEvent(QCloseEvent * e)
 
 void MainWindow::addSession(const QJsonObject &v) {
     SessionWidget* session = new SessionWidget(ui->tabs);
-    session->setCacheFileList(ui->cacheFileList);
+    //session->setCacheFileList(ui->cacheFileList);
 
     //connect(session,SIGNAL(setEditor()),this,SLOT(onSetEditor()));
     //connect(this,SIGNAL(editorSet()),session,SLOT(onEditorSet()));
@@ -258,12 +262,15 @@ void MainWindow::onReadStarted(QWidget* w) {
 
 void MainWindow::on_tabs_currentChanged(int index)
 {
-    SessionWidget* widget = tab(index);
-    if (!widget) {
+    SessionWidget* session = tab(index);
+    if (!session) {
         qDebug() << "not SessionWidget at index" << index << ui->tabs->widget(index);
         return;
     }
-    widget->loadCollected();
+    session->loadCollected();
+    QTimer::singleShot(0,[=](){
+        session->options()->fixLayout();
+    });
 }
 
 void MainWindow::on_removeAllSessions_triggered()

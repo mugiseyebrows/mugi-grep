@@ -46,7 +46,7 @@ public:
     explicit SessionWidget(QWidget *parent = nullptr);
     ~SessionWidget();
 
-    void setCacheFileList(QAction* action);
+    //void setCacheFileList(QAction* action);
 
     void cancelAll();
 
@@ -150,6 +150,7 @@ protected slots:
     void onReplacementChanged(RegExpReplacement value);
     void onReplaced(int, int);
     void onCancel();
+    void onFilesCounted(CountFilesParams);
 private:
     Ui::SessionWidget *ui;
     bool mListenOptions;

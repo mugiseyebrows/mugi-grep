@@ -39,7 +39,7 @@ public:
     void setPattern(const RegExp &);
     void setReplacement(const RegExpReplacement &value);
 
-    void setCacheFileList(QAction* action);
+    //void setCacheFileList(QAction* action);
 
     void setReplaceEnabled(bool enabled);
 
@@ -104,6 +104,10 @@ protected:
 
 
     void setPreviewEnabled(bool enabled);
+
+    bool cacheFileList() const;
+
+    void fixLayout();
 public slots:
     void on_select_clicked();
 protected slots:
@@ -123,7 +127,6 @@ protected:
     Ui::SearchOptionsWidget *ui;
     //bool mActive;
     Mode mMode;
-    QAction* mCacheFileList;
 };
 
 #endif // SEARCHOPTIONSWIDGET_H

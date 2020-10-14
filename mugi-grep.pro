@@ -64,7 +64,8 @@ HEADERS += \
     src/callonce.h \
     src/coloredline.h \
     src/coloredlinespan.h \
-    src/hunk.h
+    src/hunk.h \
+    src/widget/lineeditandcheckbox.h
 
 SOURCES += \
     src/countfilesparams.cpp \
@@ -120,7 +121,8 @@ SOURCES += \
     src/callonce.cpp \
     src/coloredline.cpp \
     src/coloredlinespan.cpp \
-    src/hunk.cpp
+    src/hunk.cpp \
+    src/widget/lineeditandcheckbox.cpp
 
 FORMS += \
     src/widget/displayoptionswidget.ui \
@@ -132,7 +134,8 @@ FORMS += \
     src/widget/searchprogresswidget.ui \
     src/widget/rxpathinput.ui \
     src/widget/rxinput.ui \
-    src/widget/rxreplaceinput.ui
+    src/widget/rxreplaceinput.ui \
+    src/widget/lineeditandcheckbox.ui
 
 target.path = /usr/local/bin
 INSTALLS += target

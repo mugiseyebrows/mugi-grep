@@ -241,11 +241,13 @@ SessionWidget::~SessionWidget()
     delete ui;
 }
 
+#if 0
 void SessionWidget::setCacheFileList(QAction *action)
 {
     mCacheFileList = action;
     ui->options->setCacheFileList(action);
 }
+#endif
 
 #if 0
 void SessionWidget::onClone() {
@@ -347,7 +349,7 @@ void SessionWidget::onSearch() {
 
     tab->params().setId(searchId);
     tab->params().setPath(ui->options->path());
-    tab->params().setCacheFileList(mCacheFileList->isChecked());
+    tab->params().setCacheFileList(ui->options->cacheFileList());
     tab->hits().clear();
     tab->trigRerender();
 

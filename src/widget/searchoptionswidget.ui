@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>660</width>
-    <height>154</height>
+    <width>436</width>
+    <height>129</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,40 +28,16 @@
      <property name="verticalSpacing">
       <number>2</number>
      </property>
-     <item row="3" column="1">
-      <widget class="RXInput" name="pattern" native="true"/>
-     </item>
-     <item row="0" column="2">
-      <widget class="QPushButton" name="select">
-       <property name="text">
-        <string>select</string>
-       </property>
-      </widget>
-     </item>
      <item row="1" column="1">
       <widget class="RXPathInput" name="filter" native="true"/>
+     </item>
+     <item row="3" column="1">
+      <widget class="RXInput" name="pattern" native="true"/>
      </item>
      <item row="3" column="0">
       <widget class="QLabel" name="label_3">
        <property name="text">
         <string>Find</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="path"/>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_4">
-       <property name="text">
-        <string>Files</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="0">
-      <widget class="QLabel" name="replaceLabel">
-       <property name="text">
-        <string>Replace</string>
        </property>
       </widget>
      </item>
@@ -72,6 +48,20 @@
        </property>
        <property name="checked">
         <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="replaceLabel">
+       <property name="text">
+        <string>Replace</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>Files</string>
        </property>
       </widget>
      </item>
@@ -96,13 +86,6 @@
        </item>
       </layout>
      </item>
-     <item row="2" column="1">
-      <widget class="QLabel" name="fileCount">
-       <property name="text">
-        <string>fileCount</string>
-       </property>
-      </widget>
-     </item>
      <item row="0" column="0">
       <widget class="QLabel" name="label">
        <property name="text">
@@ -116,6 +99,23 @@
         <string>search</string>
        </property>
       </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QLabel" name="fileCount">
+       <property name="text">
+        <string>fileCount</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QPushButton" name="select">
+       <property name="text">
+        <string>select</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="LineEditAndCheckbox" name="path" native="true"/>
      </item>
     </layout>
    </item>
@@ -138,6 +138,12 @@
    <class>RXReplaceInput</class>
    <extends>QWidget</extends>
    <header>widget/rxreplaceinput.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>LineEditAndCheckbox</class>
+   <extends>QWidget</extends>
+   <header>src\widget\lineeditandcheckbox.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

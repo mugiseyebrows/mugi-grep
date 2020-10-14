@@ -55,7 +55,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuSession">
@@ -72,7 +72,6 @@
     <property name="title">
      <string>&amp;Settings</string>
     </property>
-    <addaction name="cacheFileList"/>
     <addaction name="setEditors"/>
    </widget>
    <widget class="QMenu" name="menuAction">
