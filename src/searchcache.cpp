@@ -6,7 +6,7 @@
 
 #include "html.h"
 #include "fileio.h"
-#include "lit.h"
+
 #include "worker.h"
 #include "utils.h"
 #include "coloredline.h"

@@ -1,6 +1,5 @@
 #include "regexppath.h"
 
-#include "lit.h"
 #include <QDebug>
 
 RegExpPath::RegExpPath()

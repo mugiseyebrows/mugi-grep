@@ -37,7 +37,6 @@ HEADERS += \
     src/regexppath.h \
     src/regexp.h \
     src/html.h \
-    src/lit.h \
     src/rxcollector.h \
     src/completermodelmanager.h \
     src/version.h \
@@ -98,7 +97,6 @@ SOURCES += \
     src/html.cpp \
     src/anchorclickhandler.cpp \
     src/main.cpp \
-    src/lit.cpp \
     src/rxcollector.cpp \
     src/completermodelmanager.cpp \
     src/settings.cpp \
