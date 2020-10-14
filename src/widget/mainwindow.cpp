@@ -39,7 +39,7 @@ MainWindow::MainWindow(QWidget *parent) :
     if (IS_DEBUG) {
         QJsonObject obj;
         QString path = "D:\\w\\untitled1";
-        //path = "C:\\Qt\\5.15.1\\Src\\qtbase";
+        path = "C:\\Qt\\5.15.1\\Src\\qtbase";
         obj["path"] = path;
         addSession(obj);
     } else {

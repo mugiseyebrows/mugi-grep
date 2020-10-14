@@ -228,17 +228,18 @@ SearchCache::SearchCache() {
 
 }
 
-QPair<int,int> SearchCache::countMatchedFiles(QString path, RegExpPath filter, bool cacheFileList, bool notBinary) {
+QPair<int,int> SearchCache::countMatchedFiles(QString path, RegExpPath filter) {
 
     QMutexLocker locked(&mMutex);
-
     //qDebug() << filter << notBinary;
 
-    QStringList allFiles = getAllFiles(path, cacheFileList);
+    qDebug() << "SearchCache::countMatchedFiles" << path << filter;
+
+    QStringList allFiles = getAllFiles(path, true);
     int filesFiltered;
     int dirsFiltered;
     // todo optimize
-    QStringList files = filterFiles(allFiles,filter,notBinary,&filesFiltered,&dirsFiltered);
+    QStringList files = filterFiles(allFiles,filter,&filesFiltered,&dirsFiltered);
     return QPair<int,int>(files.size(),allFiles.size());
 }
 
@@ -264,12 +265,14 @@ QStringList SearchCache::getAllFiles(QString path, bool cacheFileList) {
     return allFiles;
 }
 
-QStringList SearchCache::filterFiles(const QStringList& allFiles, RegExpPath filter, bool notBinary, int* filesFiltered, int* dirsFiltered) {
+QStringList SearchCache::filterFiles(const QStringList& allFiles, RegExpPath filter, int* filesFiltered, int* dirsFiltered) {
 
     int filesFiltered_ = 0;
     int dirsFiltered_ = 0;
 
     QStringList files;
+
+    bool notBinary = filter.notBinary();
 
     foreach(const QString& path, allFiles) {
         if (path.contains("/.git/")) { // todo skip settings
@@ -301,14 +304,13 @@ void SearchCache::add(SearchParams params) {
     QString path = params.path();
     bool cacheFileList = params.cacheFileList();
     RegExpPath filter = params.filter();
-    bool notBinary = params.skipBinary();
 
     int searchId = params.id();
 
     QStringList allFiles = getAllFiles(path, cacheFileList);
     int filesFiltered;
     int dirsFiltered;
-    QStringList files = filterFiles(allFiles, filter, notBinary, &filesFiltered, &dirsFiltered);
+    QStringList files = filterFiles(allFiles, filter, &filesFiltered, &dirsFiltered);
 
     SearchData data(files, filesFiltered, dirsFiltered);
 
@@ -351,6 +353,8 @@ SearchHits SearchCache::search(int searchId) {
     SearchData& data = mSearchData[searchId];
     //QList<Replacement>& replacements = mReplacements[searchId];
 
+    bool notBinary = params.filter().notBinary();
+
     SearchHits hits(params.pattern());
     hits.setFiltered(data.filesFiltered());
 
@@ -367,7 +371,7 @@ SearchHits SearchCache::search(int searchId) {
         bool tooBig;
 
         //QByteArray fileData = FileCache::instance()->file(path,sd.notBinary,&binary,&readOk);
-        QByteArray fileData = FileIO::read(path,params.skipBinary(),&binary,&readOk,&tooBig);
+        QByteArray fileData = FileIO::read(path,notBinary,&binary,&readOk,&tooBig);
         QString relPath = Utils::relPath(path,params.path());
 
         bool ok = true;

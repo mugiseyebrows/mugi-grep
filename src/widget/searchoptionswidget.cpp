@@ -11,6 +11,7 @@
 #include "selectfilesdialog.h"
 #include <QAction>
 #include "regexpreplacement.h"
+#include <QCheckBox>
 
 SearchOptionsWidget::SearchOptionsWidget(QWidget *parent) :
     QWidget(parent),
@@ -36,11 +37,12 @@ SearchOptionsWidget::SearchOptionsWidget(QWidget *parent) :
     connect(ui->search,SIGNAL(clicked()),this,SIGNAL(search()));
     connect(ui->preview,SIGNAL(clicked()),this,SIGNAL(preview()));
     connect(ui->replace,SIGNAL(clicked()),this,SIGNAL(replace()));
-    //connect(ui->select,SIGNAL(clicked()),this,SIGNAL(select()));
 
     connect(ui->replacement,SIGNAL(returnPressed()),this,SIGNAL(preview()));
 
-    ui->fileCount->setVisible(false);
+    //connect(ui->notBinary,SIGNAL(stateChanged(bool)),this,SIGNAL(notBinaryChanged(bool)));
+
+    hideFileCount();
     ui->path->checkBox()->setText("cache file list");
 }
 
@@ -50,9 +52,10 @@ SearchOptionsWidget::~SearchOptionsWidget()
 }
 
 void SearchOptionsWidget::fixLayout() {
-
     QRect rect = ui->filter->matchCaseCheckBox()->geometry();
     ui->path->checkBox()->setFixedWidth(rect.width());
+    QCheckBox* checkBox = ui->filter->notBinary();
+    ui->gridLayout->addWidget(checkBox, 1, 2);
 }
 
 #if 0
@@ -273,13 +276,32 @@ void SearchOptionsWidget::setReplaceEnabled(bool enabled)
     ui->replace->setEnabled(enabled);
 }
 
+void SearchOptionsWidget::showFileCount(int filtered, int total)
+{
+    if (filtered < 0) {
+        ui->fileCount->setText("? / ?");
+    } else {
+        ui->fileCount->setText(QString("%1 / %2").arg(filtered).arg(total));
+    }
+    ui->fileCount->show();
+}
+
+void SearchOptionsWidget::hideFileCount()
+{
+    ui->fileCount->hide();
+}
+
 void SearchOptionsWidget::setPreviewEnabled(bool enabled) {
     ui->preview->setEnabled(enabled);
 }
 
-bool SearchOptionsWidget::cacheFileList() const
+bool SearchOptionsWidget::cacheFileListIsChecked() const
 {
-    return ui->path->isChecked();
+    return ui->path->checkBox()->isChecked();
+}
+
+QCheckBox* SearchOptionsWidget::cacheFileList() {
+    return ui->path->checkBox();
 }
 
 #if 0
@@ -363,7 +385,7 @@ void SearchOptionsWidget::collect(Mode mode)
     if (mode == Mode::Search) {
         collector->collect(ui->pattern->value());
         collector->collect(ui->filter->value());
-    } else {
+    } else if (mode == Mode::Replace){
         collector->collect(ui->replacement->value().pattern());
     }
 
@@ -399,10 +421,20 @@ bool SearchOptionsWidget::validate()
     return ok1 && ok2 && ok3;
 }
 
+RegExpPath SearchOptionsWidget::filter() const
+{
+    return ui->filter->value();
+}
+
 void SearchOptionsWidget::setFiler(const RegExpPath& value)
 {
     ui->filter->setValue(value);
 }
+
+/*
+bool SearchOptionsWidget::notBinary() const {
+    return ui->notBinary->isChecked();
+}*/
 
 void SearchOptionsWidget::setPattern(const RegExp& value)
 {

@@ -13,6 +13,8 @@ class AnchorClickHandler;
 class RXInput;
 class RXPathInput;
 
+class QCheckBox;
+
 namespace Ui {
 class SearchOptionsWidget;
 }
@@ -34,6 +36,8 @@ public:
     void loadCollected();
 
     bool validate();
+
+    RegExpPath filter() const;
 
     void setFiler(const RegExpPath &);
     void setPattern(const RegExp &);
@@ -100,14 +104,20 @@ protected:
 
 #endif
 
+    void showFileCount(int filtered, int total);
+
+    void hideFileCount();
+
     void setMode(Mode mode);
 
 
     void setPreviewEnabled(bool enabled);
 
-    bool cacheFileList() const;
+    bool cacheFileListIsChecked() const;
 
     void fixLayout();
+    //bool notBinary() const;
+    QCheckBox *cacheFileList();
 public slots:
     void on_select_clicked();
 protected slots:
@@ -118,6 +128,8 @@ signals:
     void filterChanged(RegExpPath);
     void replacementChanged(RegExpReplacement);
     void pathChanged(QString);
+    void notBinaryChanged(bool);
+
     void search();
     void preview();
     void replace();

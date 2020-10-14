@@ -125,7 +125,6 @@ function SearchParams() {
         filter: 'RegExpPath',
         replacement: 'RegExpReplacement',
         cacheFileList: cpp.bool,
-        skipBinary: cpp.bool
     }
     c.constructor_()
     //c.constructor_(m)
@@ -358,6 +357,7 @@ function just(m, keys) {
     return r;
 }
 
+/*
 function CountFilesParams() {
     let c = new CppClass('CountFilesParams')
     let m = {
@@ -373,6 +373,56 @@ function CountFilesParams() {
     c.constructor_(m)
     for (let k in m) {
         c.member(mName(k), m[k], {total: -1, filtered: -1, cacheFileList: true}[k])
+    }
+    c.include('QMetaType', true, true)
+    c.include('RegExpPath')
+    c.metatype()
+    c.write(src)
+}*/
+
+function GetListingParams() {
+    let c = new CppClass('GetListingParams')
+    let m = {
+        path: qt.QString,
+        cacheFileList: cpp.bool
+    }
+    for (let k in m) {
+        c.member(mName(k), m[k], {cacheFileList: false}[k])
+    }
+    c.constructor_()
+    c.constructor_(m)
+    c.include('QMetaType', true, true)
+    c.metatype()
+    c.write(src)
+}
+
+/*
+function FileCountItem() {
+    let c = new CppClass('FileCountItem')
+    let m = {
+        path: qt.QString,
+        filter: 'RegExpPath',
+        notBinary: cpp.bool,
+        total: cpp.int,
+        filtered: cpp.int
+    }
+
+
+    c.write(src)
+}*/
+
+function CountFilesParams() {
+    let c = new CppClass('CountFilesParams')
+    let m = {
+        path: qt.QString,
+        filter: 'RegExpPath',
+        total: cpp.int,
+        filtered: cpp.int
+    }
+    c.constructor_()
+    c.constructor_(m)
+    for (let k in m) {
+        c.member(mName(k), m[k], {total: -1, filtered: -1}[k])
     }
     c.include('QMetaType', true, true)
     c.include('RegExpPath')
@@ -394,3 +444,4 @@ RegExpReplacement()
 DisplayOptions()
 ReplaceFile()
 CountFilesParams()
+GetListingParams()

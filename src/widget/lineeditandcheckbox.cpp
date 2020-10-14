@@ -12,6 +12,8 @@ LineEditAndCheckbox::LineEditAndCheckbox(QWidget *parent) :
 
     connect(ui->lineEdit,SIGNAL(textChanged(QString)),this,SIGNAL(textChanged(QString)));
 
+    //connect(ui->checkBox,SIGNAL(clicked(bool)),this,SIGNAL(clicked(bool)));
+
 }
 
 LineEditAndCheckbox::~LineEditAndCheckbox()

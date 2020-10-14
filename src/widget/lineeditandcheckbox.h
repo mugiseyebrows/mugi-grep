@@ -28,6 +28,8 @@ public:
 signals:
     void textChanged(QString);
 
+    //void clicked(bool);
+
 private:
     Ui::LineEditAndCheckbox *ui;
 };

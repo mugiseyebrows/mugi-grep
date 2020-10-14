@@ -17,6 +17,7 @@
 #include "searchcache.h"
 #include "searchhits.h"
 #include "countfilesparams.h"
+#include "getlistingparams.h"
 
 #include "replaceparams.h"
 
@@ -47,6 +48,8 @@ signals:
 
     void allFiles(QString, QStringList);
 
+    void listing(QString, QStringList);
+
     void canReplace(int, bool);
 
     void replaced(int,int);
@@ -60,7 +63,7 @@ public slots:
     void onCanReplace(int);
 
     void onFinishSearch(int);
-    void onCountMatchedFiles(QString path, RegExpPath filter, bool notBinary);
+    void onCountMatchedFiles(QString path, RegExpPath filter);
     void onGetAllFiles(QString path);
     //void onSearch(int action, int searchId, QString path, RegExpPath filter, bool notBinary, RegExp search, int linesBefore, int linesAfter, bool cacheFileList, QString relpacement);
     void onSearch(SearchParams);
@@ -68,6 +71,8 @@ public slots:
 
     void onReplace(ReplaceParams params);
     void onCountFiles(CountFilesParams params);
+
+    void onGetListing(GetListingParams params);
 };
 
 #endif // WORKER2_H

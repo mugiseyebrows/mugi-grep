@@ -11,10 +11,12 @@ RC_FILE = src/mugi-grep.rc
 INCLUDEPATH += src src/widget src/model
 
 HEADERS += \
+    src/countfilesmanager.h \
     src/countfilesparams.h \
     src/displayoptions.h \
     src/fileio.h \
     src/format.h \
+    src/getlistingparams.h \
     src/mode.h \
     src/regexpreplacement.h \
     src/replacefile.h \
@@ -68,10 +70,12 @@ HEADERS += \
     src/widget/lineeditandcheckbox.h
 
 SOURCES += \
+    src/countfilesmanager.cpp \
     src/countfilesparams.cpp \
     src/displayoptions.cpp \
     src/fileio.cpp \
     src/format.cpp \
+    src/getlistingparams.cpp \
     src/mode.cpp \
     src/regexpreplacement.cpp \
     src/replacefile.cpp \

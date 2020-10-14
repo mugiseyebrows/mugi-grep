@@ -23,8 +23,6 @@ public:
     void setReplacement(const RegExpReplacement& value);
     bool cacheFileList() const;
     void setCacheFileList(bool value);
-    bool skipBinary() const;
-    void setSkipBinary(bool value);
 
 protected:
     int mId;
@@ -33,7 +31,6 @@ protected:
     RegExpPath mFilter;
     RegExpReplacement mReplacement;
     bool mCacheFileList;
-    bool mSkipBinary;
 };
 
 Q_DECLARE_METATYPE(SearchParams)

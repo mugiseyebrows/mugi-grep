@@ -1,6 +1,7 @@
 #include "worker.h"
 
 #include "searchhits.h"
+#include "countfilesparams.h"
 
 #include <QTimer>
 
@@ -16,15 +17,15 @@ void Worker::onSearch(SearchParams params)
     emit found(params.id(), hits);
 }
 
-void Worker::onCountMatchedFiles(QString path, RegExpPath filter, bool notBinary) {
-    QPair<int,int> fileCount = mCache.countMatchedFiles(path,filter,true,notBinary);
+void Worker::onCountMatchedFiles(QString path, RegExpPath filter) {
+    QPair<int,int> fileCount = mCache.countMatchedFiles(path,filter);
     emit count(fileCount.first, fileCount.second);
 }
 
-#include "countfilesparams.h"
+
 
 void Worker::onCountFiles(CountFilesParams params) {
-    QPair<int,int> count = mCache.countMatchedFiles(params.path(),params.filter(),params.cacheFileList(), params.notBinary());
+    QPair<int,int> count = mCache.countMatchedFiles(params.path(), params.filter());
     params.setFiltered(count.first);
     params.setTotal(count.second);
     emit filesCounted(params);
@@ -35,6 +36,12 @@ void Worker::onGetAllFiles(QString path)
     //qDebug() << "Worker::onGetAllFiles" << path;
     QStringList files = mCache.getAllFiles(path,true);
     emit allFiles(path,files);
+}
+
+void Worker::onGetListing(GetListingParams params)
+{
+    QStringList files = mCache.getAllFiles(params.path(),params.cacheFileList());
+    emit listing(params.path(),files);
 }
 
 void Worker::onSearchMore(int id)

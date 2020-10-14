@@ -10,6 +10,8 @@
 #include "model/checkablestringlistmodel.h"
 #include "callonce.h"
 
+#if 0
+
 namespace  {
 
 QStringList mapSplitColumn(const QStringList& items, const QRegularExpression sep, int col) {
@@ -138,3 +140,5 @@ void SelectFilesDialog::onExtensionsDataChanged(QModelIndex,QModelIndex) {
     QStringList exts = mapSplitColumn(model->checked(),QRegularExpression("\\s+"),0);
     ui->filter->setIncludeExtValue(exts.join("|"));
 }
+
+#endif

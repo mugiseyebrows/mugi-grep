@@ -6,6 +6,8 @@
 
 #include "regexppath.h"
 
+#if 0
+
 class Worker;
 
 namespace Ui {
@@ -45,5 +47,7 @@ protected slots:
 private:
     Ui::SelectFilesDialog *ui;
 };
+
+#endif
 
 #endif // SELECTFILESDIALOG_H

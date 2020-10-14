@@ -18,6 +18,7 @@
 #include "replaceparams.h"
 #include "searchhits.h"
 #include "countfilesparams.h"
+#include "getlistingparams.h"
 
 namespace Ui {
 class SessionWidget;
@@ -30,12 +31,9 @@ class QTabWidget;
 class AnchorClickHandler;
 class SearchTab;
 class CallOnce;
+class CountFilesManager;
 
 #include "format.h"
-
-/*
-Q_DECLARE_METATYPE(RegExp)
-Q_DECLARE_METATYPE(RegExpPath)*/
 
 class SessionWidget : public QWidget
 {
@@ -64,7 +62,6 @@ public:
     SearchOptionsWidget *options() const;
     void setMode(Mode mode);
 
-
     void updateReplaceButton();
 
     void select();
@@ -78,7 +75,10 @@ protected:
     Worker* mWorker;
     QThread* mThread;
     CallOnce* mReplacementChanged;
-    CallOnce* mFilterChanged;
+    //CallOnce* mCountFiles;
+    CallOnce* mGetListing;
+
+    CountFilesManager* mCountFilesManager;
 
     bool mCancel;
 
@@ -90,21 +90,14 @@ protected:
 
     SearchBrowser *createTab(const QString &name, SearchBrowser *browser = 0, bool append = true, bool select = true);
 
-    bool mSetValues;
-
     void searchOrReplace(Worker::Action action);
-
-    QAction* mCacheFileList;
-
-    QStringList mFileList;
 
     void copyToNewTab();
     void updateTabText(int index);
     SearchTab *createTab();
 
-    QList<CountFilesParams> mCountFiles;
+    QMap<QString,QStringList> mAllFiles;
 
-    QPair<int, int> findCountFiles();
 signals:
 
     //void search(SearchParams);
@@ -121,18 +114,19 @@ signals:
     void countFiles(CountFilesParams);
 
     void canReplace(int);
-    void getAllFiles(QString);
+    void getListing(GetListingParams);
 
 public slots:
     void onCanceled();
 
     void onCountFiles();
+    void onGetListing();
+    void onFilesCounted();
 protected slots:
 
     void onCompleterActivated(QModelIndex);
-    void onAllFiles(QString, QStringList);
+    void onListing(QString, QStringList);
 
-    void onCanReplace(int,bool);
 
     void on_results_currentChanged(int index);
     //void onFound(int, QString, int, int, int, QString path);
@@ -150,7 +144,10 @@ protected slots:
     void onReplacementChanged(RegExpReplacement value);
     void onReplaced(int, int);
     void onCancel();
-    void onFilesCounted(CountFilesParams);
+
+    void on_open_textChanged(QString);
+
+    void onCacheFileListClicked(bool cacheFileList);
 private:
     Ui::SessionWidget *ui;
     bool mListenOptions;

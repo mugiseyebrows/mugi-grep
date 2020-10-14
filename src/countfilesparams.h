@@ -9,29 +9,21 @@ class CountFilesParams {
 
 public:
     CountFilesParams();
-    CountFilesParams(const QString& path, const RegExpPath& filter, bool notBinary);
-    CountFilesParams(const QString& path, const RegExpPath& filter, bool cacheFileList, int total,
-                     int filtered, bool notBinary);
+    CountFilesParams(const QString& path, const RegExpPath& filter, int total, int filtered);
     QString path() const;
     void setPath(const QString& value);
     RegExpPath filter() const;
     void setFilter(const RegExpPath& value);
-    bool cacheFileList() const;
-    void setCacheFileList(bool value);
     int total() const;
     void setTotal(int value);
     int filtered() const;
     void setFiltered(int value);
-    bool notBinary() const;
-    void setNotBinary(bool value);
 
 protected:
     QString mPath;
     RegExpPath mFilter;
-    bool mCacheFileList;
     int mTotal;
     int mFiltered;
-    bool mNotBinary;
 };
 
 Q_DECLARE_METATYPE(CountFilesParams)

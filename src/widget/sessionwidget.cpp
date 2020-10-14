@@ -13,6 +13,7 @@
 #include <QUrlQuery>
 #include <QMessageBox>
 #include <QAction>
+#include <QCheckBox>
 
 #include "widget/searchbrowser.h"
 #include "mode.h"
@@ -33,6 +34,7 @@
 #include "searchtab.h"
 #include "fileio.h"
 #include "callonce.h"
+#include "countfilesmanager.h"
 
 #define RESULT_TAB_LIMIT 10
 
@@ -41,9 +43,9 @@ SessionWidget::SessionWidget(QWidget *parent) :
     ui(new Ui::SessionWidget),
     mClickHandler(new AnchorClickHandler()),
     mListenOptions(false),
-    mCacheFileList(0),
     mReplacementChanged(new CallOnce("mReplacementChanged", 500, this)),
-    mFilterChanged(new CallOnce("mFilterChanged", 500, this))
+    mGetListing(new CallOnce("mGetAllFiles", 500, this)),
+    mCountFilesManager(new CountFilesManager(this))
 {
     ui->setupUi(this);
 
@@ -92,8 +94,8 @@ SessionWidget::SessionWidget(QWidget *parent) :
     connect(ui->options,SIGNAL(pathChanged(QString)),this,SLOT(onPathChanged(QString)));
     connect(ui->options,SIGNAL(search()),this,SLOT(onSearch()));
 
-    connect(this,SIGNAL(countFiles(CountFilesParams)),mWorker,SLOT(onCountFiles(CountFilesParams)));
-    connect(mWorker,SIGNAL(filesCounted(CountFilesParams)),this,SLOT(onFilesCounted(CountFilesParams)));
+    //connect(this,SIGNAL(countFiles(CountFilesParams)),mWorker,SLOT(onCountFiles(CountFilesParams)));
+    //connect(mWorker,SIGNAL(filesCounted(CountFilesParams)),this,SLOT(onFilesCounted(CountFilesParams)));
 
     connect(ui->options,SIGNAL(preview()),this,SLOT(onPreview()));
     connect(ui->options,SIGNAL(replace()),this,SLOT(onReplace()));
@@ -103,7 +105,16 @@ SessionWidget::SessionWidget(QWidget *parent) :
     connect(mWorker,SIGNAL(replaced(int,int)),this,SLOT(onReplaced(int,int)));
 
     connect(mReplacementChanged,SIGNAL(call()),this,SLOT(onPreview()));
-    connect(mFilterChanged,SIGNAL(call()),this,SLOT(onCountFiles()));
+    //connect(mCountFiles,SIGNAL(call()),this,SLOT(onCountFiles()));
+    connect(mGetListing,SIGNAL(call()),this,SLOT(onGetListing()));
+    connect(this,SIGNAL(getListing(GetListingParams)),mWorker,SLOT(onGetListing(GetListingParams)));
+    connect(mWorker,SIGNAL(listing(QString,QStringList)),this,SLOT(onListing(QString,QStringList)));
+
+    connect(mCountFilesManager,SIGNAL(filesCounted()),this,SLOT(onFilesCounted()));
+    connect(mCountFilesManager,SIGNAL(countFiles(CountFilesParams)),mWorker,SLOT(onCountFiles(CountFilesParams)));
+    connect(mWorker,SIGNAL(filesCounted(CountFilesParams)),mCountFilesManager,SLOT(onFilesCounted(CountFilesParams)));
+
+    connect(ui->options->cacheFileList(), SIGNAL(clicked(bool)), this, SLOT(onCacheFileListClicked(bool)));
 
     mThread->start();
 
@@ -126,6 +137,15 @@ SessionWidget::SessionWidget(QWidget *parent) :
     SearchTab* tab = createTab();
     ui->results->addTab(tab,"");
     mListenOptions = true;
+}
+
+void SessionWidget::onCacheFileListClicked(bool cacheFileList) {
+
+    if (cacheFileList) {
+        onFilesCounted();
+    } else {
+        ui->options->hideFileCount();
+    }
 }
 
 SearchTab* SessionWidget::createTab() {
@@ -181,38 +201,31 @@ void SessionWidget::onFilterChanged(RegExpPath value) {
         copyToNewTab();
     }
     tab->params().setFilter(value);
-    mFilterChanged->onPost();
+
+    if (ui->options->cacheFileListIsChecked()) {
+        onFilesCounted();
+    }
 }
 
-QPair<int,int> SessionWidget::findCountFiles() {
-    SearchTab* tab = this->currentTab();
-    if (!tab) {
-        return {-1,-1};
-    }
-    for(int i=0;i<mCountFiles.size();i++) {
-        const CountFilesParams& params = mCountFiles[i];
-        if (params.filter() == tab->params().filter() && params.path() == tab->params().path()) {
-            return {params.filtered(), params.total()};
-        }
-    }
-    return {-1,-1};
+void SessionWidget::onFilesCounted() {
+    QString path = ui->options->path();
+    RegExpPath filter = ui->options->filter();
+    //bool notBinary = ui->options->notBinary();
+    QPair<int,int> count = mCountFilesManager->count(path, filter);
+    ui->options->showFileCount(count.first, count.second);
 }
 
 void SessionWidget::onCountFiles() {
-    QPair<int,int> count = findCountFiles();
-    SearchTab* tab = this->currentTab();
-    if (!tab) {
+    if (!ui->options->cacheFileListIsChecked()) {
+        ui->options->hideFileCount();
         return;
     }
-    if (count.first < 0) {
-        CountFilesParams params(tab->params().path(), tab->params().filter(), tab->params().skipBinary());
-        mCountFiles.append(params);
-        emit countFiles(params);
-    }
+    onFilesCounted();
 }
 
-void SessionWidget::onFilesCounted(CountFilesParams) {
-
+void SessionWidget::on_open_textChanged(QString)
+{
+    mGetListing->onPost();
 }
 
 void SessionWidget::onReplacementChanged(RegExpReplacement value) {
@@ -349,7 +362,7 @@ void SessionWidget::onSearch() {
 
     tab->params().setId(searchId);
     tab->params().setPath(ui->options->path());
-    tab->params().setCacheFileList(ui->options->cacheFileList());
+    tab->params().setCacheFileList(ui->options->cacheFileListIsChecked());
     tab->hits().clear();
     tab->trigRerender();
 
@@ -466,20 +479,6 @@ void SessionWidget::onCanceled() {
     mCancel = true;
 }
 
-void SessionWidget::onCanReplace(int searchId, bool can)
-{
-#if 0
-    SearchBrowser* browser = currentTab();
-    if (!browser) {
-        return;
-    }
-    if (browser->searchId() != searchId) {
-        return;
-    }
-    ui->options->setCanReplace(can);
-#endif
-}
-
 void SessionWidget::save(Format format) {
 
     SearchTab* tab = currentTab();
@@ -565,6 +564,11 @@ void SessionWidget::on_results_currentChanged(int index) {
     ui->options->setFiler(tab->params().filter());
     ui->options->setReplacement(tab->params().replacement());
     ui->options->setMode(tab->mode());
+
+    if (ui->options->cacheFileListIsChecked()) {
+        onFilesCounted();
+    }
+
     mListenOptions = true;
 
     updateReplaceButton();
@@ -669,19 +673,30 @@ QString nameFromPath(const QString& path) {
     return path.mid(p + 1);
 }
 
-void SessionWidget::onAllFiles(QString path, QStringList files) {
+void SessionWidget::onListing(QString path, QStringList files) {
 
-    //qDebug() << "SessionWidget::onAllFiles" << path;
+    qDebug() << "SessionWidget::onListing" << path;
 
-    QString path_ = ui->options->path();
-    if (path != path_) {
+    if (ui->options->path() != path) {
         return;
     }
-    mFileList = files;
 
-    QCompleter* completer = new QCompleter(ui->open);
+    bool update = !mAllFiles.contains(path) || mAllFiles[path] != files;
 
-    QStandardItemModel* model = new QStandardItemModel(mFileList.size(), 2);
+    mAllFiles[path] = files;
+
+    if (!update) {
+        return;
+    }
+
+    QCompleter* completer = ui->open->completer();
+    if (completer) {
+        completer->deleteLater();
+    }
+
+    completer = new QCompleter(ui->open);
+
+    QStandardItemModel* model = new QStandardItemModel(files.size(), 2, completer);
 
     for(int r=0;r<model->rowCount();r++) {
         model->setData(model->index(r,0), nameFromPath(files[r]));
@@ -693,10 +708,9 @@ void SessionWidget::onAllFiles(QString path, QStringList files) {
     completer->setFilterMode(Qt::MatchContains);
     completer->setCaseSensitivity(Qt::CaseInsensitive);
 
-    QTreeView* view = new QTreeView;
+    QTreeView* view = new QTreeView(ui->open);
     completer->setPopup(view);
     view->header()->hide();
-
     view->header()->setSectionResizeMode(1, QHeaderView::Stretch);
     view->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
     view->header()->setStretchLastSection(false);
@@ -704,7 +718,16 @@ void SessionWidget::onAllFiles(QString path, QStringList files) {
 
     ui->open->setCompleter(completer);
 
-    //connect(completer, SIGNAL(activated(QModelIndex)), this, SLOT(onCompleterActivated(QModelIndex)));
+    if (!ui->open->text().isEmpty()) {
+        if (!completer->popup()->isVisible()) {
+            //completer->popup()->show();
+
+            completer->complete();
+
+        }
+    }
+
+    connect(completer, SIGNAL(activated(QModelIndex)), this, SLOT(onCompleterActivated(QModelIndex)));
 }
 
 void SessionWidget::onCompleterActivated(QModelIndex index) {
@@ -715,4 +738,13 @@ void SessionWidget::onCompleterActivated(QModelIndex index) {
     QString path = model->data(model->index(index.row(),1)).toString();
     QUrl url = QUrl::fromLocalFile(path);
     mClickHandler->onAnchorClicked(url);
+}
+
+void SessionWidget::onGetListing() {
+    QString path = ui->options->path();
+    if (ui->options->cacheFileListIsChecked() && mAllFiles.contains(path)) {
+        return;
+    }
+    emit getListing(GetListingParams(path, ui->options->cacheFileListIsChecked()));
+    qDebug() << "emit getListing(path)";
 }

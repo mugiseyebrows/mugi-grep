@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>436</width>
-    <height>129</height>
+    <height>154</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -38,16 +38,6 @@
       <widget class="QLabel" name="label_3">
        <property name="text">
         <string>Find</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="2">
-      <widget class="QCheckBox" name="notBinary">
-       <property name="text">
-        <string>not binary</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
        </property>
       </widget>
      </item>
