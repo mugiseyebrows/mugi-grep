@@ -43,7 +43,7 @@ SessionWidget::SessionWidget(QWidget *parent) :
     ui(new Ui::SessionWidget),
     mClickHandler(new AnchorClickHandler()),
     mListenOptions(false),
-    mReplacementChanged(new CallOnce("mReplacementChanged", 500, this)),
+    /*mReplacementChanged(new CallOnce("mReplacementChanged", 500, this)),*/
     mGetListing(new CallOnce("mGetAllFiles", 500, this)),
     mCountFilesManager(new CountFilesManager(this))
 {
@@ -104,7 +104,7 @@ SessionWidget::SessionWidget(QWidget *parent) :
     connect(this,SIGNAL(replace(ReplaceParams)),mWorker,SLOT(onReplace(ReplaceParams)));
     connect(mWorker,SIGNAL(replaced(int,int)),this,SLOT(onReplaced(int,int)));
 
-    connect(mReplacementChanged,SIGNAL(call()),this,SLOT(onPreview()));
+    //connect(mReplacementChanged,SIGNAL(call()),this,SLOT(onPreview()));
     //connect(mCountFiles,SIGNAL(call()),this,SLOT(onCountFiles()));
     connect(mGetListing,SIGNAL(call()),this,SLOT(onGetListing()));
     connect(this,SIGNAL(getListing(GetListingParams)),mWorker,SLOT(onGetListing(GetListingParams)));
@@ -237,9 +237,9 @@ void SessionWidget::onReplacementChanged(RegExpReplacement value) {
         return;
     }
     tab->params().setReplacement(value);
-    if (tab->mode() == Mode::Preview && !tab->hits().isEmpty()) {
+    /*if (tab->mode() == Mode::Preview && !tab->hits().isEmpty()) {
         mReplacementChanged->onPost();
-    }
+    }*/
 }
 
 SessionWidget::~SessionWidget()
@@ -721,6 +721,8 @@ void SessionWidget::onListing(QString path, QStringList files) {
     if (!ui->open->text().isEmpty()) {
         if (!completer->popup()->isVisible()) {
             //completer->popup()->show();
+
+            completer->setCompletionPrefix(ui->open->text());
 
             completer->complete();
 

@@ -10,10 +10,14 @@ RC_FILE = src/mugi-grep.rc
 
 INCLUDEPATH += src src/widget src/model
 
+include (src/tablebuttons/tablebuttons.pri)
+
 HEADERS += \
     src/countfilesmanager.h \
     src/countfilesparams.h \
     src/displayoptions.h \
+    src/editordetector.h \
+    src/editorsdialog.h \
     src/fileio.h \
     src/format.h \
     src/getlistingparams.h \
@@ -30,6 +34,7 @@ HEADERS += \
     src/searchresultrenderer.h \
     src/searchtab.h \
     src/widget/displayoptionswidget.h \
+    src/widget/oneormanyeditors.h \
     src/worker.h \
     src/utils.h \
     src/replacementline.h \
@@ -72,6 +77,8 @@ SOURCES += \
     src/countfilesmanager.cpp \
     src/countfilesparams.cpp \
     src/displayoptions.cpp \
+    src/editordetector.cpp \
+    src/editorsdialog.cpp \
     src/fileio.cpp \
     src/format.cpp \
     src/getlistingparams.cpp \
@@ -88,6 +95,7 @@ SOURCES += \
     src/searchresultrenderer.cpp \
     src/searchtab.cpp \
     src/widget/displayoptionswidget.cpp \
+    src/widget/oneormanyeditors.cpp \
     src/worker.cpp \
     src/utils.cpp \
     src/replacementline.cpp \
@@ -127,7 +135,9 @@ SOURCES += \
     src/widget/lineeditandcheckbox.cpp
 
 FORMS += \
+    src/editorsdialog.ui \
     src/widget/displayoptionswidget.ui \
+    src/widget/oneormanyeditors.ui \
     src/widget/sessionwidget.ui \
     src/widget/searchoptionswidget.ui \
     src/widget/mainwindow.ui \

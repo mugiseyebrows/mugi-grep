@@ -11,6 +11,8 @@
 #include "jsonhelper.h"
 #include "regexppath.h"
 
+#define IS_DEBUG false
+
 /*static*/
 Settings* Settings::mInstance = nullptr;
 
@@ -23,6 +25,11 @@ Settings *Settings::instance()
 
 void Settings::load()
 {
+
+    if (IS_DEBUG) {
+        return;
+    }
+
     QString path = this->settingsPath();
     if (!QFile(path).exists()) {
 
@@ -57,7 +64,7 @@ void Settings::load()
     QJsonArray editors = settings.value("editors").toArray();
 
     for(QJsonValue editor: editors) {
-        mEditors.append(Editor(editor.toObject()));
+        mEditors.append(Editor::fromJson(editor.toObject()));
     }
 }
 
@@ -92,14 +99,16 @@ void Settings::setExps(const QJsonObject &value)
 
 void Settings::save()
 {
+    if (IS_DEBUG) {
+        return;
+    }
+
     QJsonObject settings;
 
     QJsonArray editors;
     Editor editor;
-    foreach(editor,mEditors) {
-        QJsonObject editor_;
-        editor.toJson(editor_);
-        editors << editor_;
+    for(const Editor& editor: mEditors) {
+        editors << editor.toJson();
     }
     settings["editors"] = editors;
     settings["sessions"] = mSessions;
@@ -114,15 +123,16 @@ void Settings::save()
 QString Settings::editor(const QString &path) const
 {
 
-    if (mEditors.isEmpty())
+    if (mEditors.isEmpty()) {
         return QString();
+    }
 
     QString ext = RegExpPath::getExt(path);
 
-    Editor editor;
-    foreach(editor,mEditors) {
-        if (editor.exp().match(ext).hasMatch())
+    for(const Editor& editor: mEditors) {
+        if (editor.matches(ext)) {
             return editor.app();
+        }
     }
     return QString();
 }
@@ -167,7 +177,8 @@ void Settings::fromModel(QAbstractItemModel *model)
     for(int i=0;i<model->rowCount();i++) {
         QString exts = model->data(model->index(i,0)).toString();
         QString app = model->data(model->index(i,1)).toString();
-        if (!exts.isEmpty() && !app.isEmpty())
-            mEditors.append( Editor(exts,app) );
+        if (!exts.isEmpty() && !app.isEmpty()) {
+            mEditors.append(Editor(exts,app));
+        }
     }
 }

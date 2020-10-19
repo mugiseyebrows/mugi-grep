@@ -23,7 +23,7 @@ signals:
     //void editorSet();
 public slots:
 
-    void onSetEditor();
+    void onSetEditor(QString path);
     void onAnchorClicked(QUrl);
 protected slots:
 

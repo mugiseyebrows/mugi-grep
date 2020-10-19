@@ -20,6 +20,7 @@
 #include <QJsonArray>
 #include "anchorclickhandler.h"
 #include "completermodelmanager.h"
+#include "editordetector.h"
 
 #define IS_DEBUG true
 
@@ -39,9 +40,17 @@ MainWindow::MainWindow(QWidget *parent) :
     if (IS_DEBUG) {
         QJsonObject obj;
         QString path = "D:\\w\\untitled1";
-        path = "C:\\Qt\\5.15.1\\Src\\qtbase";
+        //path = "C:\\Qt\\5.15.1\\Src\\qtbase";
         obj["path"] = path;
         addSession(obj);
+
+        path = "D:\\dev\\cpp-compile-on-save";
+        obj["path"] = path;
+        addSession(obj);
+
+        /*QList<Editor> editors = EditorDetector::detect();
+        qDebug() << "1";*/
+
     } else {
         QJsonArray sessions = Settings::instance()->sessions();
         if (sessions.size() > 0) {
@@ -239,7 +248,7 @@ void MainWindow::on_loadSessions_triggered() {
 
 void MainWindow::on_setEditors_triggered()
 {
-    mClickHandler->onSetEditor();
+    mClickHandler->onSetEditor(QString());
 }
 
 void MainWindow::onReadStarted(QWidget* w) {

@@ -1,4 +1,4 @@
-const {CppClass, cpp, qt, mName, CppSignature, pointer, constRef, ref} = require('mugicpp')
+const {CppClass, cpp, qt, mName, CppSignature, pointer, constRef, ref, sc} = require('mugicpp')
 const path = require('path')
 
 let src = path.join(__dirname, 'src')
@@ -351,7 +351,7 @@ function DisplayOptions() {
     c.write(src)
 }
 
-function just(m, keys) {
+function just(m, ...keys) {
     let r = {}
     keys.forEach(k => r[k] = m[k])
     return r;
@@ -430,8 +430,73 @@ function CountFilesParams() {
     c.write(src)
 }
 
+function Editor() {
+
+    let opt = {simpleTypes: ['Editor::Type']}
+
+    let c = new CppClass('Editor', opt)
+    let m = {
+        exts: qt.QString,
+        app: qt.QString,
+        type: 'Editor::Type',
+        exp: 'QRegularExpression'
+    }
+
+    for (let k in m) {
+        c.member(mName(k), m[k], {type: 'Type::NotSpecified'}[k], {exts: {setter: false}}[k])
+    }
+
+    c.definition(`
+    enum class Type {
+        NotSpecified,
+        VsCode,
+        QtCreator,
+        Geany
+    };
+    `,sc.CLASS)
+
+    c.method('name', qt.QString, '',
+    `static QMap<Editor::Type,QString> names = {
+        {Type::VsCode, "VsCode"},
+        {Type::QtCreator, "QtCreator"},
+        {Type::Geany, "Geany"},
+    }; return names.value(mType);`).const_()
+
+    c.method('setExts',cpp.void, 'const QString& value',
+    `
+    mExts = value;
+    mExp = QRegularExpression("^(" + mExts + ")$");
+    `)
+
+    c.method('isNull', cpp.bool, '', 'return mApp.isEmpty();').const_()
+
+    c.method('matches',cpp.bool,'const QString& ext', `return mExp.match(ext).hasMatch();`).const_()
+
+    c.method('fromJson', 'Editor', 'const QJsonObject& json',
+    `return Editor(json.value("exts").toString(), json.value("app").toString());
+    `).static()
+
+    c.method('toJson','QJsonObject', '', 
+    `QJsonObject json;
+    json["exts"] = mExts;
+    json["app"] = mApp;
+    return json;
+    `).const_()
+
+    c.constructor_()
+
+    let s = new CppSignature(opt)
+
+    c.constructor_(s.signature(just(m, 'exts','app', 'type'), {type: 'Type::NotSpecified'}),{},'setExts(exts);')
+    //c.constructor_('const QString& exts, const QString& app',{},'setExts(exts);')
+    
+    c.write(src)
+}
+
 // todo mugicpp metatype: add include QMetaType
 // todo mugicpp incude class Foo if ref or pointer
+// todo mugicpp canSpawn
+// todo mugicpp QRegularExpression,QJsonObject, qint64, qint8, etc
 
 SearchHit()
 SearchHits()
@@ -445,3 +510,4 @@ DisplayOptions()
 ReplaceFile()
 CountFilesParams()
 GetListingParams()
+Editor()

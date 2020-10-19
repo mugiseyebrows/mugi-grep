@@ -404,6 +404,7 @@ void SearchOptionsWidget::setPath(const QString &path)
 }
 
 void SearchOptionsWidget::loadCollected() {
+
     RXCollector* collector = RXCollector::instance();
     collector->load(ui->pattern);
     collector->load(ui->filter);

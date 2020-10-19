@@ -99,17 +99,18 @@ void AnchorClickHandler::connectBrowser(QTextBrowser *browser)
    connect(browser,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(onCustomContextMenuRequested(QPoint)));
 }
 
-void AnchorClickHandler::onSetEditor()
+void AnchorClickHandler::onSetEditor(QString path)
 {
     QWidget* widget = qApp->activeWindow();
 
-    SettingsDialog dialog(widget);
-    if (dialog.exec() == QDialog::Accepted) {
-        dialog.apply();
-        QString error = Settings::instance()->error();
-        if (!error.isEmpty()) {
-            QMessageBox::critical(widget,"error",error);
-        }
+    SettingsDialog dialog(path, widget);
+    if (dialog.exec() != QDialog::Accepted) {
+        return;
+    }
+    dialog.apply();
+    QString error = Settings::instance()->error();
+    if (!error.isEmpty()) {
+        QMessageBox::critical(widget,"error",error);
     }
 }
 
@@ -122,7 +123,7 @@ void AnchorClickHandler::onAnchorClicked(QUrl url) {
 
     QString editor = Settings::instance()->editor(path);
     if (editor.isEmpty()) {
-        onSetEditor();
+        onSetEditor(path);
         editor = Settings::instance()->editor(path);
         if (!editor.isEmpty()) {
             onAnchorClicked(url);

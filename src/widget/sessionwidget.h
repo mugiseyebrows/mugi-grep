@@ -74,7 +74,7 @@ protected:
 
     Worker* mWorker;
     QThread* mThread;
-    CallOnce* mReplacementChanged;
+    //CallOnce* mReplacementChanged;
     //CallOnce* mCountFiles;
     CallOnce* mGetListing;
 

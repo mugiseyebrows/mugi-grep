@@ -11,6 +11,11 @@ public:
     
     QVariant headerData(int section, Qt::Orientation orientation, int role) const;
 
+    bool isEmpty() const;
+
+    int append(const QString& path);
+
+    int emptyRow() const;
 signals:
     
 public slots:

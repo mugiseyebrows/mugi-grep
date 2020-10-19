@@ -1,40 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SettingsDialog</class>
- <widget class="QDialog" name="SettingsDialog">
+ <class>OneOrManyEditors</class>
+ <widget class="QDialog" name="OneOrManyEditors">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>311</width>
+    <height>108</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Settings</string>
+   <string>Choose option</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QGroupBox" name="groupBox">
-     <property name="title">
-      <string>Editors</string>
+    <widget class="QRadioButton" name="manyEditors">
+     <property name="text">
+      <string>Specific editor for each file type (extension)</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
-      <item>
-       <widget class="QTableView" name="editors">
-        <attribute name="horizontalHeaderStretchLastSection">
-         <bool>true</bool>
-        </attribute>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>command line arguments: %file% - file path, %line% - for line number</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QRadioButton" name="oneEditor">
+     <property name="text">
+      <string>One editor for all file types (extensions)</string>
+     </property>
     </widget>
    </item>
    <item>
@@ -54,7 +48,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>SettingsDialog</receiver>
+   <receiver>OneOrManyEditors</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -70,7 +64,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>SettingsDialog</receiver>
+   <receiver>OneOrManyEditors</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
