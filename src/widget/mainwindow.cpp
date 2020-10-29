@@ -22,7 +22,7 @@
 #include "completermodelmanager.h"
 #include "editordetector.h"
 
-#define IS_DEBUG true
+#define IS_DEBUG false
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
