@@ -140,6 +140,8 @@ SessionWidget::SessionWidget(QWidget *parent) :
     ui->results->addTab(tab,"");
     mListenOptions = true;
 
+    //tab->textBrowser()->setText("test");
+
     //RXCollector::instance()->load(ui->options->pathEdit());
 }
 

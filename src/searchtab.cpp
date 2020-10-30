@@ -4,6 +4,12 @@
 #include <QTextBrowser>
 #include <QVBoxLayout>
 
+bool isDarker(const QColor& color1, const QColor& color2) {
+    double v1 = color1.valueF();
+    double v2 = color2.valueF();
+    return v1 < v2;
+}
+
 SearchTab::SearchTab(QWidget* parent) : QWidget(parent), mMode(Mode::Search) {
 
     QVBoxLayout* layout = new QVBoxLayout();
@@ -19,6 +25,18 @@ SearchTab::SearchTab(QWidget* parent) : QWidget(parent), mMode(Mode::Search) {
     mTextBrowser->setOpenLinks(false);
     mDisplayOptionsWidget = new DisplayOptionsWidget();
     mRenderer = new SearchResultRenderer();
+
+    //QColor color = this->palette().color(QPalette::Window);
+
+    QColor baseColor = this->palette().color(QPalette::Base);
+
+    QColor gray = QColor(128, 128, 128);
+
+    bool darkMode = isDarker(baseColor, gray);
+
+    mRenderer->setDarkMode(darkMode);
+    mRenderer->setBaseColor(baseColor.name());
+
     layout->addWidget(mTextBrowser);
     layout->addWidget(mDisplayOptionsWidget);
     layout->setContentsMargins(0, 0, 0, 0);

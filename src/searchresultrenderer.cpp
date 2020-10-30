@@ -6,7 +6,7 @@
 #include "searchtab.h"
 #include <QDebug>
 
-SearchResultRenderer::SearchResultRenderer(QObject *parent) : QObject(parent), mZebra(false)
+SearchResultRenderer::SearchResultRenderer(QObject *parent) : QObject(parent), mTab(0), mZebra(false), mDarkMode(false)
 {
 
 }
@@ -34,13 +34,16 @@ QString fileHref(const QString& path, int lineNumber) {
 QStringList SearchResultRenderer::toHtmlSpans(const ColoredLine& coloredLine,
                                    const QStringList& backgroundColors) {
     QStringList cols;
+
+    QString foreground = mDarkMode ? "white" : "black";
+
     QList<ColoredLineSpan> spans = coloredLine.spans();
     foreach (const ColoredLineSpan& span, spans) {
         QString col = coloredLine.string().mid(span.start(), span.length());
         if (span.background() == 0 || span.background() >= backgroundColors.size()) {
-            cols << Html::span(col, span.foreground() == 0 ? "black" : "red");
+            cols << Html::span(col, span.foreground() == 0 ? foreground : "red");
         } else {
-            cols << Html::span(col, span.foreground() == 0 ? "black" : "red",
+            cols << Html::span(col, span.foreground() == 0 ? foreground : "red",
                                backgroundColors[span.background()]);
         }
     }
@@ -208,6 +211,8 @@ protected:
 
 };
 
+#include <QApplication>
+
 void SearchResultRenderer::appendSearch(const SearchHits& hits) {
     RegExp pattern = hits.pattern();
 
@@ -233,14 +238,31 @@ void SearchResultRenderer::appendSearch(const SearchHits& hits) {
 
         QMap<int, bool> zebra = doZebra(linesBefore, linesAfter, matched);
 
-        static QStringList backgroundColors = {"#ffffff", "#ffdfba", "#baffc9",
-                                               "#bae1ff", "#ffffba", "#ffb3ba"};
+        QStringList backgroundColors;
+        QStringList grayZebraColors;
 
-        QStringList grayZebraColors = {"#E6E6E6", "#F0F0F0"};
+        if (mDarkMode) {
+            backgroundColors = QStringList {mBaseColor, "#99856F", "#6F9978",
+                    "#829DB2", "#CCCC94", "#CC9096"};
+        } else {
+            backgroundColors = QStringList {mBaseColor, "#ffdfba", "#baffc9",
+                    "#bae1ff", "#ffffba", "#ffb3ba"};
+        }
+
+        if (mDarkMode) {
+            grayZebraColors = QStringList {"#191919", "#494949"};
+        } else {
+            grayZebraColors = QStringList {"#E6E6E6", "#F0F0F0"};
+        }
 
         if (linesBefore == 0 && linesAfter == 0) {
-            grayZebraColors = QStringList {"#ffffff", "#ffffff"};
+            /*if (mDarkMode) {*/
+                grayZebraColors = QStringList {mBaseColor, mBaseColor};
+            /*} else {
+                grayZebraColors = QStringList {mBaseColor, mBaseColor};
+            }*/
         }
+
 
         /*int zebraColor1 = backgroundColors.size();
         int zebraColor2 = zebraColor1 + 1;*/
@@ -682,7 +704,25 @@ ReplaceParams SearchResultRenderer::replaceParams()
     return result;
 }
 
+void SearchResultRenderer::setDarkMode(bool darkMode)
+{
+    if (mDarkMode == darkMode) {
+        return;
+    }
+    mDarkMode = darkMode;
+    onOptionsChanged();
+}
+
+void SearchResultRenderer::setBaseColor(const QString &color)
+{
+    mBaseColor = color;
+}
+
 void SearchResultRenderer::onOptionsChanged() {
+    if (!mTab) {
+        return;
+    }
+
     DisplayOptions options = mTab->displayOptions();
     mTab->textBrowser()->clear();
     mTab->hits().read(options.linesBefore(), options.linesAfter());

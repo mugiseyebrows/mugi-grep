@@ -68,7 +68,7 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
 
-    qDebug() << 1;
+    //qDebug() << 1;
 
     //connect(mMapper,SIGNAL(mapped(QWidget*)),this,SLOT(onReadStarted(QWidget*)));
 }
