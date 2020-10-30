@@ -71,7 +71,8 @@ HEADERS += \
     src/coloredline.h \
     src/coloredlinespan.h \
     src/hunk.h \
-    src/widget/lineeditandcheckbox.h
+    src/widget/lineeditandcheckbox.h \
+    src/completerhelper.h
 
 SOURCES += \
     src/countfilesmanager.cpp \
@@ -132,7 +133,8 @@ SOURCES += \
     src/coloredline.cpp \
     src/coloredlinespan.cpp \
     src/hunk.cpp \
-    src/widget/lineeditandcheckbox.cpp
+    src/widget/lineeditandcheckbox.cpp \
+    src/completerhelper.cpp
 
 FORMS += \
     src/editorsdialog.ui \

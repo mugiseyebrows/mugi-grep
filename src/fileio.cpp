@@ -34,7 +34,8 @@ QStringList FileIO::readLines(const QString& path) {
 }
 
 bool FileIO::writeLines(const QString& path, const QString& line) {
-    return writeLines(path, {line});
+    QStringList lines = {line};
+    return writeLines(path, lines);
 }
 
 bool FileIO::writeLines(const QString& path, const QStringList& lines) {

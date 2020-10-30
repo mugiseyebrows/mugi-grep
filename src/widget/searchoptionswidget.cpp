@@ -386,8 +386,10 @@ void SearchOptionsWidget::collect(Mode mode)
         collector->collect(ui->pattern->value());
         collector->collect(ui->filter->value());
     } else if (mode == Mode::Replace){
-        collector->collect(ui->replacement->value().pattern());
+        collector->collectReplacement(ui->replacement->value().pattern());
     }
+
+    collector->collectPath(ui->path->text());
 
     //updateCollector();
 
@@ -409,6 +411,7 @@ void SearchOptionsWidget::loadCollected() {
     collector->load(ui->pattern);
     collector->load(ui->filter);
     collector->load(ui->replacement);
+    collector->load(ui->path->lineEdit());
 }
 
 bool SearchOptionsWidget::validate()
@@ -444,4 +447,9 @@ void SearchOptionsWidget::setPattern(const RegExp& value)
 
 void SearchOptionsWidget::setReplacement(const RegExpReplacement& value) {
     ui->replacement->setValue(value);
+}
+
+QLineEdit *SearchOptionsWidget::pathEdit() const
+{
+    return ui->path->lineEdit();
 }

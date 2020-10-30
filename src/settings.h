@@ -31,9 +31,11 @@ public:
 
     void setSessions(const QJsonArray& value);
 
-    void setExps(const QJsonObject &value);
+    void setPatterns(const QJsonObject &value);
 
-    QJsonObject exps() const;
+    QJsonObject patterns() const;
+    void setPaths(const QJsonArray &value);
+    QJsonArray paths() const;
 protected:
     static Settings* mInstance;
 
@@ -42,6 +44,7 @@ protected:
 
     QJsonArray mSessions;
     QJsonObject mPatterns;
+    QJsonArray mPaths;
     QString mDir;
 
     Settings();

@@ -165,6 +165,48 @@ QMap<int, bool> SearchResultRenderer::doZebra(int before, int after, const QList
     return result;
 }
 
+const QString trimRight(const QString& line) {
+    int p = line.lastIndexOf(QRegularExpression("\\r?\\n"));
+    if (p > -1) {
+        return line.mid(0,p);
+    }
+    return line;
+}
+
+class Divs {
+
+public:
+    Divs() {
+
+    }
+
+    void append(const QString& line, const QString& color) {
+        if (!mColor.isEmpty() && mColor != color) {
+            close();
+        }
+        mLines.append(line);
+        mColor = color;
+    }
+
+    void close() {
+        if (mLines.isEmpty()) {
+            return;
+        }
+        mDivs << QString("<div style=\"background-color:%1\">").arg(mColor) + mLines.join("<br/>") + "</div>";
+        mLines.clear();
+    }
+
+    QStringList divs() const {
+        return mDivs;
+    }
+
+protected:
+
+    QStringList mLines;
+    QStringList mDivs;
+    QString mColor;
+
+};
 
 void SearchResultRenderer::appendSearch(const SearchHits& hits) {
     RegExp pattern = hits.pattern();
@@ -179,7 +221,9 @@ void SearchResultRenderer::appendSearch(const SearchHits& hits) {
 
     //hits.read(before, after);
 
-    QStringList res;
+    //QStringList res;
+
+    Divs divs;
 
     for (int j = 0; j < hits.size(); j++) {
 
@@ -192,10 +236,14 @@ void SearchResultRenderer::appendSearch(const SearchHits& hits) {
         static QStringList backgroundColors = {"#ffffff", "#ffdfba", "#baffc9",
                                                "#bae1ff", "#ffffba", "#ffb3ba"};
 
-        static QStringList grayZebraColors = {"#E6E6E6", "#F0F0F0"};
+        QStringList grayZebraColors = {"#E6E6E6", "#F0F0F0"};
 
-        int zebraColor1 = backgroundColors.size();
-        int zebraColor2 = zebraColor1 + 1;
+        if (linesBefore == 0 && linesAfter == 0) {
+            grayZebraColors = QStringList {"#ffffff", "#ffffff"};
+        }
+
+        /*int zebraColor1 = backgroundColors.size();
+        int zebraColor2 = zebraColor1 + 1;*/
 
         int max1 = *std::max_element(matched.begin(), matched.end());
         int max2 = siblings.isEmpty() ? 0 : *std::max_element(siblings.begin(), siblings.end());
@@ -231,8 +279,12 @@ void SearchResultRenderer::appendSearch(const SearchHits& hits) {
                         }
                         coloredLine.paintForeground(m.capturedStart(), m.capturedEnd(), 1);
                         cols << toHtmlSpans(coloredLine.mid(m.capturedStart(), m.capturedLength()),
-                                            backgroundColors + grayZebraColors);
-                        res << cols.join("");
+                                            backgroundColors);
+
+                        //res << cols.join("");
+
+                        divs.append(cols.join(""), zebra[i] ? grayZebraColors[0] : grayZebraColors[1]);
+
                     }
                 } else {
                     // all matches on one line
@@ -240,9 +292,9 @@ void SearchResultRenderer::appendSearch(const SearchHits& hits) {
                                                           mRelativePath, fileHref(mPath, i), i + 1);
                     ColoredLine coloredLine(line);
 
-                    if (linesBefore > 0 || linesAfter > 0) {
+                    /*if (linesBefore > 0 || linesAfter > 0) {
                         coloredLine.paintBackground(zebra[i] ? zebraColor1 : zebraColor2);
-                    }
+                    }*/
 
                     while (it.hasNext()) {
                         QRegularExpressionMatch m = it.next();
@@ -254,8 +306,10 @@ void SearchResultRenderer::appendSearch(const SearchHits& hits) {
                         int end = m.capturedEnd();
                         coloredLine.paintForeground(start, end, 1);
                     }
-                    cols << toHtmlSpans(coloredLine, backgroundColors + grayZebraColors);
-                    res << cols.join("");
+                    cols << toHtmlSpans(coloredLine, backgroundColors);
+                    //res << cols.join("");
+
+                    divs.append(cols.join(""), zebra[i] ? grayZebraColors[0] : grayZebraColors[1]);
                 }
 
             } else if (siblings.contains(i)) {
@@ -273,18 +327,39 @@ void SearchResultRenderer::appendSearch(const SearchHits& hits) {
 
                 ColoredLine coloredLine(line);
 
-                if (linesBefore > 0 || linesAfter > 0) {
+                /*if (linesBefore > 0 || linesAfter > 0) {
                     coloredLine.paintBackground(zebra[i] ? zebraColor1 : zebraColor2);
-                }
+                }*/
 
                 cols << toHtmlSpans(coloredLine, backgroundColors + grayZebraColors);
 
                 //cols << Html::span(line, "black");
-                res << cols.join("");
+
+                /*if (cols.size() == 1) {
+                    qDebug() << 1;
+                }*/
+
+                //res << cols.join("");
+
+                divs.append(cols.join(""), zebra[i] ? grayZebraColors[0] : grayZebraColors[1]);
+
             }
         }
     }
-    mTab->textBrowser()->append(res.join("<br/>"));
+    //QString html = res.join("<br/>");
+
+    divs.close();
+
+    QString html = divs.divs().join("");
+
+    if (html.isEmpty()) {
+        return;
+    }
+
+    /*static int i = 0;
+    dump(QString("D:\\w\\%1.html").arg(i), html);*/
+
+    mTab->textBrowser()->append(html);
 }
 
 

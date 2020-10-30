@@ -52,7 +52,14 @@ MainWindow::MainWindow(QWidget *parent) :
         qDebug() << "1";*/
 
     } else {
-        QJsonArray sessions = Settings::instance()->sessions();
+
+        RXCollector* collector = RXCollector::instance();
+        Settings* settings = Settings::instance();
+
+        collector->deserializePatterns(settings->patterns());
+        collector->deserializePaths(settings->paths());
+
+        QJsonArray sessions = settings->sessions();
         if (sessions.size() > 0) {
             deserealizeSessions(sessions);
         } else {
@@ -60,10 +67,10 @@ MainWindow::MainWindow(QWidget *parent) :
         }
     }
 
-    QJsonObject exps = Settings::instance()->exps();
-    deserealizeExps(exps);
-    connect(mMapper,SIGNAL(mapped(QWidget*)),this,SLOT(onReadStarted(QWidget*)));
 
+    qDebug() << 1;
+
+    //connect(mMapper,SIGNAL(mapped(QWidget*)),this,SLOT(onReadStarted(QWidget*)));
 }
 
 MainWindow::~MainWindow()
@@ -84,23 +91,19 @@ void MainWindow::closeEvent(QCloseEvent * e)
         }
     }
 
-    QJsonArray sessions;
-    serializeSessions(sessions);
-    QJsonObject exps;
-    serializeExps(exps);
-
     if (IS_DEBUG) {
 
     } else {
-        Settings::instance()->setSessions(sessions);
-        Settings::instance()->setExps(exps);
+        Settings::instance()->setSessions(serializeSessions());
+        Settings::instance()->setPatterns(RXCollector::instance()->serializePatterns());
+        Settings::instance()->setPaths(RXCollector::instance()->serializePaths());
         Settings::instance()->save();
     }
 
     e->accept();
 }
 
-void MainWindow::addSession(const QJsonObject &v) {
+void MainWindow::addSession(const QJsonValue &v) {
     SessionWidget* session = new SessionWidget(ui->tabs);
     //session->setCacheFileList(ui->cacheFileList);
 
@@ -109,15 +112,17 @@ void MainWindow::addSession(const QJsonObject &v) {
 
     // todo: tab name collisions
     QString title = "untitled";
-    QString path = v.value("path").toString();
+    QString path = v.toString();
+
     if (!path.isEmpty()) {
         title = QFileInfo(path).baseName();
+        RXCollector::instance()->collectPath(path);
     }
-    ui->tabs->addTab(session,title);
+    ui->tabs->addTab(session, title);
     mMapper->setMapping(session,session);
-    if (!v.isEmpty()) {
-        session->deserialize(v);
-    }
+
+    session->deserialize(v);
+
     session->loadCollected();
     /*connect(session,&SessionWidget::collect,[=](){
         mCompleterModelManager->onCollect(session->options(), ui->tabs);
@@ -148,22 +153,17 @@ SessionWidget *MainWindow::currentTab() {
     return tab(ui->tabs->currentIndex());
 }
 
-void MainWindow::serializeSessions(QJsonArray& json) const
+QJsonArray MainWindow::serializeSessions() const
 {
+    QJsonArray result;
     for(int i=0;i<ui->tabs->count();i++) {
         QWidget* w = ui->tabs->widget(i);
         SessionWidget* sw = qobject_cast<SessionWidget*>(w);
         if (!sw)
             continue;
-        QJsonObject session;
-        sw->serialize(session);
-        json << session;
+        result.append(sw->serialize());
     }
-}
-
-void MainWindow::serializeExps(QJsonObject& json) const {
-
-    return RXCollector::instance()->serialize(json);
+    return result;
 }
 
 void MainWindow::deserealizeSessions(const QJsonArray& vl)
@@ -172,12 +172,8 @@ void MainWindow::deserealizeSessions(const QJsonArray& vl)
         removeSession();
     }
     for(const QJsonValue& v : vl) {
-        addSession(v.toObject());
+        addSession(v);
     }
-}
-
-void MainWindow::deserealizeExps(const QJsonObject& exps) {
-    RXCollector::instance()->deserialize(exps);
 }
 
 void MainWindow::on_addSession_triggered()
@@ -208,8 +204,7 @@ void MainWindow::on_saveSessions_triggered() {
     if (path.isEmpty())
         return;
 
-    QJsonArray sessions;
-    serializeSessions(sessions);
+    QJsonArray sessions = serializeSessions();
     if (!saveJson(path, sessions)) {
         QMessageBox::critical(this,"Error","Cannot write file " + path);
     }
@@ -251,6 +246,7 @@ void MainWindow::on_setEditors_triggered()
     mClickHandler->onSetEditor(QString());
 }
 
+#if 0
 void MainWindow::onReadStarted(QWidget* w) {
 
     //QFileInfo(path).baseName();
@@ -268,6 +264,7 @@ void MainWindow::onReadStarted(QWidget* w) {
     }
     ui->tabs->setTabText(index,name);
 }
+#endif
 
 void MainWindow::on_tabs_currentChanged(int index)
 {
@@ -287,8 +284,8 @@ void MainWindow::on_removeAllSessions_triggered()
     while (ui->tabs->count() > 0) {
         on_removeSession_triggered();
     }
+    addSession();
 }
-
 
 void MainWindow::setCurrentTabMode(Mode mode) {
     SessionWidget* tab = currentTab();

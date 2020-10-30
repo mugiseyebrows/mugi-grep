@@ -59,7 +59,8 @@ void Settings::load()
     QJsonObject settings = doc.object();
 
     mSessions = settings.value("sessions").toArray();
-    mPatterns = settings.value("pattern").toObject();
+    mPatterns = settings.value("patterns").toObject();
+    mPaths = settings.value("paths").toArray();
 
     QJsonArray editors = settings.value("editors").toArray();
 
@@ -83,8 +84,12 @@ QJsonArray Settings::sessions() const
     return mSessions;
 }
 
-QJsonObject Settings::exps() const {
+QJsonObject Settings::patterns() const {
     return mPatterns;
+}
+
+QJsonArray Settings::paths() const {
+    return mPaths;
 }
 
 void Settings::setSessions(const QJsonArray &value)
@@ -92,9 +97,13 @@ void Settings::setSessions(const QJsonArray &value)
     mSessions = value;
 }
 
-void Settings::setExps(const QJsonObject &value)
+void Settings::setPatterns(const QJsonObject &value)
 {
     mPatterns = value;
+}
+
+void Settings::setPaths(const QJsonArray &value) {
+    mPaths = value;
 }
 
 void Settings::save()
@@ -106,13 +115,13 @@ void Settings::save()
     QJsonObject settings;
 
     QJsonArray editors;
-    Editor editor;
     for(const Editor& editor: mEditors) {
         editors << editor.toJson();
     }
     settings["editors"] = editors;
     settings["sessions"] = mSessions;
-    settings["pattern"] = mPatterns;
+    settings["patterns"] = mPatterns;
+    settings["paths"] = mPaths;
 
     QString path = this->settingsPath();
     saveJson(path, settings);

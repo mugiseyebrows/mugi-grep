@@ -28,16 +28,16 @@ public:
 
     void closeEvent(QCloseEvent *);
 
-    void addSession(const QJsonObject &v = QJsonObject());
+    void addSession(const QJsonValue &v = QJsonValue());
     void removeSession();
 
     SessionWidget* tab(int index);
     SessionWidget *currentTab();
 
     void deserealizeSessions(const QJsonArray &vl);
-    void serializeExps(QJsonObject &json) const;
-    void deserealizeExps(const QJsonObject &exps);
-    void serializeSessions(QJsonArray &json) const;
+    void serializePatterns(QJsonObject &json) const;
+    void deserealizePatterns(const QJsonObject &exps);
+    QJsonArray serializeSessions() const;
     void setCurrentTabMode(Mode mode);
 
 protected:
@@ -60,7 +60,7 @@ protected slots:
 
     void on_setEditors_triggered();
 
-    void onReadStarted(QWidget *);
+    //void onReadStarted(QWidget *);
 
     void on_tabs_currentChanged(int index);
 

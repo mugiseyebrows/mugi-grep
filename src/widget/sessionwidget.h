@@ -52,8 +52,8 @@ public:
 
     void loadCollected();
 
-    void serialize(QJsonObject &json) const;
-    void deserialize(const QJsonObject &v);
+    QJsonValue serialize() const;
+    void deserialize(const QJsonValue &v);
     SearchTab* find(int searchId);
     SearchTab *tab(int index);
     void countMatchedFiles();

@@ -7,6 +7,7 @@
 class RXInput;
 class RXPathInput;
 class RXReplaceInput;
+class QLineEdit;
 
 #include <QStringListModel>
 
@@ -16,23 +17,27 @@ public:
     static RXCollector* instance();
     void collect(const RegExpPath& exp);
     void collect(const RegExp& exp);
-    void collect(const QString &exp);
+    void collectReplacement(const QString &exp);
+    void collectPath(const QString &exp);
 
     void load(RXPathInput* input);
     void load(RXInput *input);
     void load(RXReplaceInput *input);
 
-    void serialize(QJsonObject& json);
+    void load(QLineEdit* edit);
+
+    QJsonObject serializePatterns();
 
     QList<QStringListModel *> prependModels(const QList<QStringListModel *> &models, const QStringList &exps);
 
-    void deserialize(const QList<QStringListModel *> &models, const QJsonArray &exps);
+    void deserializePatterns(const QList<QStringListModel *> &models, const QJsonArray &exps);
     QVariantList modelsLists(const QList<QStringListModel *> &models);
-    void deserialize(const QJsonObject &j);
+    void deserializePatterns(const QJsonObject &j);
     QList<QStringListModel*> models();
 
-
-
+    void deserializePatterns(QStringList &paths, const QJsonArray &arr);
+    QJsonArray serializePaths();
+    void deserializePaths(const QJsonArray &arr);
 protected:
     RXCollector();
     static RXCollector* mInstance;
@@ -40,6 +45,7 @@ protected:
     QList<QStringListModel*> mPathPatterns;
     QList<QStringListModel*> mPatterns;
     QList<QStringListModel*> mReplacements;
+    QStringList mPaths;
 };
 
 #endif // RXCOLLECTOR_H

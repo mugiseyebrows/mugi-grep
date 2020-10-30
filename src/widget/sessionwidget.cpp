@@ -19,7 +19,7 @@
 #include "mode.h"
 
 #include "worker.h"
-#include "rxcollector.h"
+
 #include "searchid.h"
 #include "settings.h"
 #include <QMessageBox>
@@ -35,6 +35,8 @@
 #include "fileio.h"
 #include "callonce.h"
 #include "countfilesmanager.h"
+
+#include "rxcollector.h"
 
 #define RESULT_TAB_LIMIT 10
 
@@ -137,6 +139,8 @@ SessionWidget::SessionWidget(QWidget *parent) :
     SearchTab* tab = createTab();
     ui->results->addTab(tab,"");
     mListenOptions = true;
+
+    //RXCollector::instance()->load(ui->options->pathEdit());
 }
 
 void SessionWidget::onCacheFileListClicked(bool cacheFileList) {
@@ -458,14 +462,18 @@ QString SessionWidget::path() const
     return ui->options->path();
 }
 
-void SessionWidget::serialize(QJsonObject& json) const
+QJsonValue SessionWidget::serialize() const
 {
-    json["path"] = ui->options->path();
+    //json["path"] = ui->options->path();
+    return QJsonValue(ui->options->path());
 }
 
-void SessionWidget::deserialize(const QJsonObject &v)
+void SessionWidget::deserialize(const QJsonValue &v)
 {
-    ui->options->setPath(v.value("path").toString());
+    if (v.isNull()) {
+        return;
+    }
+    ui->options->setPath(v.toString());
 }
 
 void SessionWidget::loadCollected()
@@ -629,6 +637,10 @@ void SessionWidget::onPathChanged(QString path)
     if (path.isEmpty()) {
         return;
     }
+
+    //QLineEdit* edit = ui->options->pathEdit();
+
+
 #if 0
     if (QDir(path).exists()) {
         //qDebug() << "getAllFiles" << path;
@@ -665,13 +677,7 @@ void SessionWidget::onReplaced(int files,int lines) {
     updateReplaceButton();
 }
 
-QString nameFromPath(const QString& path) {
-    int p = qMax(path.lastIndexOf('/'), path.lastIndexOf('\\'));
-    if (p < 0) {
-        return path;
-    }
-    return path.mid(p + 1);
-}
+#include "completerhelper.h"
 
 void SessionWidget::onListing(QString path, QStringList files) {
 
@@ -694,27 +700,9 @@ void SessionWidget::onListing(QString path, QStringList files) {
         completer->deleteLater();
     }
 
-    completer = new QCompleter(ui->open);
-
-    QStandardItemModel* model = new QStandardItemModel(files.size(), 2, completer);
-
-    for(int r=0;r<model->rowCount();r++) {
-        model->setData(model->index(r,0), nameFromPath(files[r]));
-        model->setData(model->index(r,1), files[r]);
-    }
-
-    completer->setModel(model);
-    completer->setCompletionMode(QCompleter::PopupCompletion);
-    completer->setFilterMode(Qt::MatchContains);
-    completer->setCaseSensitivity(Qt::CaseInsensitive);
-
-    QTreeView* view = new QTreeView(ui->open);
-    completer->setPopup(view);
-    view->header()->hide();
-    view->header()->setSectionResizeMode(1, QHeaderView::Stretch);
-    view->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
-    view->header()->setStretchLastSection(false);
-    view->setRootIsDecorated(false);
+    QStandardItemModel* model = CompleterHelper::filesToModel(files, ui->open);
+    completer = CompleterHelper::modelToCompleter(model, 0, ui->open);
+    CompleterHelper::completerTreeViewPopup(completer, ui->open);
 
     ui->open->setCompleter(completer);
 

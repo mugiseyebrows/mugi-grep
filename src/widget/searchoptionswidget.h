@@ -14,6 +14,7 @@ class RXInput;
 class RXPathInput;
 
 class QCheckBox;
+class QLineEdit;
 
 namespace Ui {
 class SearchOptionsWidget;
@@ -42,6 +43,8 @@ public:
     void setFiler(const RegExpPath &);
     void setPattern(const RegExp &);
     void setReplacement(const RegExpReplacement &value);
+
+    QLineEdit* pathEdit() const;
 
     //void setCacheFileList(QAction* action);
 
