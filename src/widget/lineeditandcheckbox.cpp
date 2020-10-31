@@ -43,4 +43,6 @@ bool LineEditAndCheckbox::isChecked() const {
     return ui->checkBox->isChecked();
 }
 
-
+QWidgetList LineEditAndCheckbox::widgets() const {
+    return QWidgetList {ui->lineEdit, ui->checkBox};
+}

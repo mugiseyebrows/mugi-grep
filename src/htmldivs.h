@@ -10,11 +10,17 @@ public:
 
     }
 
-    void append(const QString& line, const QString& color);
+    static QString div(const QString& text, const QString& backgroundColor = QString());
+
+    void append(const QString& line, const QString& color = QString());
 
     void close();
 
     QStringList divs() const;
+
+    bool isEmpty() const;
+
+    void clear();
 
 protected:
 

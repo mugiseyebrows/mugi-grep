@@ -25,6 +25,10 @@ RXInput::RXInput(QWidget *parent) :
     connect(ui->matchCase,SIGNAL(clicked(bool)),this,SLOT(onValueChanged()));
 }
 
+QWidgetList RXInput::widgets() const {
+    return QWidgetList {ui->include, ui->exclude, ui->matchCase};
+}
+
 RXInput::~RXInput()
 {
     delete ui;

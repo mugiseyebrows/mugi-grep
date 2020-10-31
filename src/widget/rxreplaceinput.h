@@ -25,6 +25,7 @@ public:
 
     bool validate(const QPalette &palette) override;
 
+    QWidgetList widgets() const;
 signals:
     void returnPressed();
     void valueChanged(RegExpReplacement);

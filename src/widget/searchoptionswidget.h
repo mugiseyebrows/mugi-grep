@@ -121,6 +121,7 @@ protected:
     void fixLayout();
     //bool notBinary() const;
     QCheckBox *cacheFileList();
+    QWidgetList widgets();
 public slots:
     void on_select_clicked();
 protected slots:
@@ -142,6 +143,7 @@ protected:
     Ui::SearchOptionsWidget *ui;
     //bool mActive;
     Mode mMode;
+
 };
 
 #endif // SEARCHOPTIONSWIDGET_H

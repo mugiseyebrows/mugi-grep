@@ -87,6 +87,7 @@ void Worker::onReplace(ReplaceParams params)
         }
         if (ok) {
             ok = FileIO::writeLines(file.path(), lines);
+            //ok = true;
             if (ok) {
                 countFiles++;
                 countLines += items.size();

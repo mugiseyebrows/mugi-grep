@@ -36,6 +36,10 @@ RXPathInput::~RXPathInput()
     delete ui;
 }
 
+QWidgetList RXPathInput::widgets() const {
+    return QWidgetList {ui->nameInclude, ui->extInclude, ui->nameExclude, ui->extExclude, ui->matchCase, ui->notBinary};
+}
+
 RegExpPath RXPathInput::value() const {
     return RegExpPath(exps(),ui->matchCase->isChecked(),ui->notBinary->isChecked());
 }

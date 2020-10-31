@@ -18,6 +18,10 @@ RXReplaceInput::RXReplaceInput(QWidget *parent) :
     connect(ui->preserveCase,SIGNAL(clicked(bool)),this,SLOT(onValueChanged()));
 }
 
+QWidgetList RXReplaceInput::widgets() const {
+    return QWidgetList {ui->replace, ui->preserveCase};
+}
+
 RXReplaceInput::~RXReplaceInput()
 {
     delete ui;

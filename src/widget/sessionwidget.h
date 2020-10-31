@@ -151,6 +151,9 @@ protected slots:
     void on_open_textChanged(QString);
 
     void onCacheFileListClicked(bool cacheFileList);
+private slots:
+    void on_clear_clicked();
+
 private:
     Ui::SessionWidget *ui;
     bool mListenOptions;

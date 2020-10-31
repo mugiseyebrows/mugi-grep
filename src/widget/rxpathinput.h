@@ -33,6 +33,7 @@ public:
     QCheckBox* matchCaseCheckBox() const;
 
     QCheckBox *notBinary();
+    QWidgetList widgets() const;
 protected slots:
     //void onTextChanged();
 

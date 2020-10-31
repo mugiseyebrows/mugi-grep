@@ -25,6 +25,7 @@ public:
     void setText(const QString &text);
     bool isChecked() const;
 
+    QWidgetList widgets() const;
 signals:
     void textChanged(QString);
 

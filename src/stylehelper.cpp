@@ -27,7 +27,7 @@ void StyleHelper::setDarkStyle()
     palette.setColor(QPalette::Shadow,QColor(0, 0, 0));
     palette.setColor(QPalette::Highlight,QColor(38, 79, 120));
     palette.setColor(QPalette::HighlightedText,QColor(240, 240, 240));
-    palette.setColor(QPalette::Link,QColor(0, 0, 255));
+    palette.setColor(QPalette::Link,QColor(120, 120, 255));
     palette.setColor(QPalette::LinkVisited,QColor(255, 0, 255));
     palette.setColor(QPalette::AlternateBase,QColor(45, 45, 45));
     palette.setColor(QPalette::NoRole,QColor(0, 0, 0));

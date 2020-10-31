@@ -1,6 +1,7 @@
 #include "hunk.h"
 
-Hunk::Hunk() : mLine(-1), mCount(0) {
+Hunk::Hunk(const QString& subjBackgroundColor, const QString& replBackgroundColor) :
+    mSubjBackgroundColor(subjBackgroundColor), mReplBackgroundColor(replBackgroundColor), mLine(-1), mCount(0) {
 }
 
 int Hunk::line() const {
@@ -16,35 +17,49 @@ int Hunk::count() const {
 }
 
 bool Hunk::isEmpty() const {
-    return mLines.isEmpty() && mSubj.isEmpty();
+    return mLines.isEmpty() && mSubj.isEmpty() && mContext.isEmpty();
 }
 
 void Hunk::replace(int line, const QString& subj, const QString& repl) {
-    mSubj << subj;
-    mRepl << repl;
+    flushContext();
+    mSubj.append(subj,mSubjBackgroundColor);
+    mRepl.append(repl,mReplBackgroundColor);
     if (mLine < 0)
         mLine = line;
     mCount++;
 }
 
 void Hunk::context(int line, const QString& context) {
-    flush();
-    mLines << context;
+    flushRepl();
+    mContext.append(context, QString());
     if (mLine < 0)
         mLine = line;
-    mCount++;
+    //mCount++;
 }
 
-void Hunk::flush() {
-    if (mSubj.isEmpty())
+void Hunk::flushContext() {
+    if (mContext.isEmpty()) {
         return;
-    mLines << mSubj << mRepl;
+    }
+    mContext.close();
+    mLines << mContext.divs().join("");
+    mContext.clear();
+}
+
+void Hunk::flushRepl() {
+    if (mSubj.isEmpty()) {
+        return;
+    }
+    mSubj.close();
+    mRepl.close();
+    mLines << mSubj.divs().join("");
+    mLines << mRepl.divs().join("");
     mSubj.clear();
     mRepl.clear();
 }
 
 QStringList Hunk::value() {
-    flush();
-    QStringList res;
+    flushRepl();
+    flushContext();
     return mLines;
 }

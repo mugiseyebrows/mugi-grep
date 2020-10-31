@@ -2,6 +2,14 @@
 
 #include "htmlstyle.h"
 
+QString HtmlDivs::div(const QString &text, const QString &backgroundColor)
+{
+    HtmlDivs divs;
+    divs.append(text, backgroundColor);
+    divs.close();
+    return divs.divs().join("");
+}
+
 void HtmlDivs::append(const QString &line, const QString &backgoundColor) {
     if (!mBackgroundColor.isEmpty() && mBackgroundColor != backgoundColor) {
         close();
@@ -23,3 +31,16 @@ void HtmlDivs::close() {
 QStringList HtmlDivs::divs() const {
     return mDivs;
 }
+
+bool HtmlDivs::isEmpty() const
+{
+    return mLines.isEmpty() && mDivs.isEmpty();
+}
+
+void HtmlDivs::clear()
+{
+    mLines.clear();
+    mDivs.clear();
+    mBackgroundColor = QString();
+}
+

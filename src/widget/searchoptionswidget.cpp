@@ -44,6 +44,25 @@ SearchOptionsWidget::SearchOptionsWidget(QWidget *parent) :
 
     hideFileCount();
     ui->path->checkBox()->setText("cache file list");
+
+    QWidgetList widgets = this->widgets();
+    for(int i=0;i<widgets.size()-1;i++) {
+        QWidget::setTabOrder(widgets[i], widgets[i+1]);
+    }
+
+}
+
+QWidgetList SearchOptionsWidget::widgets() {
+    QWidgetList result;
+    result << ui->path->widgets()
+           << ui->select
+           << ui->filter->widgets()
+           << ui->pattern->widgets()
+           << ui->search
+           << ui->replacement->widgets()
+           << ui->preview
+           << ui->replace;
+    return result;
 }
 
 SearchOptionsWidget::~SearchOptionsWidget()

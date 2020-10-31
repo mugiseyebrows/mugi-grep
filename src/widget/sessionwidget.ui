@@ -106,6 +106,13 @@
      <item>
       <widget class="QLineEdit" name="open"/>
      </item>
+     <item>
+      <widget class="QPushButton" name="clear">
+       <property name="text">
+        <string>clear</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
   </layout>

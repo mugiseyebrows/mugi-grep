@@ -13,6 +13,8 @@ INCLUDEPATH += src src/widget src/model
 include (src/tablebuttons/tablebuttons.pri)
 
 HEADERS += \
+    src/boolmap.h \
+    src/colors.h \
     src/countfilesmanager.h \
     src/countfilesparams.h \
     src/displayoptions.h \
@@ -78,6 +80,8 @@ HEADERS += \
     src/completerhelper.h
 
 SOURCES += \
+    src/boolmap.cpp \
+    src/colors.cpp \
     src/countfilesmanager.cpp \
     src/countfilesparams.cpp \
     src/displayoptions.cpp \

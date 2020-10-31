@@ -65,12 +65,18 @@
          <property name="text">
           <string>preview</string>
          </property>
+         <property name="autoDefault">
+          <bool>true</bool>
+         </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="replace">
          <property name="text">
           <string>replace</string>
+         </property>
+         <property name="autoDefault">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -88,6 +94,9 @@
        <property name="text">
         <string>search</string>
        </property>
+       <property name="autoDefault">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
      <item row="2" column="1">
@@ -101,6 +110,9 @@
       <widget class="QPushButton" name="select">
        <property name="text">
         <string>select</string>
+       </property>
+       <property name="autoDefault">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -137,6 +149,12 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>search</tabstop>
+  <tabstop>preview</tabstop>
+  <tabstop>replace</tabstop>
+  <tabstop>select</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

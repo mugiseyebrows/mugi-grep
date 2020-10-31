@@ -3,9 +3,11 @@
 #include <QString>
 #include <QStringList>
 
+#include "htmldivs.h"
+
 class Hunk {
 public:
-    Hunk();
+    Hunk(const QString& subjBackgroundColor, const QString& replBackgroundColor);
     int line() const;
     QStringList lines() const;
     int count() const;
@@ -15,11 +17,17 @@ public:
     QStringList value();
 
 protected:
-    void flush();
+
+    void flushRepl();
+    void flushContext();
+
+    HtmlDivs mSubj;
+    HtmlDivs mRepl;
+    HtmlDivs mContext;
+    QString mSubjBackgroundColor;
+    QString mReplBackgroundColor;
     int mLine;
-    QStringList mLines;
     int mCount;
-    QStringList mSubj;
-    QStringList mRepl;
+    QStringList mLines;
 };
 #endif // HUNK_H

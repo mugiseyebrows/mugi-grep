@@ -9,6 +9,7 @@
 #include "regexpreplacement.h"
 #include "replaceparams.h"
 
+class Colors;
 class ColoredLine;
 
 class SearchTab;
@@ -37,7 +38,7 @@ protected:
     void appendSearch(const SearchHits &hits);
     void appendPreview(const SearchHits &hits);
     void appendReplace(const SearchHits &hits);
-    QStringList fileNameLineNumber(bool showFileName, bool showLineNumber, const QString &relativePath, const QString &href, int lineNumber, const QString &separator, const QString &anchorColor, const QString &separatorColor, const QString &linenumberColor);
+    QStringList fileNameLineNumber(const Colors &colors, bool showFileName, bool showLineNumber, const QString &relativePath, const QString &href, int lineNumber, const QString &separator);
 signals:
 
 protected slots:

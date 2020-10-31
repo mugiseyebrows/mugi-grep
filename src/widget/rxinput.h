@@ -22,6 +22,7 @@ public:
     RegExp value() const;
     void setValue(const RegExp &value);
 
+    QWidgetList widgets() const;
 protected:
     Ui::RXInput *ui;
 
