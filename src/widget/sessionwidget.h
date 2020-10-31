@@ -32,6 +32,7 @@ class AnchorClickHandler;
 class SearchTab;
 class CallOnce;
 class CountFilesManager;
+class Settings;
 
 #include "format.h"
 
@@ -41,7 +42,7 @@ class SessionWidget : public QWidget
     
 public:
 
-    explicit SessionWidget(QWidget *parent = nullptr);
+    explicit SessionWidget(Settings* settings, QWidget *parent = nullptr);
     ~SessionWidget();
 
     //void setCacheFileList(QAction* action);
@@ -97,6 +98,8 @@ protected:
     SearchTab *createTab();
 
     QMap<QString,QStringList> mAllFiles;
+
+    Settings* mSettings;
 
 signals:
 

@@ -13,6 +13,7 @@ class SessionWidget;
 class QSignalMapper;
 class AnchorClickHandler;
 class CompleterModelManager;
+class Settings;
 
 namespace Ui {
 class MainWindow;
@@ -23,7 +24,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
     
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(Settings* settings, QWidget *parent = 0);
     ~MainWindow();
 
     void closeEvent(QCloseEvent *);
@@ -46,6 +47,7 @@ protected:
     QSignalMapper* mMapper;
     AnchorClickHandler* mClickHandler;
     CompleterModelManager* mCompleterModelManager;
+    Settings* mSettings;
 
 signals:
     void editorSet();
@@ -79,6 +81,8 @@ protected:
 private slots:
     void on_saveAsText_triggered();
     void on_saveAsHtml_triggered();
+    void on_lightStyle_triggered();
+    void on_darkStyle_triggered();
 };
 
 #endif // MAINWINDOW_H

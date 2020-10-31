@@ -87,7 +87,7 @@ QPair<QString,QStringList> toAppArgs(const QString& editor, const QString& path,
 
 } // namespace
 
-AnchorClickHandler::AnchorClickHandler(QObject *parent) : QObject(parent)
+AnchorClickHandler::AnchorClickHandler(Settings* settings, QObject *parent) : QObject(parent), mSettings(settings)
 {
 
 }
@@ -103,12 +103,12 @@ void AnchorClickHandler::onSetEditor(QString path)
 {
     QWidget* widget = qApp->activeWindow();
 
-    SettingsDialog dialog(path, widget);
+    SettingsDialog dialog(mSettings, path, widget);
     if (dialog.exec() != QDialog::Accepted) {
         return;
     }
     dialog.apply();
-    QString error = Settings::instance()->error();
+    QString error = mSettings->error();
     if (!error.isEmpty()) {
         QMessageBox::critical(widget,"error",error);
     }
@@ -121,10 +121,10 @@ void AnchorClickHandler::onAnchorClicked(QUrl url) {
     QString path = urlPath(url);
     QString line = urlLine(url,"1");
 
-    QString editor = Settings::instance()->editor(path);
+    QString editor = mSettings->editor(path);
     if (editor.isEmpty()) {
         onSetEditor(path);
-        editor = Settings::instance()->editor(path);
+        editor = mSettings->editor(path);
         if (!editor.isEmpty()) {
             onAnchorClicked(url);
             return;

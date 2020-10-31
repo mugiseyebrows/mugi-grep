@@ -24,10 +24,12 @@
 
 #define IS_DEBUG false
 
-MainWindow::MainWindow(QWidget *parent) :
+MainWindow::MainWindow(Settings *settings, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow), mMapper(new QSignalMapper(this)),
-    mClickHandler(new AnchorClickHandler(this)), mCompleterModelManager(new CompleterModelManager(this))
+    mClickHandler(new AnchorClickHandler(settings, this)),
+    mCompleterModelManager(new CompleterModelManager(this)),
+    mSettings(settings)
 {
     ui->setupUi(this);
 
@@ -54,12 +56,11 @@ MainWindow::MainWindow(QWidget *parent) :
     } else {
 
         RXCollector* collector = RXCollector::instance();
-        Settings* settings = Settings::instance();
 
-        collector->deserializePatterns(settings->patterns());
-        collector->deserializePaths(settings->paths());
+        collector->deserializePatterns(mSettings->patterns());
+        collector->deserializePaths(mSettings->paths());
 
-        QJsonArray sessions = settings->sessions();
+        QJsonArray sessions = mSettings->sessions();
         if (sessions.size() > 0) {
             deserealizeSessions(sessions);
         } else {
@@ -94,17 +95,17 @@ void MainWindow::closeEvent(QCloseEvent * e)
     if (IS_DEBUG) {
 
     } else {
-        Settings::instance()->setSessions(serializeSessions());
-        Settings::instance()->setPatterns(RXCollector::instance()->serializePatterns());
-        Settings::instance()->setPaths(RXCollector::instance()->serializePaths());
-        Settings::instance()->save();
+        mSettings->setSessions(serializeSessions());
+        mSettings->setPatterns(RXCollector::instance()->serializePatterns());
+        mSettings->setPaths(RXCollector::instance()->serializePaths());
+        mSettings->save();
     }
 
     e->accept();
 }
 
 void MainWindow::addSession(const QJsonValue &v) {
-    SessionWidget* session = new SessionWidget(ui->tabs);
+    SessionWidget* session = new SessionWidget(mSettings, ui->tabs);
     //session->setCacheFileList(ui->cacheFileList);
 
     //connect(session,SIGNAL(setEditor()),this,SLOT(onSetEditor()));
@@ -350,4 +351,153 @@ void MainWindow::on_saveAsText_triggered()
 void MainWindow::on_saveAsHtml_triggered()
 {
     onSave(Format::Html);
+}
+
+
+QString colorRepr(const QColor& color) {
+    int r,g,b,a;
+    color.getRgb(&r,&g,&b,&a);
+    if (a == 255) {
+        return QString("QColor(%1, %2, %3)").arg(r).arg(g).arg(b);
+    }
+    return QString("QColor(%1, %2, %3, %4)").arg(r).arg(g).arg(b).arg(a);
+}
+
+QString setPaletteColor(const QString& name, QPalette::ColorGroup group, QPalette::ColorRole role, const QColor& color) {
+
+    static QStringList roles_ = {
+        "QPalette::WindowText",
+        "QPalette::Button",
+        "QPalette::Light",
+        "QPalette::Midlight",
+        "QPalette::Dark",
+        "QPalette::Mid",
+        "QPalette::Text",
+        "QPalette::BrightText",
+        "QPalette::ButtonText",
+        "QPalette::Base",
+        "QPalette::Window",
+        "QPalette::Shadow",
+        "QPalette::Highlight",
+        "QPalette::HighlightedText",
+        "QPalette::Link",
+        "QPalette::LinkVisited",
+        "QPalette::AlternateBase",
+        "QPalette::NoRole",
+        "QPalette::ToolTipBase",
+        "QPalette::ToolTipText",
+        "QPalette::PlaceholderText"
+    };
+
+    static QStringList groups_ = {
+        "QPalette::Active",
+        "QPalette::Disabled",
+        "QPalette::Inactive"
+    };
+
+    if (group == QPalette::All) {
+        return QString("%1.setColor(%2,%3);").arg(name).arg(roles_[role]).arg(colorRepr(color));
+    }
+    return QString("%1.setColor(%2,%3,%4);").arg(name).arg(groups_[group]).arg(roles_[role]).arg(colorRepr(color));
+}
+
+void dumpPalette(const QString& fileName) {
+
+    QFile file(fileName);
+    if (!file.open(QIODevice::WriteOnly)) {
+        qDebug() << "cannot open" << fileName << "for writing";
+        return;
+    }
+    QTextStream stream(&file);
+
+    QList<QPalette::ColorGroup> groups = {QPalette::Active,
+                                          QPalette::Disabled,
+                                          QPalette::Inactive};
+    QStringList groups_ = {
+        "QPalette::Active",
+        "QPalette::Disabled",
+        "QPalette::Inactive"
+    };
+
+    QList<QPalette::ColorRole> roles = {QPalette::WindowText,
+                                        QPalette::Button,
+                                        QPalette::Light,
+                                        QPalette::Midlight,
+                                        QPalette::Dark,
+                                        QPalette::Mid,
+                                        QPalette::Text,
+                                        QPalette::BrightText,
+                                        QPalette::ButtonText,
+                                        QPalette::Base,
+                                        QPalette::Window,
+                                        QPalette::Shadow,
+                                        QPalette::Highlight,
+                                        QPalette::HighlightedText,
+                                        QPalette::Link,
+                                        QPalette::LinkVisited,
+                                        QPalette::AlternateBase,
+                                        QPalette::NoRole,
+                                        QPalette::ToolTipBase,
+                                        QPalette::ToolTipText,
+                                        QPalette::PlaceholderText};
+
+    QStringList roles_ = {
+        "QPalette::WindowText",
+        "QPalette::Button",
+        "QPalette::Light",
+        "QPalette::Midlight",
+        "QPalette::Dark",
+        "QPalette::Mid",
+        "QPalette::Text",
+        "QPalette::BrightText",
+        "QPalette::ButtonText",
+        "QPalette::Base",
+        "QPalette::Window",
+        "QPalette::Shadow",
+        "QPalette::Highlight",
+        "QPalette::HighlightedText",
+        "QPalette::Link",
+        "QPalette::LinkVisited",
+        "QPalette::AlternateBase",
+        "QPalette::NoRole",
+        "QPalette::ToolTipBase",
+        "QPalette::ToolTipText",
+        "QPalette::PlaceholderText"
+    };
+
+    QPalette palette = qApp->palette();
+
+    for(QPalette::ColorRole role: roles) {
+        QColor c1 = palette.color(QPalette::Active, role);
+        QColor c2 = palette.color(QPalette::Disabled, role);
+        QColor c3 = palette.color(QPalette::Inactive, role);
+        QString name = "palette";
+        if (c1 == c2 && c2 == c3) {
+            stream << setPaletteColor(name, QPalette::All, role, c1) << "\n";
+        } else {
+            stream << setPaletteColor(name, QPalette::Active, role, c1) << "\n";
+            stream << setPaletteColor(name, QPalette::Disabled, role, c2) << "\n";
+            stream << setPaletteColor(name, QPalette::Inactive, role, c3) << "\n";
+        }
+    }
+
+    stream.flush();
+
+    qDebug() << fileName << "writen";
+}
+
+#include "stylehelper.h"
+
+void MainWindow::on_lightStyle_triggered()
+{
+    //dumpPalette("D:\\w\\light-palette.txt");
+    StyleHelper::setLightStyle();
+    mSettings->setStyle("light");
+}
+
+void MainWindow::on_darkStyle_triggered()
+{
+    StyleHelper::setDarkStyle();
+    //dumpPalette("D:\\w\\dark-palette.txt");
+    mSettings->setStyle("dark");
 }

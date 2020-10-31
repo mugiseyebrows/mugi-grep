@@ -5,8 +5,17 @@
 #include <QDir>
 #include "searchtab.h"
 #include <QDebug>
+#include <QApplication>
 
-SearchResultRenderer::SearchResultRenderer(QObject *parent) : QObject(parent), mTab(0), mZebra(false), mDarkMode(false)
+
+bool isDarker(const QColor& color1, const QColor& color2) {
+    double v1 = color1.valueF();
+    double v2 = color2.valueF();
+    return v1 < v2;
+}
+
+
+SearchResultRenderer::SearchResultRenderer(QObject *parent) : QObject(parent), mTab(0), mZebra(false)
 {
 
 }
@@ -35,15 +44,15 @@ QStringList SearchResultRenderer::toHtmlSpans(const ColoredLine& coloredLine,
                                    const QStringList& backgroundColors) {
     QStringList cols;
 
-    QString foreground = mDarkMode ? "white" : "black";
+    //QString foreground = mDarkMode ? "white" : "black";
 
     QList<ColoredLineSpan> spans = coloredLine.spans();
     foreach (const ColoredLineSpan& span, spans) {
         QString col = coloredLine.string().mid(span.start(), span.length());
         if (span.background() == 0 || span.background() >= backgroundColors.size()) {
-            cols << Html::span(col, span.foreground() == 0 ? foreground : "red");
+            cols << Html::span(col, span.foreground() == 0 ? QString() : "red");
         } else {
-            cols << Html::span(col, span.foreground() == 0 ? foreground : "red",
+            cols << Html::span(col, span.foreground() == 0 ? QString() : "red",
                                backgroundColors[span.background()]);
         }
     }
@@ -143,13 +152,17 @@ QString withBackreferences(const QRegularExpressionMatch& m, const QVariantList&
 
 QStringList SearchResultRenderer::fileNameLineNumber(bool showFileName, bool showLineNumber,
                                           const QString& relativePath, const QString& href,
-                                          int lineNumber) {
+                                          int lineNumber,
+                                            const QString& separator,
+                                         const QString& anchorColor,
+                                         const QString& separatorColor,
+                                         const QString& linenumberColor) {
     QStringList cols;
     if (showFileName) {
-        cols << Html::anchor(relativePath, href, "violet") << Html::span(":", "blue");
+        cols << Html::anchor(relativePath, href, anchorColor) << Html::span(separator, separatorColor);
     }
     if (showLineNumber) {
-        cols << Html::span(QString::number(lineNumber), "green") << Html::span(":", "blue");
+        cols << Html::span(QString::number(lineNumber), linenumberColor) << Html::span(separator, separatorColor);
     }
     return cols;
 }
@@ -176,42 +189,8 @@ const QString trimRight(const QString& line) {
     return line;
 }
 
-class Divs {
-
-public:
-    Divs() {
-
-    }
-
-    void append(const QString& line, const QString& color) {
-        if (!mColor.isEmpty() && mColor != color) {
-            close();
-        }
-        mLines.append(line);
-        mColor = color;
-    }
-
-    void close() {
-        if (mLines.isEmpty()) {
-            return;
-        }
-        mDivs << QString("<div style=\"background-color:%1\">").arg(mColor) + mLines.join("<br/>") + "</div>";
-        mLines.clear();
-    }
-
-    QStringList divs() const {
-        return mDivs;
-    }
-
-protected:
-
-    QStringList mLines;
-    QStringList mDivs;
-    QString mColor;
-
-};
-
 #include <QApplication>
+#include "htmldivs.h"
 
 void SearchResultRenderer::appendSearch(const SearchHits& hits) {
     RegExp pattern = hits.pattern();
@@ -228,7 +207,17 @@ void SearchResultRenderer::appendSearch(const SearchHits& hits) {
 
     //QStringList res;
 
-    Divs divs;
+    QPalette palette = qApp->palette();
+
+    bool darkStyle = isDarker(palette.color(QPalette::Base), QColor(128,128,128));
+
+    QString baseColor = palette.color(QPalette::Base).name();
+    QString alternateBaseColor = palette.color(QPalette::AlternateBase).name();
+    QString anchorColor = palette.color(QPalette::Link).name();
+    QString separatorColor = darkStyle ? "#74c69d" : "#2d6a4f" ;
+    QString linenumberColor = darkStyle ? "#e85d04" : "#dc2f02";
+
+    HtmlDivs divs;
 
     for (int j = 0; j < hits.size(); j++) {
 
@@ -241,28 +230,23 @@ void SearchResultRenderer::appendSearch(const SearchHits& hits) {
         QStringList backgroundColors;
         QStringList grayZebraColors;
 
-        if (mDarkMode) {
-            backgroundColors = QStringList {mBaseColor, "#99856F", "#6F9978",
-                    "#829DB2", "#CCCC94", "#CC9096"};
+        if (darkStyle) {
+            backgroundColors = QStringList {QString(), "#09194f", "#70041b", "#560100", "#151350", "#3f1440", "#113302"};
         } else {
-            backgroundColors = QStringList {mBaseColor, "#ffdfba", "#baffc9",
-                    "#bae1ff", "#ffffba", "#ffb3ba"};
+            backgroundColors = QStringList {QString(), "#ffdfba", "#baffc9", "#bae1ff", "#ffffba", "#ffb3ba"};
         }
 
-        if (mDarkMode) {
+        /*if (mDarkMode) {
             grayZebraColors = QStringList {"#191919", "#494949"};
         } else {
             grayZebraColors = QStringList {"#E6E6E6", "#F0F0F0"};
-        }
+        }*/
+
+        grayZebraColors = QStringList {baseColor, alternateBaseColor};
 
         if (linesBefore == 0 && linesAfter == 0) {
-            /*if (mDarkMode) {*/
-                grayZebraColors = QStringList {mBaseColor, mBaseColor};
-            /*} else {
-                grayZebraColors = QStringList {mBaseColor, mBaseColor};
-            }*/
+            grayZebraColors = QStringList {QString(), QString()};
         }
-
 
         /*int zebraColor1 = backgroundColors.size();
         int zebraColor2 = zebraColor1 + 1;*/
@@ -292,7 +276,9 @@ void SearchResultRenderer::appendSearch(const SearchHits& hits) {
                     // each match on new line
                     while (it.hasNext()) {
                         QStringList cols = fileNameLineNumber(showFileName, showLineNumber,
-                                                              mRelativePath, fileHref(mPath, i), i + 1);
+                                                              mRelativePath,
+                                                              fileHref(mPath, i), i + 1,
+                                                              ":",anchorColor, separatorColor, linenumberColor);
                         QRegularExpressionMatch m = it.next();
                         ColoredLine coloredLine(line);
                         int jmax = qMin(m.lastCapturedIndex(), backgroundColors.size() - 1);
@@ -311,7 +297,8 @@ void SearchResultRenderer::appendSearch(const SearchHits& hits) {
                 } else {
                     // all matches on one line
                     QStringList cols = fileNameLineNumber(showFileName, showLineNumber,
-                                                          mRelativePath, fileHref(mPath, i), i + 1);
+                                                          mRelativePath, fileHref(mPath, i), i + 1,
+                                                          ":", anchorColor, separatorColor, linenumberColor);
                     ColoredLine coloredLine(line);
 
                     /*if (linesBefore > 0 || linesAfter > 0) {
@@ -337,15 +324,17 @@ void SearchResultRenderer::appendSearch(const SearchHits& hits) {
             } else if (siblings.contains(i)) {
 
                 QString line = lines[i];
-                QString href = "file:///" + QDir::toNativeSeparators(mPath) +
-                               "?line=" + QString::number(i + 1);
-                QStringList cols;
-                if (showFileName) {
+
+
+                QString href = fileHref(mPath, i + 1);
+
+                QStringList cols = fileNameLineNumber(showFileName, showLineNumber, mRelativePath, href, i + 1, "-", anchorColor, separatorColor, linenumberColor);
+                /*if (showFileName) {
                     cols << Html::anchor(mRelativePath, href, "violet") << Html::span("-", "blue");
                 }
                 if (showLineNumber) {
                     cols << Html::span(QString::number(i + 1), "green") << Html::span("-", "blue");
-                }
+                }*/
 
                 ColoredLine coloredLine(line);
 
@@ -353,7 +342,7 @@ void SearchResultRenderer::appendSearch(const SearchHits& hits) {
                     coloredLine.paintBackground(zebra[i] ? zebraColor1 : zebraColor2);
                 }*/
 
-                cols << toHtmlSpans(coloredLine, backgroundColors + grayZebraColors);
+                cols << toHtmlSpans(coloredLine, backgroundColors);
 
                 //cols << Html::span(line, "black");
 
@@ -450,6 +439,13 @@ void SearchResultRenderer::appendReplace(const SearchHits& hits) {
     bool showFileName = options.fileName();
     bool showLineNumber = options.lineNumber();
 
+    QPalette palette = qApp->palette();
+    QString base = palette.color(QPalette::Base).name();
+    QString alternateBase = palette.color(QPalette::AlternateBase).name();
+    QString anchorColor = palette.color(QPalette::Link).name();
+    QString separatorColor = "violet";
+    QString linenumberColor = "green";
+
     //hits.read(before, after);
 
     QStringList res;
@@ -488,7 +484,8 @@ void SearchResultRenderer::appendReplace(const SearchHits& hits) {
                 //qDebug() << pattern.includeExp().pattern();
 
                 QStringList cols = fileNameLineNumber(showFileName, showLineNumber,
-                                                      mRelativePath, fileHref(mPath, i), i + 1);
+                                                      mRelativePath, fileHref(mPath, i), i + 1,
+                                                      ":", anchorColor, separatorColor, linenumberColor);
                 ColoredLine coloredLine(line);
 
                 if (linesBefore > 0 || linesAfter > 0) {
@@ -702,20 +699,6 @@ ReplaceParams SearchResultRenderer::replaceParams()
     }
 
     return result;
-}
-
-void SearchResultRenderer::setDarkMode(bool darkMode)
-{
-    if (mDarkMode == darkMode) {
-        return;
-    }
-    mDarkMode = darkMode;
-    onOptionsChanged();
-}
-
-void SearchResultRenderer::setBaseColor(const QString &color)
-{
-    mBaseColor = color;
 }
 
 void SearchResultRenderer::onOptionsChanged() {

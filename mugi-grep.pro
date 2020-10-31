@@ -21,6 +21,8 @@ HEADERS += \
     src/fileio.h \
     src/format.h \
     src/getlistingparams.h \
+    src/htmldivs.h \
+    src/htmlstyle.h \
     src/mode.h \
     src/regexpreplacement.h \
     src/replacefile.h \
@@ -33,6 +35,7 @@ HEADERS += \
     src/searchcache.h \
     src/searchresultrenderer.h \
     src/searchtab.h \
+    src/stylehelper.h \
     src/widget/displayoptionswidget.h \
     src/widget/oneormanyeditors.h \
     src/worker.h \
@@ -83,6 +86,8 @@ SOURCES += \
     src/fileio.cpp \
     src/format.cpp \
     src/getlistingparams.cpp \
+    src/htmldivs.cpp \
+    src/htmlstyle.cpp \
     src/mode.cpp \
     src/regexpreplacement.cpp \
     src/replacefile.cpp \
@@ -95,6 +100,7 @@ SOURCES += \
     src/searchdata.cpp \
     src/searchresultrenderer.cpp \
     src/searchtab.cpp \
+    src/stylehelper.cpp \
     src/widget/displayoptionswidget.cpp \
     src/widget/oneormanyeditors.cpp \
     src/worker.cpp \

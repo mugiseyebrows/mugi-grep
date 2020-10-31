@@ -13,16 +13,6 @@
 
 #define IS_DEBUG false
 
-/*static*/
-Settings* Settings::mInstance = nullptr;
-
-Settings *Settings::instance()
-{
-    if (!mInstance)
-        mInstance = new Settings();
-    return mInstance;
-}
-
 void Settings::load()
 {
 
@@ -61,6 +51,7 @@ void Settings::load()
     mSessions = settings.value("sessions").toArray();
     mPatterns = settings.value("patterns").toObject();
     mPaths = settings.value("paths").toArray();
+    mStyle = settings.value("style").toString();
 
     QJsonArray editors = settings.value("editors").toArray();
 
@@ -90,6 +81,15 @@ QJsonObject Settings::patterns() const {
 
 QJsonArray Settings::paths() const {
     return mPaths;
+}
+
+QString Settings::style() const
+{
+    return mStyle;
+}
+
+void Settings::setStyle(const QString& style) {
+    mStyle = style;
 }
 
 void Settings::setSessions(const QJsonArray &value)
@@ -122,6 +122,7 @@ void Settings::save()
     settings["sessions"] = mSessions;
     settings["patterns"] = mPatterns;
     settings["paths"] = mPaths;
+    settings["style"] = mStyle;
 
     QString path = this->settingsPath();
     saveJson(path, settings);
@@ -145,8 +146,6 @@ QString Settings::editor(const QString &path) const
     }
     return QString();
 }
-
-
 
 Settings::Settings()
 {

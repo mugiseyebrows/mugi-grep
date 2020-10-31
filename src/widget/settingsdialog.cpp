@@ -11,16 +11,17 @@
 #include "editorsdialog.h"
 #include "oneormanyeditors.h"
 
-SettingsDialog::SettingsDialog(const QString &path, QWidget *parent) :
+SettingsDialog::SettingsDialog(Settings* settings, const QString &path, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::SettingsDialog),
+    mSettings(settings),
     mMode(Mode::Undefined),
     mApply(false)
 {
     ui->setupUi(this);
 
     EditorsModel* model = new EditorsModel(this);
-    Settings::instance()->toModel(model);
+    mSettings->toModel(model);
 
     if (model->isEmpty()) {
         OneOrManyEditors dialog(this);
@@ -94,6 +95,6 @@ SettingsDialog::~SettingsDialog()
 void SettingsDialog::apply()
 {
     QAbstractItemModel* model = ui->editors->model();
-    Settings::instance()->fromModel(model);
-    Settings::instance()->save();
+    mSettings->fromModel(model);
+    mSettings->save();
 }

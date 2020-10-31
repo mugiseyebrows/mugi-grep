@@ -24,25 +24,18 @@ public:
 
     ReplaceParams replaceParams();
 
-    void setDarkMode(bool darkMode);
-
-    void setBaseColor(const QString& color);
-
     static void testTokenize();
+
 protected:
     SearchTab* mTab;
     bool mZebra;
 
-    bool mDarkMode;
-
-    QString mBaseColor;
-
     QStringList toHtmlSpans(const ColoredLine &coloredLine, const QStringList &backgroundColors);
-    QStringList fileNameLineNumber(bool showFileName, bool showLineNumber, const QString &relativePath, const QString &href, int lineNumber);
     QMap<int, bool> doZebra(int before, int after, const QList<int> &matched);
     void appendSearch(const SearchHits &hits);
     void appendPreview(const SearchHits &hits);
     void appendReplace(const SearchHits &hits);
+    QStringList fileNameLineNumber(bool showFileName, bool showLineNumber, const QString &relativePath, const QString &href, int lineNumber, const QString &separator, const QString &anchorColor, const QString &separatorColor, const QString &linenumberColor);
 signals:
 
 protected slots:

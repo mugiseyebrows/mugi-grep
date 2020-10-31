@@ -6,17 +6,19 @@
 #include <QPoint>
 
 class QTextBrowser;
+class Settings;
 
 class AnchorClickHandler : public QObject
 {
     Q_OBJECT
 public:
-    explicit AnchorClickHandler(QObject *parent = nullptr);
+    explicit AnchorClickHandler(Settings* settings, QObject *parent = nullptr);
 
     void connectBrowser(QTextBrowser* browser);
 
 protected:
     //QUrl mQueued;
+    Settings* mSettings;
 
 signals:
     //void setEditor();
