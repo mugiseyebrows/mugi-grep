@@ -26,12 +26,14 @@ public:
 
     static void testTokenize();
 
+
+    static void testDoZebra();
 protected:
     SearchTab* mTab;
     bool mZebra;
 
     QStringList toHtmlSpans(const ColoredLine &coloredLine, const QStringList &backgroundColors);
-    QMap<int, bool> doZebra(int before, int after, const QList<int> &matched);
+    static QMap<int, bool> doZebra(int before, int after, const QList<int> &matched, bool *initial);
     void appendSearch(const SearchHits &hits);
     void appendPreview(const SearchHits &hits);
     void appendReplace(const SearchHits &hits);

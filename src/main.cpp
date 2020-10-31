@@ -14,6 +14,7 @@
 #include "replaceparams.h"
 #include "countfilesparams.h"
 #include "getlistingparams.h"
+#include "searchresultrenderer.h"
 
 #include <QStyleFactory>
 #include "settings.h"
@@ -56,6 +57,8 @@ int main(int argc, char *argv[])
 
     //RegExpPath::test();
     //RegExp::test();
+
+    //SearchResultRenderer::testDoZebra();
 
     MainWindow w(&settings);
     w.show();

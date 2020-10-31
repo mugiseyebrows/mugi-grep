@@ -167,19 +167,100 @@ QStringList SearchResultRenderer::fileNameLineNumber(bool showFileName, bool sho
     return cols;
 }
 
-QMap<int, bool> SearchResultRenderer::doZebra(int before, int after, const QList<int>& matched) {
+
+
+QMap<int, bool> SearchResultRenderer::doZebra(int before, int after, const QList<int>& matched, bool* initial) {
+
+
+    QList<QPair<int,int> > ranges;
+    for(int match: matched) {
+        ranges.append(QPair<int,int>(match - before, match + after));
+    }
+
+    int i = 0;
+    while (i < ranges.size()-1) {
+        auto range1 = ranges[i];
+        auto range2 = ranges[i+1];
+        if (range2.first - 1 <= range1.second) {
+            ranges.removeAt(i+1);
+            ranges[i] = QPair<int,int>(range1.first, range2.second);
+            i--;
+        }
+        i++;
+    }
+
     QMap<int, bool> result;
-    for(int j=0;j<matched.size();j++) {
+
+    for(int i=0;i<ranges.size();i++) {
+        auto range = ranges[i];
+        for(int j=range.first;j<=range.second;j++) {
+            result[j] = i % 2 ? !(*initial) : (*initial);
+        }
+    }
+
+    /*for(int j=0;j<matched.size();j++) {
         int match = matched[j];
         for(int i=match-before;i<match+after+1;i++) {
             result[i] = j % 2 ? mZebra : !mZebra;
         }
-    }
-    if (matched.size() % 2) {
-        mZebra = !mZebra;
+    }*/
+    if (ranges.size() % 2) {
+        *initial = !(*initial);
     }
     return result;
 }
+
+
+class BoolRanges {
+public:
+    BoolRanges() {
+
+    }
+
+    BoolRanges& fill(int begin, int end, bool value) {
+        for(int i=begin;i<=end;i++) {
+            mMap[i] = value;
+        }
+        return *this;
+    }
+
+    BoolRanges& true_(int begin, int end) {
+        return fill(begin, end, true);
+    }
+    BoolRanges& false_(int begin, int end) {
+        return fill(begin, end, false);
+    }
+    QMap<int,bool> map() {
+        return mMap;
+    }
+
+    QMap<int,bool> mMap;
+};
+
+void SearchResultRenderer::testDoZebra() {
+
+    bool initial = true;
+
+    auto m1 = BoolRanges().true_(0,6).false_(8,12).map();
+    auto m2 = doZebra(2,2,{2,4,10},&initial);
+
+    Q_ASSERT(m1 == m2);
+
+    m1 = BoolRanges().true_(2,4).map();
+    m2 = doZebra(0,0,{2,3,4},&initial);
+
+    Q_ASSERT(m1 == m2);
+    Q_ASSERT(initial == false);
+
+    m1 = BoolRanges().false_(1,3).true_(7,11).map();
+    m2 = doZebra(1,1,{2,8,10},&initial);
+
+    Q_ASSERT(m1 == m2);
+    Q_ASSERT(initial == false);
+
+    qDebug() << "testDoZebra passed";
+}
+
 
 const QString trimRight(const QString& line) {
     int p = line.lastIndexOf(QRegularExpression("\\r?\\n"));
@@ -225,7 +306,7 @@ void SearchResultRenderer::appendSearch(const SearchHits& hits) {
         QSet<int> siblings = hit.siblings(linesBefore, linesAfter);
         QList<int> matched = hit.hits();
 
-        QMap<int, bool> zebra = doZebra(linesBefore, linesAfter, matched);
+        QMap<int, bool> zebra = doZebra(linesBefore, linesAfter, matched, &mZebra);
 
         QStringList backgroundColors;
         QStringList grayZebraColors;
@@ -456,7 +537,7 @@ void SearchResultRenderer::appendReplace(const SearchHits& hits) {
         QSet<int> siblings = hit.siblings(linesBefore, linesAfter);
         QList<int> matched = hit.hits();
 
-        QMap<int, bool> zebra = doZebra(linesBefore, linesAfter, matched);
+        QMap<int, bool> zebra = doZebra(linesBefore, linesAfter, matched, &mZebra);
 
         static QStringList backgroundColors = {"#ffffff", "#ffdfba", "#baffc9",
                                                "#bae1ff", "#ffffba", "#ffb3ba"};
