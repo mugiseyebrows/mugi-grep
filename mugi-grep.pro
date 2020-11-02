@@ -26,13 +26,18 @@ HEADERS += \
     src/htmldivs.h \
     src/htmlstyle.h \
     src/mode.h \
+    src/model/checklistmodel.h \
     src/regexpreplacement.h \
+    src/renamedialog.h \
+    src/renameparams.h \
+    src/replacedparams.h \
     src/replacefile.h \
     src/replaceitem.h \
     src/replaceparams.h \
     src/searchdata.h \
     src/searchhit.h \
     src/searchhits.h \
+    src/searchnamehits.h \
     src/searchparams.h \
     src/searchcache.h \
     src/searchresultrenderer.h \
@@ -63,14 +68,12 @@ HEADERS += \
     src/widget/mainwindow.h \
     src/widget/rxpathinput.h \
     src/widget/settingsdialog.h \
-    src/widget/selectfilesdialog.h \
     src/widget/rxinput.h \
     src/widget/rxbaseinput.h \
     src/widget/regexpbaseinput.h \
     src/widget/intlineedit.h \
     src/widget/elidedlabel.h \
     src/model/editorsmodel.h \
-    src/model/checkablestringlistmodel.h \
     src/widget/rxreplaceinput.h \
     src/callonce.h \
     src/coloredline.h \
@@ -93,13 +96,18 @@ SOURCES += \
     src/htmldivs.cpp \
     src/htmlstyle.cpp \
     src/mode.cpp \
+    src/model/checklistmodel.cpp \
     src/regexpreplacement.cpp \
+    src/renamedialog.cpp \
+    src/renameparams.cpp \
+    src/replacedparams.cpp \
     src/replacefile.cpp \
     src/replaceitem.cpp \
     src/replaceparams.cpp \
     src/searchcache.cpp \
     src/searchhit.cpp \
     src/searchhits.cpp \
+    src/searchnamehits.cpp \
     src/searchparams.cpp \
     src/searchdata.cpp \
     src/searchresultrenderer.cpp \
@@ -131,13 +139,11 @@ SOURCES += \
     src/widget/mainwindow.cpp \
     src/widget/rxinput.cpp \
     src/widget/settingsdialog.cpp \
-    src/widget/selectfilesdialog.cpp \
     src/widget/rxbaseinput.cpp \
     src/widget/regexpbaseinput.cpp \
     src/widget/intlineedit.cpp \
     src/widget/elidedlabel.cpp \
     src/model/editorsmodel.cpp \
-    src/model/checkablestringlistmodel.cpp \
     src/widget/rxreplaceinput.cpp \
     src/callonce.cpp \
     src/coloredline.cpp \
@@ -148,13 +154,13 @@ SOURCES += \
 
 FORMS += \
     src/editorsdialog.ui \
+    src/renamedialog.ui \
     src/widget/displayoptionswidget.ui \
     src/widget/oneormanyeditors.ui \
     src/widget/sessionwidget.ui \
     src/widget/searchoptionswidget.ui \
     src/widget/mainwindow.ui \
     src/widget/settingsdialog.ui \
-    src/widget/selectfilesdialog.ui \
     src/widget/searchprogresswidget.ui \
     src/widget/rxpathinput.ui \
     src/widget/rxinput.ui \

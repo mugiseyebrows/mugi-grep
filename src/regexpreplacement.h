@@ -8,15 +8,18 @@ class RegExpReplacement {
 
 public:
     RegExpReplacement();
-    RegExpReplacement(const QString& pattern, bool preserveCase);
+    RegExpReplacement(const QString& pattern, bool preserveCase, bool renameFiles);
     QString pattern() const;
     void setPattern(const QString& value);
     bool preserveCase() const;
     void setPreserveCase(bool value);
+    bool renameFiles() const;
+    void setRenameFiles(bool value);
 
 protected:
     QString mPattern;
     bool mPreserveCase;
+    bool mRenameFiles;
 };
 
 Q_DECLARE_METATYPE(RegExpReplacement)

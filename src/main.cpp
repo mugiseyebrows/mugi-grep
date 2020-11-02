@@ -15,10 +15,13 @@
 #include "countfilesparams.h"
 #include "getlistingparams.h"
 #include "searchresultrenderer.h"
+#include "replacedparams.h"
 
 #include <QStyleFactory>
 #include "settings.h"
 #include "stylehelper.h"
+#include "renameparams.h"
+#include "searchnamehits.h"
 
 int main(int argc, char *argv[])
 {
@@ -32,6 +35,9 @@ int main(int argc, char *argv[])
     qRegisterMetaType<SearchHits>();
     qRegisterMetaType<CountFilesParams>();
     qRegisterMetaType<GetListingParams>();
+    qRegisterMetaType<ReplacedParams>();
+    qRegisterMetaType<RenameParams>();
+    qRegisterMetaType<SearchNameHits>();
 
     QApplication a(argc, argv);
     a.setApplicationName(APP_NAME);

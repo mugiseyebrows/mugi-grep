@@ -19,6 +19,8 @@
 #include "searchhits.h"
 #include "countfilesparams.h"
 #include "getlistingparams.h"
+#include "searchnamehits.h"
+#include "renameparams.h"
 
 namespace Ui {
 class SessionWidget;
@@ -101,6 +103,7 @@ protected:
 
     Settings* mSettings;
 
+
 signals:
 
     //void search(SearchParams);
@@ -119,12 +122,14 @@ signals:
     void canReplace(int);
     void getListing(GetListingParams);
 
+    void rename(RenameParams);
+
 public slots:
     void onCanceled();
-
     void onCountFiles();
     void onGetListing();
     void onFilesCounted();
+    void onRenamed(int, int);
 protected slots:
 
     void onCompleterActivated(QModelIndex);
@@ -132,9 +137,8 @@ protected slots:
 
 
     void on_results_currentChanged(int index);
-    //void onFound(int, QString, int, int, int, QString path);
 
-    void onFound(int, SearchHits);
+    void onFound(int, SearchHits, SearchNameHits);
 
     //void onClone();
     void onSearch();
@@ -145,7 +149,7 @@ protected slots:
     void onPatternChanged(RegExp);
     void onFilterChanged(RegExpPath);
     void onReplacementChanged(RegExpReplacement value);
-    void onReplaced(int, int);
+    void onReplaced(ReplacedParams);
     void onCancel();
 
     void on_open_textChanged(QString);

@@ -66,102 +66,6 @@ QSet<int> getSiblings(const QList<int>& matched, int linesBefore, int linesAfter
 }
 
 
-
-
-#if 0
-QStringList replacePreview(const QStringList& lines, const QString& path, const QString& mRelativePath,
-                           const SearchParams& params, QList<Replacement>& replacements) {
-
-    QStringList res;
-
-    RegExp exp = params.search();
-    QString replacement = params.replace();
-    bool preserveCase = params.preserveCase();
-
-    QList<int> matched = getMatched(lines, exp);
-    QSet<int> siblings = getSiblings(matched, params.linesBefore(), params.linesAfter());
-
-    if (matched.isEmpty()) {
-        return res;
-    }
-
-    QRegularExpression rx = exp.includeExp();
-    QVariantList replacement_ = tokenize(replacement);
-    QString href = "file:///" + QDir::toNativeSeparators(path);
-    res << Html::anchor(mRelativePath, href, "violet");
-
-    QStringList oldLines;
-    QStringList newLines;
-
-    Hunk hunk;
-
-    QString lightRed = "#FFD9DD";
-    QString red = "#fdb8c0";
-    QString lightGreen = "#D9FFE3";
-    QString green = "#acf2bd";
-
-    for(int i=0;i<lines.size();i++) {
-        if (matched.contains(i)) {
-            QString line = lines[i];
-            QRegularExpressionMatchIterator it = rx.globalMatch(line);
-            QStringList oldLine;
-            QStringList newLine;
-            int prev = 0;
-            while(it.hasNext()) {
-                QRegularExpressionMatch m = it.next();
-                QString s = line.mid(prev,m.capturedStart() - prev);
-                oldLine << s;
-                newLine << s;
-
-                s = line.mid(m.capturedStart(),m.capturedLength());
-                oldLine << s;
-                newLine << withBackreferences(m,replacement_,preserveCase);
-                prev = m.capturedEnd();
-            }
-
-            if (prev < line.size()) {
-                oldLine << line.mid(prev);
-                newLine << line.mid(prev);
-            }
-
-            Q_ASSERT(oldLine.join("") == line);
-
-            QString subj = Html::span("- ","blue",lightRed) + Html::spanZebra(oldLine,"black",lightRed,red);
-            QString repl = Html::span("+ ","blue",lightGreen) + Html::spanZebra(newLine,"black",lightGreen,green);
-
-            hunk.replace(i + 1, subj, repl);
-            oldLines << oldLine.join("");
-            newLines << newLine.join("");
-        } else if (siblings.contains(i)) {
-            QString subj = Html::span("&nbsp;&nbsp;" + lines[i], "black");
-            hunk.context(i + 1, subj);
-        } else {
-            if (!hunk.isEmpty()) {
-                QStringList value = hunk.value();
-                res << Html::span(QString("@@ %1,%2 %1,%2 @@").arg(hunk.line()).arg(hunk.count()), "blue")
-                    << value;
-                hunk = Hunk();
-            }
-        }
-    }
-
-    if (!hunk.isEmpty()) {
-        QStringList value = hunk.value();
-        res << Html::span(QString("@@ %1,%2 %1,%2 @@").arg(hunk.line()).arg(hunk.count()), "blue")
-            << value;
-        hunk = Hunk();
-    }
-
-    QList<ReplacementLine> replacementLines;
-    for(int i=0;i<oldLines.size();i++) {
-        replacementLines.append(ReplacementLine(matched[i],oldLines[i],newLines[i]));
-    }
-
-    replacements.append(Replacement(path,replacementLines));
-    return res;
-}
-#endif
-
 #if 0
 QStringList searchBinary(const QStringList& lines, const QString& path, const QString& relativePath,
                         const SearchParams& params) {
@@ -342,11 +246,12 @@ bool SearchCache::isFinished(int searchId) {
     return data.filesComplete() >= data.filesSize();
 }
 
-SearchHits SearchCache::search(int searchId) {
+QPair<SearchHits,SearchNameHits> SearchCache::search(int searchId) {
     QMutexLocker locked(&mMutex);
+
     if (!mSearchParams.contains(searchId) || !mSearchData.contains(searchId)) {
         qDebug() << "!mSearchParams.contains(searchId) || !mSearchData.contains(searchId)";
-        return SearchHits();
+        return QPair<SearchHits,SearchNameHits>();
     }
 
     SearchParams& params = mSearchParams[searchId];
@@ -363,8 +268,16 @@ SearchHits SearchCache::search(int searchId) {
     int lineCount = 0;
     int fileCount = 0;
 
+    SearchNameHits nameHits(params.pattern());
+
     for (int i=data.filesComplete();i<data.filesSize();i++) {
         QString path = data.file(i);
+
+        QString name = FileIO::nameFromPath(path);
+
+        if (params.pattern().match(name)) {
+            nameHits.append(path);
+        }
 
         bool binary;
         bool readOk;
@@ -409,13 +322,13 @@ SearchHits SearchCache::search(int searchId) {
 
             hits.setComplete(data.filesComplete());
             hits.setTotal(data.filesSize());
-            return hits;
+            return QPair<SearchHits,SearchNameHits>(hits, nameHits);
         }
     }
 
     hits.setComplete(data.filesComplete());
     hits.setTotal(data.filesSize());
-    return hits;
+    return QPair<SearchHits,SearchNameHits>(hits,nameHits);
 }
 
 #if 0

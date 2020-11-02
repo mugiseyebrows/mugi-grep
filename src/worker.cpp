@@ -14,7 +14,8 @@ void Worker::onSearch(SearchParams params)
 {
     mCache.add(params);
     SearchHits hits(params.pattern());
-    emit found(params.id(), hits);
+    SearchNameHits nameHits(params.pattern());
+    emit found(params.id(), hits, nameHits);
 }
 
 void Worker::onCountMatchedFiles(QString path, RegExpPath filter) {
@@ -51,14 +52,15 @@ void Worker::onSearchMore(int id)
     if (mCache.isFinished(id)) {
         return;
     }
-    SearchHits hits = mCache.search(id);
-    emit found(id,hits);
+    QPair<SearchHits,SearchNameHits> hits = mCache.search(id);
+    emit found(id,hits.first, hits.second);
     if (mCache.isFinished(id)) {
         mCache.finish(id);
     }
 }
 
 #include "fileio.h"
+#include "replacedparams.h"
 
 void Worker::onReplace(ReplaceParams params)
 {
@@ -98,7 +100,26 @@ void Worker::onReplace(ReplaceParams params)
             countErrors++;
         }
     }
-    emit replaced(countFiles, countLines);
+
+    emit replaced(ReplacedParams(countFiles, countLines, params.renames()));
+}
+
+void Worker::onRename(RenameParams params)
+{
+    int successful = 0;
+    int failed = 0;
+
+    auto renames = params.renames();
+    for(auto item : renames) {
+
+       if (!QFile::rename(item.first, item.second)) {
+            qDebug() << "failed to rename" << item.first << item.second;
+            failed++;
+       } else {
+            successful++;
+       }
+    }
+    emit renamed(successful, failed);
 }
 
 void Worker::onFinishSearch(int id) {

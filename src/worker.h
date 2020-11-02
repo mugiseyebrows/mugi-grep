@@ -18,8 +18,11 @@
 #include "searchhits.h"
 #include "countfilesparams.h"
 #include "getlistingparams.h"
+#include "searchnamehits.h"
 
 #include "replaceparams.h"
+#include "replacedparams.h"
+#include "renameparams.h"
 
 class Worker : public QObject
 {
@@ -42,7 +45,7 @@ protected:
 
 signals:
     
-    void found(int,SearchHits);
+    void found(int,SearchHits,SearchNameHits);
 
     void count(int,int);
 
@@ -52,9 +55,11 @@ signals:
 
     void canReplace(int, bool);
 
-    void replaced(int,int);
+    void replaced(ReplacedParams);
 
     void filesCounted(CountFilesParams);
+
+    void renamed(int,int);
 
     //void previewed(int, SearchHits);
 
@@ -70,6 +75,7 @@ public slots:
     void onSearchMore(int);
 
     void onReplace(ReplaceParams params);
+    void onRename(RenameParams);
     void onCountFiles(CountFilesParams params);
 
     void onGetListing(GetListingParams params);

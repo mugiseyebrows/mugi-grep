@@ -23,7 +23,7 @@ public:
     void setTab(SearchTab* tab);
     void append(const SearchHits &hits);
 
-    ReplaceParams replaceParams();
+    ReplaceParams replaceParams(bool rename);
 
     static void testTokenize();
 

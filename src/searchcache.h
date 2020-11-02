@@ -11,7 +11,7 @@
 #include "searchdata.h"
 #include "replacement.h"
 #include "searchhits.h"
-
+#include "searchnamehits.h"
 
 QStringList searchLines(const QStringList &mLines, const QString& mPath, const QString& mRelativePath,
                         const SearchParams &params);
@@ -33,7 +33,7 @@ public:
 
     void finish(int searchId);
 
-    SearchHits search(int searchId);
+    QPair<SearchHits, SearchNameHits> search(int searchId);
 
     //QMap<QString,int> fileSize() const;
 

@@ -10,6 +10,8 @@
 #include "htmldivs.h"
 #include "colors.h"
 #include "hunk.h"
+#include <QDir>
+#include "fileio.h"
 
 SearchResultRenderer::SearchResultRenderer(QObject *parent) : QObject(parent), mTab(0), mZebra(false)
 {
@@ -547,7 +549,36 @@ void SearchResultRenderer::append(const SearchHits& hits) {
     }
 }
 
-ReplaceParams SearchResultRenderer::replaceParams()
+QString replace(const QString& line, QRegularExpression rx, const QVariantList& replacement_, bool preserveCase) {
+
+    QRegularExpressionMatchIterator it = rx.globalMatch(line);
+    QStringList oldLine;
+    QStringList newLine;
+    int prev = 0;
+
+    while(it.hasNext()) {
+        QRegularExpressionMatch m = it.next();
+        QString s = line.mid(prev,m.capturedStart() - prev);
+        oldLine << s;
+        newLine << s;
+
+        s = line.mid(m.capturedStart(),m.capturedLength());
+        oldLine << s;
+        newLine << withBackreferences(m,replacement_,preserveCase);
+        prev = m.capturedEnd();
+    }
+
+    if (prev < line.size()) {
+        oldLine << line.mid(prev);
+        newLine << line.mid(prev);
+    }
+
+    Q_ASSERT(oldLine.join("") == line);
+
+    return newLine.join("");
+}
+
+ReplaceParams SearchResultRenderer::replaceParams(bool rename)
 {
     SearchHits hits = mTab->hits();
     RegExpReplacement replacement__ = mTab->params().replacement();
@@ -561,7 +592,7 @@ ReplaceParams SearchResultRenderer::replaceParams()
 
     QRegularExpression rx = exp.includeExp();
 
-    ReplaceParams result;
+    QList<ReplaceFile> files;
 
     for (int j=0;j<hits.size();j++) {
 
@@ -574,38 +605,27 @@ ReplaceParams SearchResultRenderer::replaceParams()
         QList<int> matched = hit.hits();
 
         foreach(int i, matched) {
-
             QString line = lines[i];
-            QRegularExpressionMatchIterator it = rx.globalMatch(line);
-            QStringList oldLine;
-            QStringList newLine;
-            int prev = 0;
-            while(it.hasNext()) {
-                QRegularExpressionMatch m = it.next();
-                QString s = line.mid(prev,m.capturedStart() - prev);
-                oldLine << s;
-                newLine << s;
-
-                s = line.mid(m.capturedStart(),m.capturedLength());
-                oldLine << s;
-                newLine << withBackreferences(m,replacement_,preserveCase);
-                prev = m.capturedEnd();
-            }
-
-            if (prev < line.size()) {
-                oldLine << line.mid(prev);
-                newLine << line.mid(prev);
-            }
-
-            Q_ASSERT(oldLine.join("") == line);
-
-            file.append(ReplaceItem(i, oldLine.join(""), newLine.join("")));
+            QString newLine = replace(line, rx, replacement_, preserveCase);
+            file.append(ReplaceItem(i, line, newLine));
         }
 
-        result.append(file);
+        files.append(file);
     }
 
-    return result;
+    QList<QPair<QString,QString>> renames;
+
+    if (rename) {
+        QStringList nameHits = mTab->nameHits().hits();
+        for(const QString& path: nameHits) {
+            QString name = FileIO::nameFromPath(path);
+            QString newName = replace(name, rx, replacement_, preserveCase);
+            QString newPath = QDir(FileIO::dirName(path)).filePath(newName);
+            renames.append(QPair<QString,QString>(path,newPath));
+        }
+    }
+
+    return ReplaceParams(files, rename, renames);
 }
 
 void SearchResultRenderer::onOptionsChanged() {

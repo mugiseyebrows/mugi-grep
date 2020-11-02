@@ -19,9 +19,6 @@ SearchTab::SearchTab(QWidget* parent) : QWidget(parent), mMode(Mode::Search) {
     mTextBrowser->setOpenLinks(false);
     mDisplayOptionsWidget = new DisplayOptionsWidget();
     mRenderer = new SearchResultRenderer();
-
-    //QColor color = this->palette().color(QPalette::Window);
-
     layout->addWidget(mTextBrowser);
     layout->addWidget(mDisplayOptionsWidget);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -37,6 +34,9 @@ void SearchTab::setParams(const SearchParams& value) {
 }
 void SearchTab::setHits(const SearchHits& value) {
     mHits = value;
+}
+void SearchTab::setNameHits(const SearchNameHits& value) {
+    mNameHits = value;
 }
 QTextBrowser* SearchTab::textBrowser() const {
     return mTextBrowser;
@@ -56,12 +56,13 @@ SearchResultRenderer* SearchTab::renderer() const {
 void SearchTab::setRenderer(SearchResultRenderer* value) {
     mRenderer = value;
 }
-void SearchTab::append(const SearchHits& hits) {
+void SearchTab::append(const SearchHits& hits, const SearchNameHits& nameHits) {
     if (hits.isEmpty()) {
         return;
     }
     int size = mHits.size();
     mHits.append(hits);
+    mNameHits.append(nameHits);
     read();
     mRenderer->append(mHits.mid(size));
 }
@@ -85,14 +86,17 @@ SearchParams& SearchTab::params() {
 SearchHits& SearchTab::hits() {
     return mHits;
 }
+SearchNameHits& SearchTab::nameHits() {
+    return mNameHits;
+}
 DisplayOptions SearchTab::displayOptions() const {
     return mDisplayOptionsWidget->options();
 }
 void SearchTab::setDisplayOptions(const DisplayOptions& value) {
     mDisplayOptionsWidget->setOptions(value);
 }
-ReplaceParams SearchTab::replaceParams() {
-    return mRenderer->replaceParams();
+ReplaceParams SearchTab::replaceParams(bool renameFiles) {
+    return mRenderer->replaceParams(renameFiles);
 }
 QString SearchTab::toPlainText() const {
     return mTextBrowser->toPlainText();

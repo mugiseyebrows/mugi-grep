@@ -29,7 +29,7 @@ RXReplaceInput::~RXReplaceInput()
 
 RegExpReplacement RXReplaceInput::value() const
 {
-    return RegExpReplacement(exps()[0], ui->preserveCase->isChecked());
+    return RegExpReplacement(exps()[0], ui->preserveCase->isChecked(), ui->renameFiles->isChecked());
 }
 
 void RXReplaceInput::setValue(const RegExpReplacement &value)

@@ -113,6 +113,7 @@ protected:
 
     void setMode(Mode mode);
 
+    bool renameFiles() const;
 
     void setPreviewEnabled(bool enabled);
 

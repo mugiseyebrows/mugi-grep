@@ -8,7 +8,7 @@
 #include <QDir>
 #include "worker.h"
 #include "anchorclickhandler.h"
-#include "selectfilesdialog.h"
+
 #include <QAction>
 #include "regexpreplacement.h"
 #include <QCheckBox>
@@ -113,6 +113,11 @@ void SearchOptionsWidget::setMode(Mode mode)
         widget->setVisible(mode == Mode::Preview || mode == Mode::Replace);
     }
     ui->search->setVisible(mode == Mode::Search);
+}
+
+bool SearchOptionsWidget::renameFiles() const
+{
+    return ui->replacement->value().renameFiles();
 }
 
 #if 0

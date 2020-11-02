@@ -49,6 +49,25 @@ bool FileIO::writeLines(const QString& path, const QStringList& lines) {
     return true;
 }
 
+
+QString FileIO::nameFromPath(const QString& path) {
+    int p = qMax(path.lastIndexOf('/'), path.lastIndexOf('\\'));
+    if (p < 0) {
+        return path;
+    }
+    return path.mid(p + 1);
+}
+
+
+QString FileIO::dirName(const QString& path) {
+    int p = qMax(path.lastIndexOf('/'), path.lastIndexOf('\\'));
+    if (p < 0) {
+        return ".";
+    }
+    return path.mid(0,p);
+}
+
+
 QByteArray FileIO::read(const QString &path, bool skipBinary, bool *binary, bool *readOk, bool* tooBig)
 {
     QFile file(path);

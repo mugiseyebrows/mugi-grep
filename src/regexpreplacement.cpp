@@ -3,8 +3,8 @@
 
 RegExpReplacement::RegExpReplacement() : mPreserveCase(false) {
 }
-RegExpReplacement::RegExpReplacement(const QString& pattern, bool preserveCase)
-    : mPattern(pattern), mPreserveCase(preserveCase) {
+RegExpReplacement::RegExpReplacement(const QString& pattern, bool preserveCase, bool renameFiles)
+    : mPattern(pattern), mPreserveCase(preserveCase), mRenameFiles(renameFiles) {
 }
 QString RegExpReplacement::pattern() const {
     return mPattern;
@@ -17,4 +17,10 @@ bool RegExpReplacement::preserveCase() const {
 }
 void RegExpReplacement::setPreserveCase(bool value) {
     mPreserveCase = value;
+}
+bool RegExpReplacement::renameFiles() const {
+    return mRenameFiles;
+}
+void RegExpReplacement::setRenameFiles(bool value) {
+    mRenameFiles = value;
 }

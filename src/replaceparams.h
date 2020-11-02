@@ -4,19 +4,28 @@
 #include "replacefile.h"
 #include <QList>
 #include <QMetaType>
+#include <QPair>
+#include <QString>
 
 class ReplaceParams {
 
 public:
     ReplaceParams();
-    ReplaceParams(const QList<ReplaceFile>& files);
+    ReplaceParams(const QList<ReplaceFile>& files, bool renameFiles,
+                  const QList<QPair<QString, QString>>& renames);
     void append(const ReplaceFile& file);
     int size() const;
     QList<ReplaceFile> files() const;
     void setFiles(const QList<ReplaceFile>& value);
+    bool renameFiles() const;
+    void setRenameFiles(bool value);
+    QList<QPair<QString, QString>> renames() const;
+    void setRenames(const QList<QPair<QString, QString>>& value);
 
 protected:
     QList<ReplaceFile> mFiles;
+    bool mRenameFiles;
+    QList<QPair<QString, QString>> mRenames;
 };
 
 Q_DECLARE_METATYPE(ReplaceParams)

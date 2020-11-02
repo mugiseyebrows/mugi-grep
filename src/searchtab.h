@@ -9,6 +9,7 @@ class QTextBrowser;
 #include "html.h"
 #include "mode.h"
 #include "searchhits.h"
+#include "searchnamehits.h"
 #include "searchparams.h"
 #include "searchresultrenderer.h"
 #include "utils.h"
@@ -17,20 +18,22 @@ class SearchTab : public QWidget {
     Q_OBJECT
 public:
     SearchTab(QWidget* parent = 0);
-    void append(const SearchHits& hits);
+    void append(const SearchHits& hits, const SearchNameHits& nameHits);
     void read();
     void trigRerender();
     void setMode(Mode value);
     SearchParams& params();
     SearchHits& hits();
+    SearchNameHits& nameHits();
     DisplayOptions displayOptions() const;
     void setDisplayOptions(const DisplayOptions& value);
-    ReplaceParams replaceParams();
+    ReplaceParams replaceParams(bool renameFiles);
     QString toPlainText() const;
     QString toHtml() const;
     Mode mode() const;
     void setParams(const SearchParams& value);
     void setHits(const SearchHits& value);
+    void setNameHits(const SearchNameHits& value);
     QTextBrowser* textBrowser() const;
     void setTextBrowser(QTextBrowser* value);
     DisplayOptionsWidget* displayOptionsWidget() const;
@@ -42,6 +45,7 @@ protected:
     Mode mMode;
     SearchParams mParams;
     SearchHits mHits;
+    SearchNameHits mNameHits;
     QTextBrowser* mTextBrowser;
     DisplayOptionsWidget* mDisplayOptionsWidget;
     SearchResultRenderer* mRenderer;

@@ -58,3 +58,12 @@ void SearchProgressWidget::replaced(int files,int lines) {
     ui->status2->setText(QString());
     ui->status2->hide();
 }
+
+void SearchProgressWidget::renamed(int successful,int failed) {
+
+    ui->status1->setText(QString("%1 file%2 renamed")
+                         .arg(successful)
+                         .arg(successful == 1 ? "" : "s"));
+    ui->status2->setText(QString());
+    ui->status2->hide();
+}

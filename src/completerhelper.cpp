@@ -4,20 +4,12 @@
 #include <QCompleter>
 #include <QTreeView>
 #include <QHeaderView>
-
-QString CompleterHelper::nameFromPath(const QString& path) {
-    int p = qMax(path.lastIndexOf('/'), path.lastIndexOf('\\'));
-    if (p < 0) {
-        return path;
-    }
-    return path.mid(p + 1);
-}
-
+#include "fileio.h"
 
 QStandardItemModel* CompleterHelper::filesToModel(const QStringList& files, QObject* parent) {
     QStandardItemModel* model = new QStandardItemModel(files.size(), 2, parent);
     for(int r=0;r<model->rowCount();r++) {
-        model->setData(model->index(r,0), nameFromPath(files[r]));
+        model->setData(model->index(r,0), FileIO::nameFromPath(files[r]));
         model->setData(model->index(r,1), files[r]);
     }
     return model;
