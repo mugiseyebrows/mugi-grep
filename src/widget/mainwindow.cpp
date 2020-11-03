@@ -439,7 +439,10 @@ void dumpPalette(const QString& fileName) {
                                         QPalette::NoRole,
                                         QPalette::ToolTipBase,
                                         QPalette::ToolTipText,
-                                        QPalette::PlaceholderText};
+#ifdef HAS_PLACEHOLDER_TEXT
+                                        QPalette::PlaceholderText
+#endif
+                                       };
 
     QStringList roles_ = {
         "QPalette::WindowText",
@@ -462,7 +465,9 @@ void dumpPalette(const QString& fileName) {
         "QPalette::NoRole",
         "QPalette::ToolTipBase",
         "QPalette::ToolTipText",
+#ifdef HAS_PLACEHOLDER_TEXT
         "QPalette::PlaceholderText"
+#endif
     };
 
     QPalette palette = qApp->palette();

@@ -33,7 +33,9 @@ void StyleHelper::setDarkStyle()
     palette.setColor(QPalette::NoRole,QColor(0, 0, 0));
     palette.setColor(QPalette::ToolTipBase,QColor(255, 255, 220));
     palette.setColor(QPalette::ToolTipText,QColor(0, 0, 0));
+#ifdef HAS_PLACEHOLDER_TEXT
     palette.setColor(QPalette::PlaceholderText,QColor(212, 212, 212, 128));
+#endif
     qApp->setPalette(palette);
 }
 
@@ -78,6 +80,8 @@ void StyleHelper::setLightStyle()
     palette.setColor(QPalette::NoRole,QColor(0, 0, 0));
     palette.setColor(QPalette::ToolTipBase,QColor(255, 255, 220));
     palette.setColor(QPalette::ToolTipText,QColor(0, 0, 0));
+#ifdef HAS_PLACEHOLDER_TEXT
     palette.setColor(QPalette::PlaceholderText,QColor(0, 0, 0, 128));
+#endif
     qApp->setPalette(palette);
 }

@@ -1,7 +1,12 @@
 
 QT       += core gui
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4) {
+QT += widgets
+greaterThan(QT_MINOR_VERSION, 11): DEFINES += HAS_PLACEHOLDER_TEXT
+}
+
+#message("qt" $$QT_MAJOR_VERSION $$QT_MINOR_VERSION)
 
 TARGET = mugi-grep
 TEMPLATE = app
