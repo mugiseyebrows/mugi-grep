@@ -363,7 +363,7 @@ function RegExpReplacement() {
     c.constructor_()
     c.constructor_(m)
     for (let k in m) {
-        c.member(mName(k), m[k], {preserveCase: 'false'}[k])
+        c.member(mName(k), m[k], {preserveCase: false, renameFiles: true}[k])
     }
 
     c.include('QMetaType', true, true)
