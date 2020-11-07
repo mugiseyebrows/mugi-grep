@@ -3,6 +3,8 @@
 #include <QString>
 #include <QLatin1Char>
 #include <QFileInfo>
+#include <QSettings>
+#include <QDir>
 
 EditorDetector::EditorDetector()
 {
@@ -87,7 +89,7 @@ QString findProgramFiles64() {
     return QString();
 }
 
-QString findAppData() {
+QString findAppDataRoaming() {
     QString path = QString::fromLocal8Bit(qgetenv("APPDATA"));
     if (!path.isEmpty() && exists(path)) {
         return path;
@@ -104,7 +106,7 @@ QString findAppData() {
 }
 
 QString findAppDataLocal() {
-    QString path = findAppData();
+    QString path = findAppDataRoaming();
     if (path.isEmpty()) {
         return QString();
     }
@@ -132,7 +134,6 @@ QString joinSpace(const QStringList& args) {
 
 }
 
-
 QList<Editor> EditorDetector::detect()
 {
 
@@ -145,6 +146,7 @@ QList<Editor> EditorDetector::detect()
     QString programFiles32 = findProgramFiles32();
     QString programFiles64 = findProgramFiles64();
     QString appDataLocal = findAppDataLocal();
+    QString appDataRoaming = findAppDataRoaming();
 
     QString vsCode1 = existing({programFiles32, programFiles64, appDataLocal}, "Microsoft VS Code\\Code.exe");
 
@@ -156,6 +158,55 @@ QList<Editor> EditorDetector::detect()
 
     if (!geany1.isEmpty()) {
         geany = geany1;
+    }
+
+    QString qtCreator1 = existing({"C:\\Qt\\Tools\\QtCreator\\bin"}, executableName("qtcreator"));
+    if (!qtCreator1.isEmpty()) {
+        qtCreator = qtCreator1;
+    }
+
+    QStringList regKeys = {
+        "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall",
+        "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall"
+    };
+
+    QRegularExpression geanyRx("Geany [0-9.]+", QRegularExpression::CaseInsensitiveOption);
+
+    for(const QString& regKey: regKeys) {
+        QSettings settings(regKey, QSettings::NativeFormat);
+        QStringList groups = settings.childGroups();
+        for(const QString& group: groups) {
+            settings.beginGroup(group);
+            QString displayName = settings.value("DisplayName").toString();
+            QString installLocation = settings.value("InstallLocation").toString();
+            QString displayIcon = settings.value("DisplayIcon").toString();
+            if (displayName == "Microsoft Visual Studio Code") {
+                QString path = existing({installLocation},"Code.exe");
+                if (!path.isEmpty()) {
+                    vsCode = path;
+                }
+            }
+            if (geanyRx.match(displayName).hasMatch()) {
+                if (exists(displayIcon)) {
+                    geany = displayIcon;
+                }
+            }
+            settings.endGroup();
+        }
+    }
+
+    QString startMenuQt = pathJoin(appDataRoaming, "Microsoft\\Windows\\Start Menu\\Programs\\Qt");
+    if (exists(startMenuQt)) {
+        QStringList files = QDir(startMenuQt).entryList(QDir::Files);
+        QRegularExpression rxQtCreator("Qt Creator",QRegularExpression::CaseInsensitiveOption);
+        for(const QString& name: files) {
+            if (rxQtCreator.match(name).hasMatch()) {
+                QString path = QFile::symLinkTarget(pathJoin(startMenuQt, name));
+                if (exists(path)) {
+                    qtCreator = path;
+                }
+            }
+        }
     }
 
 #endif
