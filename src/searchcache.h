@@ -39,7 +39,7 @@ public:
 
     QPair<int, int> countMatchedFiles(QString path, RegExpPath filter);
 
-    QStringList getAllFiles(QString path, bool cacheFileList);
+    QStringList getListing(QString path, bool cacheFileList);
     static QStringList filterFiles(const QStringList &allFiles, RegExpPath filter, int *filesFiltered, int *dirsFiltered);
     static void testTokenize();
 
@@ -48,6 +48,7 @@ public:
     bool isFinished(int searchId);
     bool isPreviewFinished(int searchId);
 
+    QString getCachedListingPath(const QString &path);
 protected:
 
     QMutex mMutex;

@@ -12,6 +12,9 @@
 #include "coloredline.h"
 #include "hunk.h"
 
+#include <QStandardPaths>
+#include <QCryptographicHash>
+
 #if 0
 QStringList bytesToLines(const QByteArray& bytes) {
     QTextCodec* codec = QTextCodec::codecForName("UTF-8");
@@ -139,7 +142,7 @@ QPair<int,int> SearchCache::countMatchedFiles(QString path, RegExpPath filter) {
 
     qDebug() << "SearchCache::countMatchedFiles" << path << filter;
 
-    QStringList allFiles = getAllFiles(path, true);
+    QStringList allFiles = getListing(path, true);
     int filesFiltered;
     int dirsFiltered;
     // todo optimize
@@ -147,13 +150,34 @@ QPair<int,int> SearchCache::countMatchedFiles(QString path, RegExpPath filter) {
     return QPair<int,int>(files.size(),allFiles.size());
 }
 
-QStringList SearchCache::getAllFiles(QString path, bool cacheFileList) {
+QString SearchCache::getCachedListingPath(const QString& path) {
+    QString appData = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QTextCodec* codec = QTextCodec::codecForName("UTF-8");
+    QCryptographicHash hash(QCryptographicHash::Sha1);
+    hash.addData(codec->fromUnicode(path));
+    QString name = QString("%1-%2.txt").arg(FileIO::nameFromPath(path)).arg(QString::fromLatin1(hash.result().toHex(0)));
+    return QDir(appData).filePath(name);
+}
+
+QStringList SearchCache::getListing(QString path, bool cacheFileList) {
     // todo skip directory entirely if filter matches if not cacheFileList
     QString path_ = QDir(path).absolutePath();
     QStringList allFiles;
     if (cacheFileList && mFileList.contains(path_)) {
         allFiles = mFileList[path_];
     } else {
+
+        QString cachedListingPath;
+
+        if (cacheFileList) {
+            cachedListingPath = getCachedListingPath(path_);
+            if (QFile::exists(cachedListingPath)) {
+                allFiles = FileIO::readLines(cachedListingPath);
+                mFileList[path_] = allFiles;
+                return allFiles;
+            }
+        }
+
         QDirIterator it(path, QDir::Files, QDirIterator::Subdirectories);
         while (it.hasNext()) {
             QString path = it.next();
@@ -161,6 +185,10 @@ QStringList SearchCache::getAllFiles(QString path, bool cacheFileList) {
         }
         if (cacheFileList) {
             mFileList[path_] = allFiles;
+        }
+
+        if (cacheFileList) {
+            FileIO::writeLines(cachedListingPath, allFiles);
         }
     }
     if (!cacheFileList) {
@@ -211,7 +239,7 @@ void SearchCache::add(SearchParams params) {
 
     int searchId = params.id();
 
-    QStringList allFiles = getAllFiles(path, cacheFileList);
+    QStringList allFiles = getListing(path, cacheFileList);
     int filesFiltered;
     int dirsFiltered;
     QStringList files = filterFiles(allFiles, filter, &filesFiltered, &dirsFiltered);

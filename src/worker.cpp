@@ -35,13 +35,13 @@ void Worker::onCountFiles(CountFilesParams params) {
 void Worker::onGetAllFiles(QString path)
 {
     //qDebug() << "Worker::onGetAllFiles" << path;
-    QStringList files = mCache.getAllFiles(path,true);
+    QStringList files = mCache.getListing(path,true);
     emit allFiles(path,files);
 }
 
 void Worker::onGetListing(GetListingParams params)
 {
-    QStringList files = mCache.getAllFiles(params.path(),params.cacheFileList());
+    QStringList files = mCache.getListing(params.path(),params.cacheFileList());
     emit listing(params.path(),files);
 }
 
