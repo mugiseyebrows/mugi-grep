@@ -3,12 +3,18 @@
 
 #include <QWidget>
 #include "regexppath.h"
+#include "regexp.h"
+#include "regexpreplacement.h"
+#include "mode.h"
 
 class SearchBrowser;
 class Worker;
 class AnchorClickHandler;
 class RXInput;
 class RXPathInput;
+
+class QCheckBox;
+class QLineEdit;
 
 namespace Ui {
 class SearchOptionsWidget;
@@ -19,46 +25,64 @@ class SearchOptionsWidget : public QWidget
     Q_OBJECT
 
 public:
-    enum Mode {
-        ModeSearch,
-        ModeReplace
-    };
+
     explicit SearchOptionsWidget(QWidget *parent = nullptr);
     ~SearchOptionsWidget();
 
-    void setActive(bool active);
-    void setBrowser(SearchBrowser* browser, bool setValues = true);
-    void setMode(Mode mode);
+    void collect(Mode mode);
 
     QString path() const;
     void setPath(const QString& path);
 
+    void loadCollected();
+
     bool validate();
 
-    void collect();
-    void emitTabTitle();
+    RegExpPath filter() const;
+
+    void setFiler(const RegExpPath &);
+    void setPattern(const RegExp &);
+    void setReplacement(const RegExpReplacement &value);
+
+    QLineEdit* pathEdit() const;
+
+    //void setCacheFileList(QAction* action);
+
+    void setReplaceEnabled(bool enabled);
+
+#if 0
+    void setActive(bool active);
+    void setBrowser(SearchBrowser* browser, bool setValues = true);
+    void setMode(Mode mode);
+
+
+
+
+
+
+    //void emitTabTitle();
     void init(Worker *worker, AnchorClickHandler *clickHandler);
-    void setBrowserValues();
-    void updateCompletions();
+    //void setBrowserValues();
+
     void countMatchedFiles();
 
     void setCanReplace(bool can);
 
     void select();
-    void setCacheFileList(QAction* action);
+
 signals:
     void search();
     void preview();
     void replace();
     void clone();
-    void tabTitle(QString, bool);
+    //void tabTitle(QString, bool);
     void countMatchedFiles(QString,RegExpPath,bool);
     void pathChanged(QString);
 protected slots:
-    void onFilterTextChanged();
-    void onExpTextChanged();
-    void onLinesAfterValueChanged();
-    void onLinesBeforeValueChanged();
+    //void onFilterTextChanged();
+    //void onExpTextChanged();
+    //void onLinesAfterValueChanged();
+    //void onLinesBeforeValueChanged();
     void onCountMatchedFiles(int matched, int total);
     void onNotBinaryClicked(bool value);
     void onPreserveCaseClicked(bool value);
@@ -71,14 +95,56 @@ protected slots:
     void on_showFileName_clicked(bool checked);
     void on_showLineNumber_clicked(bool checked);
     void on_onlyMatched_clicked(bool checked);
+    void onCacheToggled(bool checked);
 protected:
-    Ui::SearchOptionsWidget *ui;
-    bool mActive;
+
+
     SearchBrowser* mBrowser;
     Worker* mWorker;
     AnchorClickHandler* mClickHandler;
+
+
+
+#endif
+
+    void showFileCount(int filtered, int total);
+
+    void hideFileCount();
+
+    void setMode(Mode mode);
+
+    bool renameFiles() const;
+
+    void setPreviewEnabled(bool enabled);
+
+    bool cacheFileListIsChecked() const;
+
+    void fixLayout();
+    //bool notBinary() const;
+    QCheckBox *cacheFileList();
+    QWidgetList widgets();
+public slots:
+    void on_select_clicked();
+protected slots:
+    //void on_doSearch_clicked();
+
+signals:
+    void patternChanged(RegExp);
+    void filterChanged(RegExpPath);
+    void replacementChanged(RegExpReplacement);
+    void pathChanged(QString);
+    void notBinaryChanged(bool);
+
+    void search();
+    void preview();
+    void replace();
+    //void select();
+
+protected:
+    Ui::SearchOptionsWidget *ui;
+    //bool mActive;
     Mode mMode;
-    QAction* mCacheFileList;
+
 };
 
 #endif // SEARCHOPTIONSWIDGET_H

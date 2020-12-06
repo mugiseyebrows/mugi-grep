@@ -22,11 +22,13 @@ RXPathInput::RXPathInput(QWidget *parent) :
     QComboBox* input;
     foreach(input,mInputs) {
         connect(input->lineEdit(),SIGNAL(returnPressed()),this,SIGNAL(returnPressed()));
-        connect(input->lineEdit(),SIGNAL(textChanged(QString)),this,SIGNAL(textChanged()));
+        connect(input->lineEdit(),SIGNAL(textChanged(QString)),this,SLOT(onValueChanged()));
         connect(input->lineEdit(),SIGNAL(textChanged(QString)),this,SLOT(onClearValidation()));
         input->setMaximumWidth(maximumWidth);
     }
-    connect(ui->matchCase,SIGNAL(clicked(bool)),this,SIGNAL(caseClicked(bool)));
+
+    connect(ui->matchCase,SIGNAL(clicked(bool)),this,SLOT(onValueChanged()));
+    connect(ui->notBinary,SIGNAL(clicked(bool)),this,SLOT(onValueChanged()));
 }
 
 RXPathInput::~RXPathInput()
@@ -34,13 +36,22 @@ RXPathInput::~RXPathInput()
     delete ui;
 }
 
+QWidgetList RXPathInput::widgets() const {
+    return QWidgetList {ui->nameInclude, ui->extInclude, ui->nameExclude, ui->extExclude, ui->matchCase, ui->notBinary};
+}
+
 RegExpPath RXPathInput::value() const {
-    return RegExpPath(exps(),ui->matchCase->isChecked());
+    return RegExpPath(exps(),ui->matchCase->isChecked(),ui->notBinary->isChecked());
+}
+
+QCheckBox* RXPathInput::notBinary() {
+    return ui->notBinary;
 }
 
 void RXPathInput::setValue(const RegExpPath &value) {
-    setExps(value.exps());
+    setExps(value.patterns());
     ui->matchCase->setChecked(value.case_());
+    ui->notBinary->setChecked(value.notBinary());
 }
 
 void RXPathInput::enableTextChanged(bool active)
@@ -68,6 +79,22 @@ void RXPathInput::setExpludeExtValue(const QString &value)
     ui->extExclude->lineEdit()->setText(value);
 }
 
+QCheckBox *RXPathInput::matchCaseCheckBox() const
+{
+    return ui->matchCase;
+}
+
 void RXPathInput::onClearValidation() {
     RXBaseInput::clearValidation(palette());
 }
+
+void RXPathInput::onValueChanged() {
+    emit valueChanged(value());
+}
+
+#if 0
+void RXPathInput::onTextChanged() {
+    //emit textChanged(value());
+    emit valueChanged(value());
+}
+#endif

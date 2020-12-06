@@ -11,6 +11,7 @@ CompleterModelManager::CompleterModelManager(QObject *parent) : QObject(parent)
 
 void CompleterModelManager::onCollect(SearchOptionsWidget* options, QTabWidget * tabs)
 {
+    /*
     QList<QStringListModel*> models = RXCollector::instance()->models();
     options->collect();
     for(int index=0;index<tabs->count();index++) {
@@ -19,11 +20,11 @@ void CompleterModelManager::onCollect(SearchOptionsWidget* options, QTabWidget *
             qDebug() << "not SessionWidget at index" << index << tabs->widget(index);
             return;
         }
-        session->updateCompletions();
+        session->loadCollected();
     }
     foreach (QStringListModel* model, models) {
         model->deleteLater();
-    }
+    }*/
 }
 
 SessionWidget *CompleterModelManager::tab(QTabWidget* tabs, int index)

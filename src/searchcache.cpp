@@ -5,13 +5,17 @@
 #include <QDebug>
 
 #include "html.h"
-#include "filereader.h"
-#include "lit.h"
+#include "fileio.h"
+
 #include "worker.h"
 #include "utils.h"
 #include "coloredline.h"
 #include "hunk.h"
 
+#include <QStandardPaths>
+#include <QCryptographicHash>
+
+#if 0
 QStringList bytesToLines(const QByteArray& bytes) {
     QTextCodec* codec = QTextCodec::codecForName("UTF-8");
     QStringList lines = codec->toUnicode(bytes).split("\n");
@@ -22,20 +26,7 @@ QByteArray linesToBytes(const QStringList& lines) {
     QTextCodec* codec = QTextCodec::codecForName("UTF-8");
     return codec->fromUnicode(lines.join("\n"));
 }
-
-QStringList toHtmlSpans(const ColoredLine& coloredLine, const QStringList& backgroundColors) {
-    QStringList cols;
-    QList<ColoredLineSpan> spans = coloredLine.spans();
-    foreach(const ColoredLineSpan& span, spans) {
-        QString col = coloredLine.string().mid(span.start(), span.length());
-        if (span.background() == 0 || span.background() >= backgroundColors.size()) {
-            cols << Html::span(col, span.foreground() == 0 ? "black" : "red");
-        } else {
-            cols << Html::span(col, span.foreground() == 0 ? "black" : "red", backgroundColors[span.background()]);
-        }
-    }
-    return cols;
-}
+#endif
 
 QStringList fileNameLineNumber(bool showFileName, bool showLineNumber, const QString& relativePath, const QString& href, int lineNumber) {
     QStringList cols;
@@ -78,252 +69,7 @@ QSet<int> getSiblings(const QList<int>& matched, int linesBefore, int linesAfter
 }
 
 
-QStringList searchLines(const QStringList& lines, const QString& mPath, const QString& mRelativePath,
-                        const SearchParams& params) {
-
-    QStringList res;
-
-    RegExp exp = params.search();
-    int linesBefore = params.linesBefore();
-    int linesAfter = params.linesAfter();
-
-    QList<int> matched = getMatched(lines, exp);
-    QSet<int> siblings = getSiblings(matched, linesBefore, linesAfter);
-
-    static QStringList backgroundColors = {"#ffffff","#ffdfba","#baffc9","#bae1ff","#ffffba","#ffb3ba"};
-
-    bool onlyMatched = params.onlyMatched();
-    bool showFileName = params.showFileName();
-    bool showLineNumber = params.showLineNumber();
-
-    // pass 2
-    for(int i=0;i<lines.length();i++) {
-
-        if (matched.contains(i)) {
-
-            QString line = lines[i];
-
-            QRegularExpression regexp = exp.includeExp();
-            QRegularExpressionMatchIterator it = regexp.globalMatch(line);
-
-            QString href = "file:///" + QDir::toNativeSeparators(mPath) + "?line=" + QString::number(i+1);
-
-            if (onlyMatched) {
-                // each match on new line
-                while(it.hasNext()) {
-                    QStringList cols = fileNameLineNumber(showFileName, showLineNumber, mRelativePath, href, i+1);
-                    QRegularExpressionMatch m = it.next();
-                    ColoredLine coloredLine(line);
-                    int jmax = qMin(m.lastCapturedIndex(), backgroundColors.size() - 1);
-                    for(int j=1;j<=jmax;j++) {
-                        coloredLine.paintBackground(m.capturedStart(j), m.capturedEnd(j), j);
-                    }
-                    coloredLine.paintForeground(m.capturedStart(), m.capturedEnd(), 1);
-                    cols << toHtmlSpans(coloredLine.mid(m.capturedStart(),m.capturedLength()), backgroundColors);
-                    res << cols.join("");
-                }
-            } else {
-                // all matches on one line
-                QStringList cols = fileNameLineNumber(showFileName, showLineNumber, mRelativePath, href, i+1);
-                ColoredLine coloredLine(line);
-                while(it.hasNext()) {
-                    QRegularExpressionMatch m = it.next();
-                    int jmax = qMin(m.lastCapturedIndex(), backgroundColors.size() - 1);
-                    for(int j=1;j<=jmax;j++) {
-                        coloredLine.paintBackground(m.capturedStart(j), m.capturedEnd(j), j);
-                    }
-                    coloredLine.paintForeground(m.capturedStart(), m.capturedEnd(), 1);
-                }
-                cols << toHtmlSpans(coloredLine, backgroundColors);
-                res << cols.join("");
-            }
-
-        } else if (siblings.contains(i)) {
-
-            QString line = lines[i];
-            QString href = "file:///" + QDir::toNativeSeparators(mPath) + "?line=" + QString::number(i+1);
-            QStringList cols;
-            if (showFileName) {
-                cols << Html::anchor(mRelativePath, href, "violet")
-                     << Html::span("-", "blue");
-            }
-            if (showLineNumber) {
-                cols << Html::span(QString::number(i+1), "green")
-                     << Html::span("-", "blue");
-            }
-            cols << Html::span(line, "black");
-            res << cols.join("");
-        }
-    }
-
-    return res;
-}
-
-int backreferenceLength(const QString& replacement, int pos) {
-    if (replacement[pos] == '\\' && pos + 1 < replacement.size() && replacement[pos+1].isDigit()) {
-        int len = 1;
-        while(++pos < replacement.size()) {
-            if (!replacement[pos].isDigit()) {
-                break;
-            }
-            len++;
-        }
-        return len;
-    }
-    return -1;
-}
-
-QVariantList tokenize(const QString& replacement) {
-    QVariantList result;
-    int prev = 0;
-    int i = 0;
-    while (i < replacement.size()) {
-        int len = backreferenceLength(replacement, i);
-        if (len > 0) {
-            if (i - prev > 0) {
-                QString part = replacement.mid(prev,i - prev);
-                result.append(part);
-            }
-            QString ref = replacement.mid(i+1,len-1);
-            result.append(ref.toInt());
-            prev = i + len;
-            i += len;
-        } else {
-            i++;
-        }
-    }
-    if (prev < replacement.size()) {
-        QString part = replacement.mid(prev);
-        result.append(part);
-    }
-    return result;
-}
-
-void compare(const QVariantList& e, const QVariantList& a) {
-    if (e == a) {
-        return;
-    }
-    QString e_ = "{" + Utils::toStringList(e).join("|") + "}";
-    QString a_ = "{" + Utils::toStringList(a).join("|") + "}";
-    qDebug() << "not equal, expected: " << e_.toStdString().c_str() << ", actual " << a_.toStdString().c_str();
-}
-
-QString sameCase(const QString& repl, const QString& orig) {
-    if (orig.toLower() == orig) {
-        return repl.toLower();
-    } else if (orig.toUpper() == orig) {
-        return repl.toUpper();
-    }
-    return repl;
-}
-
-QString withBackreferences(const QRegularExpressionMatch& m, const QVariantList& replacement, bool preserveCase) {
-    QStringList result;
-    foreach(const QVariant& v, replacement) {
-        if (v.type() == QVariant::Int) {
-            result.append(m.captured(v.toInt()));
-        } else if (v.type() == QVariant::String) {
-            result.append(v.toString());
-        } else {
-            qDebug() << "withBackreferences error:" << v;
-        }
-    }
-    QString result_ = result.join("");
-    return preserveCase ? sameCase(result_, m.captured(0)) : result_;
-}
-
-QStringList replacePreview(const QStringList& lines, const QString& path, const QString& mRelativePath,
-                           const SearchParams& params, QList<Replacement>& replacements) {
-
-    QStringList res;
-
-    RegExp exp = params.search();
-    QString replacement = params.replace();
-    bool preserveCase = params.preserveCase();
-
-    QList<int> matched = getMatched(lines, exp);
-    QSet<int> siblings = getSiblings(matched, params.linesBefore(), params.linesAfter());
-
-    if (matched.isEmpty()) {
-        return res;
-    }
-
-    QRegularExpression rx = exp.includeExp();
-    QVariantList replacement_ = tokenize(replacement);
-    QString href = "file:///" + QDir::toNativeSeparators(path);
-    res << Html::anchor(mRelativePath, href, "violet");
-
-    QStringList oldLines;
-    QStringList newLines;
-
-    Hunk hunk;
-
-    QString lightRed = "#FFD9DD";
-    QString red = "#fdb8c0";
-    QString lightGreen = "#D9FFE3";
-    QString green = "#acf2bd";
-
-    for(int i=0;i<lines.size();i++) {
-        if (matched.contains(i)) {
-            QString line = lines[i];
-            QRegularExpressionMatchIterator it = rx.globalMatch(line);
-            QStringList oldLine;
-            QStringList newLine;
-            int prev = 0;
-            while(it.hasNext()) {
-                QRegularExpressionMatch m = it.next();
-                QString s = line.mid(prev,m.capturedStart() - prev);
-                oldLine << s;
-                newLine << s;
-
-                s = line.mid(m.capturedStart(),m.capturedLength());
-                oldLine << s;
-                newLine << withBackreferences(m,replacement_,preserveCase);
-                prev = m.capturedEnd();
-            }
-
-            if (prev < line.size()) {
-                oldLine << line.mid(prev);
-                newLine << line.mid(prev);
-            }
-
-            Q_ASSERT(oldLine.join("") == line);
-
-            QString subj = Html::span("- ","blue",lightRed) + Html::spanZebra(oldLine,"black",lightRed,red);
-            QString repl = Html::span("+ ","blue",lightGreen) + Html::spanZebra(newLine,"black",lightGreen,green);
-
-            hunk.replace(i + 1, subj, repl);
-            oldLines << oldLine.join("");
-            newLines << newLine.join("");
-        } else if (siblings.contains(i)) {
-            QString subj = Html::span("&nbsp;&nbsp;" + lines[i], "black");
-            hunk.context(i + 1, subj);
-        } else {
-            if (!hunk.isEmpty()) {
-                QStringList value = hunk.value();
-                res << Html::span(QString("@@ %1,%2 %1,%2 @@").arg(hunk.line()).arg(hunk.count()), "blue")
-                    << value;
-                hunk = Hunk();
-            }
-        }
-    }
-
-    if (!hunk.isEmpty()) {
-        QStringList value = hunk.value();
-        res << Html::span(QString("@@ %1,%2 %1,%2 @@").arg(hunk.line()).arg(hunk.count()), "blue")
-            << value;
-        hunk = Hunk();
-    }
-
-    QList<ReplacementLine> replacementLines;
-    for(int i=0;i<oldLines.size();i++) {
-        replacementLines.append(ReplacementLine(matched[i],oldLines[i],newLines[i]));
-    }
-
-    replacements.append(Replacement(path,replacementLines));
-    return res;
-}
-
+#if 0
 QStringList searchBinary(const QStringList& lines, const QString& path, const QString& relativePath,
                         const SearchParams& params) {
     QStringList res;
@@ -341,16 +87,31 @@ QStringList searchBinary(const QStringList& lines, const QString& path, const QS
     }
     return res;
 }
+#endif
 
-QStringList searchLines(const QByteArray& bytes, const QString& path, const QString& relativePath,
-                        const SearchParams& params, int* lineCount) {
 
-    QTextCodec* codec = QTextCodec::codecForName("UTF-8");
-    QStringList lines = codec->toUnicode(bytes).split("\n");
-    *lineCount = lines.size();
-    return searchLines(lines, path, relativePath, params);
+void searchLines(const QStringList& lines, const QString& path, const QString& relativePath,
+                        const SearchParams& params, SearchHits& hits) {
+    QStringList res;
+    RegExp exp = params.pattern();
+    QList<int> matched = getMatched(lines, exp);
+    if (matched.isEmpty()) {
+        return;
+    }
+    SearchHit hit(path, relativePath, matched);
+    hits.append(hit);
 }
 
+void searchLines(const QByteArray& bytes, const QString& path, const QString& relativePath,
+                        const SearchParams& params, SearchHits& hits, int* lineCount) {
+
+    QTextCodec* codec = QTextCodec::codecForName("UTF-8");
+    QStringList lines = codec->toUnicode(bytes).split(QRegularExpression("\\r?\\n"));
+    *lineCount = lines.size();
+    return searchLines(lines, path, relativePath, params, hits);
+}
+
+#if 0
 QStringList replacePreview(const QByteArray& bytes, const QString& path, const QString& relativePath,
                            const SearchParams& params, int* lineCount, QList<Replacement>& replacements) {
 
@@ -360,6 +121,7 @@ QStringList replacePreview(const QByteArray& bytes, const QString& path, const Q
     return replacePreview(lines, path, relativePath, params, replacements);
 }
 
+
 QStringList searchBinary(const QByteArray& bytes, const QString& path, const QString& relativePath,
                          const SearchParams& params) {
 
@@ -367,32 +129,55 @@ QStringList searchBinary(const QByteArray& bytes, const QString& path, const QSt
     QStringList lines = codec->toUnicode(bytes).split("\n");
     return searchBinary(lines,path,relativePath,params);
 }
+#endif
 
 SearchCache::SearchCache() {
 
 }
 
-QPair<int,int> SearchCache::countMatchedFiles(QString path, RegExpPath filter, bool notBinary) {
+QPair<int,int> SearchCache::countMatchedFiles(QString path, RegExpPath filter) {
 
     QMutexLocker locked(&mMutex);
-
     //qDebug() << filter << notBinary;
 
-    QStringList allFiles = getAllFiles(path, true);
+    qDebug() << "SearchCache::countMatchedFiles" << path << filter;
+
+    QStringList allFiles = getListing(path, true);
     int filesFiltered;
     int dirsFiltered;
     // todo optimize
-    QStringList files = filterFiles(allFiles,filter,notBinary,&filesFiltered,&dirsFiltered);
+    QStringList files = filterFiles(allFiles,filter,&filesFiltered,&dirsFiltered);
     return QPair<int,int>(files.size(),allFiles.size());
 }
 
-QStringList SearchCache::getAllFiles(QString path, bool cacheFileList) {
+QString SearchCache::getCachedListingPath(const QString& path) {
+    QString appData = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QTextCodec* codec = QTextCodec::codecForName("UTF-8");
+    QCryptographicHash hash(QCryptographicHash::Sha1);
+    hash.addData(codec->fromUnicode(path));
+    QString name = QString("%1-%2.txt").arg(FileIO::nameFromPath(path)).arg(QString::fromLatin1(hash.result().toHex(0)));
+    return QDir(appData).filePath(name);
+}
+
+QStringList SearchCache::getListing(QString path, bool cacheFileList) {
     // todo skip directory entirely if filter matches if not cacheFileList
     QString path_ = QDir(path).absolutePath();
     QStringList allFiles;
     if (cacheFileList && mFileList.contains(path_)) {
         allFiles = mFileList[path_];
     } else {
+
+        QString cachedListingPath;
+
+        if (cacheFileList) {
+            cachedListingPath = getCachedListingPath(path_);
+            if (QFile::exists(cachedListingPath)) {
+                allFiles = FileIO::readLines(cachedListingPath);
+                mFileList[path_] = allFiles;
+                return allFiles;
+            }
+        }
+
         QDirIterator it(path, QDir::Files, QDirIterator::Subdirectories);
         while (it.hasNext()) {
             QString path = it.next();
@@ -401,6 +186,10 @@ QStringList SearchCache::getAllFiles(QString path, bool cacheFileList) {
         if (cacheFileList) {
             mFileList[path_] = allFiles;
         }
+
+        if (cacheFileList) {
+            FileIO::writeLines(cachedListingPath, allFiles);
+        }
     }
     if (!cacheFileList) {
         mFileList.remove(path_);
@@ -408,12 +197,14 @@ QStringList SearchCache::getAllFiles(QString path, bool cacheFileList) {
     return allFiles;
 }
 
-QStringList SearchCache::filterFiles(const QStringList& allFiles, RegExpPath filter, bool notBinary, int* filesFiltered, int* dirsFiltered) {
+QStringList SearchCache::filterFiles(const QStringList& allFiles, RegExpPath filter, int* filesFiltered, int* dirsFiltered) {
 
     int filesFiltered_ = 0;
     int dirsFiltered_ = 0;
 
     QStringList files;
+
+    bool notBinary = filter.notBinary();
 
     foreach(const QString& path, allFiles) {
         if (path.contains("/.git/")) { // todo skip settings
@@ -437,6 +228,7 @@ QStringList SearchCache::filterFiles(const QStringList& allFiles, RegExpPath fil
     return files;
 }
 
+
 void SearchCache::add(SearchParams params) {
 
     QMutexLocker locked(&mMutex);
@@ -444,63 +236,84 @@ void SearchCache::add(SearchParams params) {
     QString path = params.path();
     bool cacheFileList = params.cacheFileList();
     RegExpPath filter = params.filter();
-    bool notBinary = params.skipBinary();
 
     int searchId = params.id();
 
-    QStringList allFiles = getAllFiles(path, cacheFileList);
+    QStringList allFiles = getListing(path, cacheFileList);
     int filesFiltered;
     int dirsFiltered;
-    QStringList files = filterFiles(allFiles, filter, notBinary, &filesFiltered, &dirsFiltered);
+    QStringList files = filterFiles(allFiles, filter, &filesFiltered, &dirsFiltered);
 
     SearchData data(files, filesFiltered, dirsFiltered);
 
     mSearchParams.insert(searchId,params);
     mSearchData.insert(searchId,data);
-    mReplacements.insert(searchId,QList<Replacement>());
+    //mReplacements.insert(searchId,QList<Replacement>());
 }
 
 void SearchCache::finish(int searchId) {
-    /*
+
     QMutexLocker locked(&mMutex);
     mSearchData.remove(searchId);
-    */
+    mSearchParams.remove(searchId);
 }
 
+#if 0
 bool SearchCache::isPreview(int searchId) {
     QMutexLocker locked(&mMutex);
     return mSearchParams.contains(searchId) && mSearchParams[searchId].action() == Worker::Preview && mReplacements.contains(searchId);
 }
+#endif
 
-void SearchCache::search(int searchId, QString &data, int *complete, int *total, int *filtered, QString &file) {
+bool SearchCache::isFinished(int searchId) {
+    QMutexLocker locked(&mMutex);
+    if (!mSearchData.contains(searchId) || !mSearchParams.contains(searchId)) {
+        return true;
+    }
+    const SearchData& data = mSearchData[searchId];
+    return data.filesComplete() >= data.filesSize();
+}
 
+QPair<SearchHits,SearchNameHits> SearchCache::search(int searchId) {
     QMutexLocker locked(&mMutex);
 
-    if (!mSearchParams.contains(searchId)) {
-        qDebug() << "!mSearchData.contains(searchId)";
-        return;
+    if (!mSearchParams.contains(searchId) || !mSearchData.contains(searchId)) {
+        qDebug() << "!mSearchParams.contains(searchId) || !mSearchData.contains(searchId)";
+        return QPair<SearchHits,SearchNameHits>();
     }
 
-    SearchParams& searchParams = mSearchParams[searchId];
-    SearchData& searchData = mSearchData[searchId];
-    QList<Replacement>& replacements = mReplacements[searchId];
+    SearchParams& params = mSearchParams[searchId];
+    SearchData& data = mSearchData[searchId];
+    //QList<Replacement>& replacements = mReplacements[searchId];
+
+    bool notBinary = params.filter().notBinary();
+
+    SearchHits hits(params.pattern());
+    hits.setFiltered(data.filesFiltered());
 
     //int lim = qMin(sd.complete + 100, sd.files.size());
-    QStringList res;
 
     int lineCount = 0;
     int fileCount = 0;
 
-    for (int i=searchData.filesComplete();i<searchData.filesSize();i++) {
-        QString path = searchData.file(i);
+    SearchNameHits nameHits(params.pattern());
+
+    for (int i=data.filesComplete();i<data.filesSize();i++) {
+        QString path = data.file(i);
+
+        QString name = FileIO::nameFromPath(path);
+
+        if (params.pattern().match(name)) {
+            nameHits.append(path);
+        }
 
         bool binary;
         bool readOk;
         bool tooBig;
 
         //QByteArray fileData = FileCache::instance()->file(path,sd.notBinary,&binary,&readOk);
-        QByteArray fileData = FileReader::read(path,searchParams.skipBinary(),&binary,&readOk,&tooBig);
-        QString relPath = Utils::relPath(path,searchParams.path());
+        QByteArray fileData = FileIO::read(path,notBinary,&binary,&readOk,&tooBig);
+        QString relPath = Utils::relPath(path,params.path());
 
         bool ok = true;
 
@@ -516,41 +329,37 @@ void SearchCache::search(int searchId, QString &data, int *complete, int *total,
         int fileLineCount = 0;
 
         if (ok) {
-            if (searchParams.action() == Worker::Search) {
-                if (binary) {
-                    res << searchBinary(fileData, path, relPath, searchParams);
-                } else {
-                    res << searchLines(fileData, path, relPath, searchParams, &fileLineCount);
-                }
-            } else if (searchParams.action() == Worker::Preview) {
-                if (binary) {
-
-                } else {
-                    res << replacePreview(fileData, path, relPath, searchParams, &fileLineCount, replacements);
-                }
+            if (binary) {
+                //res << searchBinary(fileData, path, relPath, searchParams);
+            } else {
+                searchLines(fileData, path, relPath, params, hits, &fileLineCount);
+                hits.setLast(relPath);
             }
         }
 
         lineCount += fileLineCount;
         fileCount += 1;
-        searchData.setFilesComplete(i + 1);
+        data.setFilesComplete(i + 1);
 
-        if (res.size() > 100 || lineCount > 4000 || fileCount > 50) {
-            data = res.join("<br/>");
-            *complete = searchData.filesComplete();
-            *total = searchData.filesSize();
-            *filtered = searchData.filesFiltered();
-            file = relPath;
-            return;
+
+        if (lineCount > 4000 || fileCount > 50) {
+
+            /*complete = searchData.filesComplete();
+            total = searchData.filesSize();
+            filtered = searchData.filesFiltered();*/
+
+            hits.setComplete(data.filesComplete());
+            hits.setTotal(data.filesSize());
+            return QPair<SearchHits,SearchNameHits>(hits, nameHits);
         }
     }
-    data = res.join("<br/>");
-    *complete = searchData.filesComplete();
-    *total = searchData.filesSize();
-    *filtered = searchData.filesFiltered();
-    file = QString();
+
+    hits.setComplete(data.filesComplete());
+    hits.setTotal(data.filesSize());
+    return QPair<SearchHits,SearchNameHits>(hits,nameHits);
 }
 
+#if 0
 void SearchCache::replace(int searchId, int* filesChanged, int* linesChanged, QStringList& notChanged) {
     QMutexLocker locked(&mMutex);
     if (!mReplacements.contains(searchId)) {
@@ -609,39 +418,5 @@ void SearchCache::replace(int searchId, int* filesChanged, int* linesChanged, QS
 
     mReplacements.remove(searchId);
 }
-
-void SearchCache::testTokenize() {
-
-    qDebug() << "testTokenize() started";
-
-    QString t;
-    QVariantList a,e;
-
-    t = "foo\\1bar\\2baz";
-    e = {"foo",1,"bar",2,"baz"};
-    a = tokenize(t);
-    compare(e,a);
-
-    t = "foo\\1bar\\2baz\\3";
-    e = {"foo",1,"bar",2,"baz",3};
-    a = tokenize(t);
-    compare(e,a);
-
-    t = "foo\\1bar\\2baz\\3a";
-    e = {"foo",1,"bar",2,"baz",3,"a"};
-    a = tokenize(t);
-    compare(e,a);
-
-    t = "\\1bar\\2baz\\3";
-    e = {1,"bar",2,"baz",3};
-    a = tokenize(t);
-    compare(e,a);
-
-    t = "\\1bar\\2\\3baz\\52";
-    e = {1,"bar",2,3,"baz",52};
-    a = tokenize(t);
-    compare(e,a);
-
-    qDebug() << "testTokenize() finished";
-}
+#endif
 

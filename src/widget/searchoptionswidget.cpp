@@ -8,21 +8,61 @@
 #include <QDir>
 #include "worker.h"
 #include "anchorclickhandler.h"
-#include "selectfilesdialog.h"
+
 #include <QAction>
+#include "regexpreplacement.h"
+#include <QCheckBox>
 
 SearchOptionsWidget::SearchOptionsWidget(QWidget *parent) :
     QWidget(parent),
-    mActive(true),
+    /*mActive(true),
     mBrowser(0),
     mWorker(0),
     mClickHandler(0),
     mMode(ModeSearch),
-    mCacheFileList(0),
+    mCacheFileList(0),*/
     ui(new Ui::SearchOptionsWidget)
 {
     ui->setupUi(this);
-    ui->search->setEnabled(false);
+    ui->replace->setEnabled(false);
+
+    connect(ui->pattern,SIGNAL(valueChanged(RegExp)),this,SIGNAL(patternChanged(RegExp)));
+    connect(ui->filter,SIGNAL(valueChanged(RegExpPath)),this,SIGNAL(filterChanged(RegExpPath)));
+    connect(ui->path,SIGNAL(textChanged(QString)),this,SIGNAL(pathChanged(QString)));
+    connect(ui->replacement,SIGNAL(valueChanged(RegExpReplacement)),this,SIGNAL(replacementChanged(RegExpReplacement)));
+
+    connect(ui->pattern,SIGNAL(returnPressed()),this,SIGNAL(search()));
+    connect(ui->filter,SIGNAL(returnPressed()),this,SIGNAL(search()));
+
+    connect(ui->search,SIGNAL(clicked()),this,SIGNAL(search()));
+    connect(ui->preview,SIGNAL(clicked()),this,SIGNAL(preview()));
+    connect(ui->replace,SIGNAL(clicked()),this,SIGNAL(replace()));
+
+    connect(ui->replacement,SIGNAL(returnPressed()),this,SIGNAL(preview()));
+
+    //connect(ui->notBinary,SIGNAL(stateChanged(bool)),this,SIGNAL(notBinaryChanged(bool)));
+
+    hideFileCount();
+    ui->path->checkBox()->setText("cache file list");
+
+    QWidgetList widgets = this->widgets();
+    for(int i=0;i<widgets.size()-1;i++) {
+        QWidget::setTabOrder(widgets[i], widgets[i+1]);
+    }
+
+}
+
+QWidgetList SearchOptionsWidget::widgets() {
+    QWidgetList result;
+    result << ui->path->widgets()
+           << ui->select
+           << ui->filter->widgets()
+           << ui->pattern->widgets()
+           << ui->search
+           << ui->replacement->widgets()
+           << ui->preview
+           << ui->replace;
+    return result;
 }
 
 SearchOptionsWidget::~SearchOptionsWidget()
@@ -30,8 +70,17 @@ SearchOptionsWidget::~SearchOptionsWidget()
     delete ui;
 }
 
+void SearchOptionsWidget::fixLayout() {
+    QRect rect = ui->filter->matchCaseCheckBox()->geometry();
+    ui->path->checkBox()->setFixedWidth(rect.width());
+    QCheckBox* checkBox = ui->filter->notBinary();
+    ui->gridLayout->addWidget(checkBox, 1, 2);
+}
+
+#if 0
 void SearchOptionsWidget::setBrowser(SearchBrowser *browser, bool setValues)
 {
+
     mBrowser = browser;
     if (setValues) {
         //updateCompletions();
@@ -53,17 +102,25 @@ void SearchOptionsWidget::setBrowser(SearchBrowser *browser, bool setValues)
     mActive = true;
 }
 
-void SearchOptionsWidget::setMode(SearchOptionsWidget::Mode mode)
+#endif
+
+void SearchOptionsWidget::setMode(Mode mode)
 {
     mMode = mode;
     QWidgetList widgets;
     widgets << ui->replaceLabel << ui->replace << ui->preview << ui->replacement;
     foreach(QWidget* widget, widgets) {
-        widget->setVisible(mode == ModeReplace);
+        widget->setVisible(mode == Mode::Preview || mode == Mode::Replace);
     }
-    ui->search->setVisible(mode == ModeSearch);
+    ui->search->setVisible(mode == Mode::Search);
 }
 
+bool SearchOptionsWidget::renameFiles() const
+{
+    return ui->replacement->value().renameFiles();
+}
+
+#if 0
 
 void SearchOptionsWidget::init(Worker *worker, AnchorClickHandler* clickHandler) {
 
@@ -90,28 +147,10 @@ void SearchOptionsWidget::init(Worker *worker, AnchorClickHandler* clickHandler)
 
     ui->fileCount->setText("? / ?");
     setMode(mMode);
+
 }
 
 
-QString SearchOptionsWidget::path() const
-{
-    return ui->path->text();
-}
-
-void SearchOptionsWidget::setPath(const QString &path)
-{
-    ui->path->setText(path);
-}
-
-bool SearchOptionsWidget::validate()
-{
-    QPalette palette = this->palette();
-
-    bool ok1 = ui->filter->validate(palette);
-    bool ok2 = ui->exp->validate(palette);
-    bool ok3 = mMode == ModeReplace ? ui->replacement->validate(palette) : true;
-    return ok1 && ok2 && ok3;
-}
 
 void SearchOptionsWidget::setBrowserValues()
 {
@@ -127,31 +166,14 @@ void SearchOptionsWidget::setBrowserValues()
     mBrowser->setOnlyMatched(ui->onlyMatched->isChecked());
 }
 
-void SearchOptionsWidget::collect()
-{
-    RXCollector* collector = RXCollector::instance();
-    //mActive = false;
-    collector->collect(ui->exp->value());
-    collector->collect(ui->filter->value());
-    collector->collect(ui->replacement->value());
-    //updateCollector();
-}
-
-void SearchOptionsWidget::updateCompletions() {
-    mActive = false;
-    RXCollector* collector = RXCollector::instance();
-    collector->load(ui->exp);
-    collector->load(ui->filter);
-    collector->load(ui->replacement);
-    mActive = true;
-}
 
 void SearchOptionsWidget::setActive(bool active)
 {
     mActive = active;
 }
+#endif
 
-void SearchOptionsWidget::on_selectPath_clicked()
+void SearchOptionsWidget::on_select_clicked()
 {
     QString path = QFileDialog::getExistingDirectory(this, QString(), ui->path->text());
     if (path.isEmpty()) {
@@ -160,6 +182,7 @@ void SearchOptionsWidget::on_selectPath_clicked()
     ui->path->setText(QDir::toNativeSeparators(path));
 }
 
+#if 0
 void SearchOptionsWidget::on_search_clicked()
 {
     emit search();
@@ -189,6 +212,7 @@ void SearchOptionsWidget::setCanReplace(bool can)
     ui->replace->setEnabled(can);
 }
 
+
 void SearchOptionsWidget::onFilterTextChanged() {
     if (!mActive || !mBrowser) {
         return;
@@ -214,6 +238,8 @@ void SearchOptionsWidget::onExpTextChanged() {
     emitTabTitle();
 }
 
+
+
 void SearchOptionsWidget::emitTabTitle() {
 
     QString include = ui->exp->value().include();
@@ -228,6 +254,7 @@ void SearchOptionsWidget::emitTabTitle() {
     }
     emit tabTitle(title, mBrowser->isExecuted());
 }
+
 
 void SearchOptionsWidget::onLinesAfterValueChanged() {
     /*if (!mActive || !mBrowser) {
@@ -251,6 +278,7 @@ void SearchOptionsWidget::onLinesBeforeValueChanged() {
     mBrowser->setLinesBefore(ui->linesBefore->value());
 }
 
+
 void SearchOptionsWidget::select() {
     QString path = ui->path->text();
     SelectFilesDialog dialog(path, ui->filter->value(), mWorker, mClickHandler, this);
@@ -258,17 +286,54 @@ void SearchOptionsWidget::select() {
         ui->filter->setValue(dialog.filter());
     }
 }
+#endif
 
+#if 0
 void SearchOptionsWidget::setCacheFileList(QAction *action)
 {
-    mCacheFileList = action;
     ui->fileCount->setVisible(action->isChecked());
-    connect(mCacheFileList,&QAction::toggled,[=](bool checked){
-        ui->fileCount->setVisible(checked);
-        if (checked && !ui->filter->value().isEmpty()) {
-            emit countMatchedFiles();
-        }
-    });
+}
+#endif
+
+void SearchOptionsWidget::setReplaceEnabled(bool enabled)
+{
+    ui->replace->setEnabled(enabled);
+}
+
+void SearchOptionsWidget::showFileCount(int filtered, int total)
+{
+    if (filtered < 0) {
+        ui->fileCount->setText("? / ?");
+    } else {
+        ui->fileCount->setText(QString("%1 / %2").arg(filtered).arg(total));
+    }
+    ui->fileCount->show();
+}
+
+void SearchOptionsWidget::hideFileCount()
+{
+    ui->fileCount->hide();
+}
+
+void SearchOptionsWidget::setPreviewEnabled(bool enabled) {
+    ui->preview->setEnabled(enabled);
+}
+
+bool SearchOptionsWidget::cacheFileListIsChecked() const
+{
+    return ui->path->checkBox()->isChecked();
+}
+
+QCheckBox* SearchOptionsWidget::cacheFileList() {
+    return ui->path->checkBox();
+}
+
+#if 0
+void SearchOptionsWidget::onCacheToggled(bool checked) {
+    ui->fileCount->setVisible(checked);
+    if (checked && !ui->filter->value().isEmpty()) {
+        emit countMatchedFiles();
+    }
 }
 
 void SearchOptionsWidget::onCountMatchedFiles(int matched, int total)
@@ -280,6 +345,7 @@ void SearchOptionsWidget::on_path_textChanged(QString path)
 {
     emit pathChanged(path);
 }
+
 
 void SearchOptionsWidget::onNotBinaryClicked(bool value) {
     /*if (!mActive || !mBrowser) {
@@ -331,4 +397,83 @@ void SearchOptionsWidget::on_showLineNumber_clicked(bool checked)
 void SearchOptionsWidget::on_onlyMatched_clicked(bool checked)
 {
     mBrowser->setOnlyMatched(checked);
+}
+#endif
+
+void SearchOptionsWidget::collect(Mode mode)
+{
+
+    RXCollector* collector = RXCollector::instance();
+    //mActive = false;
+
+    if (mode == Mode::Search) {
+        collector->collect(ui->pattern->value());
+        collector->collect(ui->filter->value());
+    } else if (mode == Mode::Replace){
+        collector->collectReplacement(ui->replacement->value().pattern());
+    }
+
+    collector->collectPath(ui->path->text());
+
+    //updateCollector();
+
+}
+
+QString SearchOptionsWidget::path() const
+{
+    return ui->path->text();
+}
+
+void SearchOptionsWidget::setPath(const QString &path)
+{
+    ui->path->setText(path);
+}
+
+void SearchOptionsWidget::loadCollected() {
+
+    RXCollector* collector = RXCollector::instance();
+    collector->load(ui->pattern);
+    collector->load(ui->filter);
+    collector->load(ui->replacement);
+    collector->load(ui->path->lineEdit());
+}
+
+bool SearchOptionsWidget::validate()
+{
+    QPalette palette = this->palette();
+
+    bool ok1 = ui->filter->validate(palette);
+    bool ok2 = ui->pattern->validate(palette);
+    //bool ok3 = mMode == ModeReplace ? ui->replacement->validate(palette) : true;
+    bool ok3 = true;
+    return ok1 && ok2 && ok3;
+}
+
+RegExpPath SearchOptionsWidget::filter() const
+{
+    return ui->filter->value();
+}
+
+void SearchOptionsWidget::setFiler(const RegExpPath& value)
+{
+    ui->filter->setValue(value);
+}
+
+/*
+bool SearchOptionsWidget::notBinary() const {
+    return ui->notBinary->isChecked();
+}*/
+
+void SearchOptionsWidget::setPattern(const RegExp& value)
+{
+    ui->pattern->setValue(value);
+}
+
+void SearchOptionsWidget::setReplacement(const RegExpReplacement& value) {
+    ui->replacement->setValue(value);
+}
+
+QLineEdit *SearchOptionsWidget::pathEdit() const
+{
+    return ui->path->lineEdit();
 }

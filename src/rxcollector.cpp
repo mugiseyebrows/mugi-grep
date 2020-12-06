@@ -11,6 +11,12 @@
 #include "rxpathinput.h"
 #include "rxinput.h"
 
+#include "completerhelper.h"
+#include <QCompleter>
+#include <QLineEdit>
+#include <QDir>
+
+#define log(msg)  qDebug() << msg
 
 RXCollector *RXCollector::mInstance = nullptr;
 
@@ -20,24 +26,44 @@ RXCollector *RXCollector::instance()
 {
     if (!mInstance) {
         mInstance = new RXCollector();
+        /*mInstance->collectPath("D:\\dev\\mugi-grep");
+        mInstance->collectPath("D:\\dev\\mugi-query");*/
     }
     return mInstance;
 }
 
 void RXCollector::collect(const RegExpPath &exp)
 {
-    mPathExps = prependModels(mPathExps, exp.exps());
+    log("collect filter");
+    mPathPatterns = prependModels(mPathPatterns, exp.patterns());
 }
 
 void RXCollector::collect(const RegExp &exp)
 {
-    mExps = prependModels(mExps, exp.exps());
+    log("collect pattern");
+    mPatterns = prependModels(mPatterns, exp.exps());
 }
 
-void RXCollector::collect(const QString& exp) {
+void RXCollector::collectReplacement(const QString& exp) {
+    qDebug() << "collect replacement";
     QStringList exps;
     exps << exp;
     mReplacements = prependModels(mReplacements, exps);
+}
+
+
+
+void RXCollector::collectPath(const QString& path) {
+    if (!QFile(path).exists()) {
+        qDebug() << path << "not exists";
+        return;
+    }
+    QString path_ = QDir::toNativeSeparators(path);
+    if (mPaths.contains(path_)) {
+        return;
+    }
+    mPaths << path_;
+    qSort(mPaths.begin(),mPaths.end());
 }
 
 QList<QStringListModel *> RXCollector::prependModels(const QList<QStringListModel *> &models, const QStringList &exps) {
@@ -65,33 +91,54 @@ QList<QStringListModel *> RXCollector::prependModels(const QList<QStringListMode
 
 void RXCollector::load(RXPathInput *input)
 {
-    for(int i=0;i<mPathExps.size();i++) {
+    log("load path patterns");
+    for(int i=0;i<mPathPatterns.size();i++) {
         QComboBox* combo = input->input(i);
-        QStringListModel* model = mPathExps[i];
+        QStringListModel* model = mPathPatterns[i];
         QString text = combo->currentText();
         combo->setModel(model);
         combo->setCurrentText(text);
+        combo->setCompleter(nullptr);
     }
 }
 
 void RXCollector::load(RXInput *input) {
-    for(int i=0;i<mExps.size();i++) {
+    log("load patterns");
+    for(int i=0;i<mPatterns.size();i++) {
         QComboBox* combo = input->input(i);
-        QStringListModel* model = mExps[i];
+        QStringListModel* model = mPatterns[i];
         QString text = combo->currentText();
         combo->setModel(model);
         combo->setCurrentText(text);
+        combo->setCompleter(nullptr);
     }
 }
 
 void RXCollector::load(RXReplaceInput *input) {
-    for(int i=0;i<mReplacements.size();i++) {
-        QComboBox* combo = input->input(i);
-        QStringListModel* model = mReplacements[i];
+    log("load replacements");
+    //for(int i=0;i<mReplacements.size();i++) {
+        QComboBox* combo = input->input(0);
+        QStringListModel* model = mReplacements[0];
         QString text = combo->currentText();
         combo->setModel(model);
         combo->setCurrentText(text);
+        combo->setCompleter(nullptr);
+        //}
+}
+
+void RXCollector::load(QLineEdit *edit)
+{
+    /*if (mPaths.isEmpty()) {
+        mPaths = QStringList {"D:\\dev\\mugi-query", "D:\\dev\\mugi-grep"};
+    }*/
+    QCompleter* completer = edit->completer();
+    if (completer) {
+        completer->deleteLater();
     }
+    QStandardItemModel* model = CompleterHelper::filesToModel(mPaths, edit);
+    completer = CompleterHelper::modelToCompleter(model, 1, edit);
+    CompleterHelper::completerTreeViewPopup(completer, edit);
+    edit->setCompleter(completer);
 }
 
 void arrayOfArraysOfString(const QVariantList& src, QJsonArray& dst) {
@@ -100,17 +147,36 @@ void arrayOfArraysOfString(const QVariantList& src, QJsonArray& dst) {
     }
 }
 
-void RXCollector::serialize(QJsonObject &j)
+QJsonArray arrayOfArrays(const QList<QStringList>& listOfLists) {
+    QJsonArray result;
+    for(const QStringList list: listOfLists) {
+        result.append(QJsonArray::fromStringList(list));
+    }
+    return result;
+}
+
+
+QList<QStringList> modelsLists_(const QList<QStringListModel *> &models) {
+    QList<QStringList> result;
+    for(int i=0;i<models.size();i++) {
+        QStringListModel* m = models[i];
+        result.append(m->stringList());
+    }
+    return result;
+}
+
+QJsonObject RXCollector::serializePatterns()
 {
-    QJsonArray pathexps;
-    arrayOfArraysOfString(modelsLists(mPathExps), pathexps);
-    QJsonArray exps;
-    arrayOfArraysOfString(modelsLists(mExps),exps);
-    QJsonArray replacements;
-    arrayOfArraysOfString(modelsLists(mReplacements),replacements);
-    j["pathexps"] = pathexps;
-    j["exps"] = exps;
-    j["replacements"] = replacements;
+
+    QJsonObject j;
+    j["path"] = arrayOfArrays(modelsLists_(mPathPatterns));
+    j["pattern"] = arrayOfArrays(modelsLists_(mPatterns));
+    j["replacement"] = arrayOfArrays(modelsLists_(mReplacements));
+    return j;
+}
+
+QJsonArray RXCollector::serializePaths() {
+    return QJsonArray::fromStringList(mPaths);
 }
 
 QVariantList RXCollector::modelsLists(const QList<QStringListModel *> &models) {
@@ -122,12 +188,11 @@ QVariantList RXCollector::modelsLists(const QList<QStringListModel *> &models) {
     return exps;
 }
 
-void RXCollector::deserialize(const QList<QStringListModel *> &models, const QJsonArray& exps) {
+void RXCollector::deserializePatterns(const QList<QStringListModel *> &models, const QJsonArray& exps) {
 
     if (!exps.isEmpty()) {
         for(int i=0;i<models.size();i++) {
             if (i < exps.size()) {
-
                 QJsonArray a = exps[i].toArray();
                 QStringList vs = Utils::toStringList(a.toVariantList());
                 QStringListModel* m = models[i];
@@ -137,27 +202,37 @@ void RXCollector::deserialize(const QList<QStringListModel *> &models, const QJs
     }
 }
 
-void RXCollector::deserialize(const QJsonObject &j)
+void RXCollector::deserializePaths(const QJsonArray& arr) {
+    if (arr.isEmpty()) {
+        return;
+    }
+    mPaths.clear();
+    foreach (const QJsonValue& v, arr) {
+        mPaths << v.toString();
+    }
+}
+
+void RXCollector::deserializePatterns(const QJsonObject &j)
 {
-    deserialize(mPathExps,j.value("pathexps").toArray());
-    deserialize(mExps,j.value("exps").toArray());
-    deserialize(mReplacements,j.value("replacements").toArray());
+    deserializePatterns(mPathPatterns,j.value("path").toArray());
+    deserializePatterns(mPatterns,j.value("pattern").toArray());
+    deserializePatterns(mReplacements,j.value("replacement").toArray());
 }
 
 QList<QStringListModel *> RXCollector::models()
 {
     QList<QStringListModel *> result;
-    result << mPathExps << mExps;
+    result << mPathPatterns << mPatterns;
     return result;
 }
 
 RXCollector::RXCollector()
 {
     for(int i=0;i<4;i++) {
-        mPathExps << new QStringListModel();
+        mPathPatterns << new QStringListModel();
     }
     for(int i=0;i<2;i++) {
-        mExps << new QStringListModel();
+        mPatterns << new QStringListModel();
     }
     mReplacements << new QStringListModel();
 }

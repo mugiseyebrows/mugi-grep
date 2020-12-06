@@ -27,8 +27,18 @@ void ColoredLine::paintForeground(int start, int end, int color) {
     paint(start, end, color, mForeground);
 }
 
+void ColoredLine::paintForeground(int color)
+{
+    paint(0, mForeground.size(), color, mForeground);
+}
+
 void ColoredLine::paintBackground(int start, int end, int color) {
     paint(start, end, color, mBackground);
+}
+
+void ColoredLine::paintBackground(int color)
+{
+    paint(0, mBackground.size(), color, mBackground);
 }
 
 void ColoredLine::paint(int start, int end, int color, QList<int>& dest) {

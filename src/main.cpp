@@ -9,6 +9,19 @@
 
 #include "searchcache.h"
 #include "searchparams.h"
+#include "searchhits.h"
+#include "regexpreplacement.h"
+#include "replaceparams.h"
+#include "countfilesparams.h"
+#include "getlistingparams.h"
+#include "searchresultrenderer.h"
+#include "replacedparams.h"
+
+#include <QStyleFactory>
+#include "settings.h"
+#include "stylehelper.h"
+#include "renameparams.h"
+#include "searchnamehits.h"
 
 int main(int argc, char *argv[])
 {
@@ -16,16 +29,44 @@ int main(int argc, char *argv[])
 
     qRegisterMetaType<RegExp>();
     qRegisterMetaType<RegExpPath>();
+    qRegisterMetaType<RegExpReplacement>();
     qRegisterMetaType<SearchParams>();
+    qRegisterMetaType<ReplaceParams>();
+    qRegisterMetaType<SearchHits>();
+    qRegisterMetaType<CountFilesParams>();
+    qRegisterMetaType<GetListingParams>();
+    qRegisterMetaType<ReplacedParams>();
+    qRegisterMetaType<RenameParams>();
+    qRegisterMetaType<SearchNameHits>();
 
     QApplication a(argc, argv);
     a.setApplicationName(APP_NAME);
     a.setApplicationVersion(APP_VERSION);
 
+    Settings settings;
+
+    qApp->setStyle(QStyleFactory::create("Fusion"));
+
+    QString style = settings.style();
+    if (style == "dark") {
+        StyleHelper::setDarkStyle();
+    } else {
+        StyleHelper::setLightStyle();
+    }
+
+
+    //
+
+    /*a.setStyle("Windows");
+    QStringList keys = QStyleFactory::keys();
+    qDebug() << keys[0];*/
+
     //RegExpPath::test();
     //RegExp::test();
 
-    MainWindow w;
+    //SearchResultRenderer::testDoZebra();
+
+    MainWindow w(&settings);
     w.show();
 
     //SearchCache::testTokenize();

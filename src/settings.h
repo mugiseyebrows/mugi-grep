@@ -13,7 +13,7 @@ class QAbstractItemModel;
 class Settings
 {
 public:
-    static Settings* instance();
+    Settings();
 
     void load();
     void save();
@@ -31,20 +31,26 @@ public:
 
     void setSessions(const QJsonArray& value);
 
-    void setExps(const QJsonObject &value);
+    void setPatterns(const QJsonObject &value);
 
-    QJsonObject exps() const;
+    QJsonObject patterns() const;
+    void setPaths(const QJsonArray &value);
+    QJsonArray paths() const;
+
+    QString style() const;
+
+    void setStyle(const QString &style);
 protected:
-    static Settings* mInstance;
 
     QList<Editor> mEditors;
     QString mError;
 
     QJsonArray mSessions;
-    QJsonObject mExps;
+    QJsonObject mPatterns;
+    QJsonArray mPaths;
     QString mDir;
+    QString mStyle;
 
-    Settings();
 };
 
 #endif // SETTINGS_H

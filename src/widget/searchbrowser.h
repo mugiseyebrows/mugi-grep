@@ -9,6 +9,8 @@
 #include <QTextBrowser>
 #include <QWidget>
 
+#if 0
+
 class QDebug;
 class SearchBrowser : public QTextBrowser {
     Q_OBJECT
@@ -57,4 +59,7 @@ protected:
     QString mReplacement;
     bool mPreserveCase;
 };
+#endif
+
 #endif // SEARCHBROWSER_H
+

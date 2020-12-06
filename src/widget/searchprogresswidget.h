@@ -20,6 +20,7 @@ public:
     void progress(int i, int t, int s, QString path);
     void aborted();
     void replaced(int files, int lines);
+    void renamed(int successful, int failed);
 signals:
     void canceled();
 private:

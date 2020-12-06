@@ -1,6 +1,7 @@
 #include "widget/mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QTimer>
 #include <QCloseEvent>
 #include <QFileInfo>
 #include <QSignalMapper>
@@ -9,6 +10,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QVariantMap>
+#include <QMimeData>
 
 #include "sessionwidget.h"
 #include "settingsdialog.h"
@@ -18,11 +20,16 @@
 #include <QJsonArray>
 #include "anchorclickhandler.h"
 #include "completermodelmanager.h"
+#include "editordetector.h"
 
-MainWindow::MainWindow(QWidget *parent) :
+#define IS_DEBUG false
+
+MainWindow::MainWindow(Settings *settings, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow), mMapper(new QSignalMapper(this)),
-    mClickHandler(new AnchorClickHandler(this)), mCompleterModelManager(new CompleterModelManager(this))
+    mClickHandler(new AnchorClickHandler(settings, this)),
+    mCompleterModelManager(new CompleterModelManager(this)),
+    mSettings(settings)
 {
     ui->setupUi(this);
 
@@ -32,25 +39,48 @@ MainWindow::MainWindow(QWidget *parent) :
 
     setWindowTitle(QString("%1 %2").arg(qApp->applicationName()).arg(qApp->applicationVersion()));
 
-    QJsonArray sessions = Settings::instance()->sessions();
+    if (IS_DEBUG) {
+        QJsonObject obj;
+        QString path = "D:\\w\\untitled1";
+        //path = "C:\\Qt\\5.15.1\\Src\\qtbase";
+        obj["path"] = path;
+        addSession(obj);
 
-    if (sessions.size() > 0) {
-        deserealizeSessions(sessions);
+        path = "D:\\dev\\cpp-compile-on-save";
+        obj["path"] = path;
+        addSession(obj);
+
+        /*QList<Editor> editors = EditorDetector::detect();
+        qDebug() << "1";*/
+
     } else {
-        addSession();
+
+        RXCollector* collector = RXCollector::instance();
+
+        collector->deserializePatterns(mSettings->patterns());
+        collector->deserializePaths(mSettings->paths());
+
+        QJsonArray sessions = mSettings->sessions();
+        if (sessions.size() > 0) {
+            deserealizeSessions(sessions);
+        } else {
+            addSession();
+        }
     }
 
-    QJsonObject exps = Settings::instance()->exps();
-    deserealizeExps(exps);
 
-    connect(mMapper,SIGNAL(mapped(QWidget*)),this,SLOT(onReadStarted(QWidget*)));
+    //qDebug() << 1;
 
+    //connect(mMapper,SIGNAL(mapped(QWidget*)),this,SLOT(onReadStarted(QWidget*)));
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
 }
+
+
+
 
 void MainWindow::closeEvent(QCloseEvent * e)
 {
@@ -62,40 +92,42 @@ void MainWindow::closeEvent(QCloseEvent * e)
         }
     }
 
-    QJsonArray sessions;
-    serializeSessions(sessions);
-    QJsonObject exps;
-    serializeExps(exps);
+    if (IS_DEBUG) {
 
-    Settings::instance()->setSessions(sessions);
-    Settings::instance()->setExps(exps);
-    Settings::instance()->save();
+    } else {
+        mSettings->setSessions(serializeSessions());
+        mSettings->setPatterns(RXCollector::instance()->serializePatterns());
+        mSettings->setPaths(RXCollector::instance()->serializePaths());
+        mSettings->save();
+    }
 
     e->accept();
 }
 
-void MainWindow::addSession(const QJsonObject &v) {
-    SessionWidget* session = new SessionWidget(ui->tabs);
-    session->setCacheFileList(ui->cacheFileList);
+void MainWindow::addSession(const QJsonValue &v) {
+    SessionWidget* session = new SessionWidget(mSettings, ui->tabs);
+    //session->setCacheFileList(ui->cacheFileList);
 
     //connect(session,SIGNAL(setEditor()),this,SLOT(onSetEditor()));
     //connect(this,SIGNAL(editorSet()),session,SLOT(onEditorSet()));
 
     // todo: tab name collisions
     QString title = "untitled";
-    QString path = v.value("path").toString();
+    QString path = v.toString();
+
     if (!path.isEmpty()) {
         title = QFileInfo(path).baseName();
+        RXCollector::instance()->collectPath(path);
     }
-    ui->tabs->addTab(session,title);
+    ui->tabs->addTab(session, title);
     mMapper->setMapping(session,session);
-    if (!v.isEmpty()) {
-        session->deserialize(v);
-    }
-    session->updateCompletions();
-    connect(session,&SessionWidget::collect,[=](){
+
+    session->deserialize(v);
+
+    session->loadCollected();
+    /*connect(session,&SessionWidget::collect,[=](){
         mCompleterModelManager->onCollect(session->options(), ui->tabs);
-    });
+    });*/
 }
 
 void MainWindow::removeSession() {
@@ -122,22 +154,17 @@ SessionWidget *MainWindow::currentTab() {
     return tab(ui->tabs->currentIndex());
 }
 
-void MainWindow::serializeSessions(QJsonArray& json) const
+QJsonArray MainWindow::serializeSessions() const
 {
+    QJsonArray result;
     for(int i=0;i<ui->tabs->count();i++) {
         QWidget* w = ui->tabs->widget(i);
         SessionWidget* sw = qobject_cast<SessionWidget*>(w);
         if (!sw)
             continue;
-        QJsonObject session;
-        sw->serialize(session);
-        json << session;
+        result.append(sw->serialize());
     }
-}
-
-void MainWindow::serializeExps(QJsonObject& json) const {
-
-    return RXCollector::instance()->serialize(json);
+    return result;
 }
 
 void MainWindow::deserealizeSessions(const QJsonArray& vl)
@@ -146,12 +173,8 @@ void MainWindow::deserealizeSessions(const QJsonArray& vl)
         removeSession();
     }
     for(const QJsonValue& v : vl) {
-        addSession(v.toObject());
+        addSession(v);
     }
-}
-
-void MainWindow::deserealizeExps(const QJsonObject& exps) {
-    RXCollector::instance()->deserialize(exps);
 }
 
 void MainWindow::on_addSession_triggered()
@@ -182,8 +205,7 @@ void MainWindow::on_saveSessions_triggered() {
     if (path.isEmpty())
         return;
 
-    QJsonArray sessions;
-    serializeSessions(sessions);
+    QJsonArray sessions = serializeSessions();
     if (!saveJson(path, sessions)) {
         QMessageBox::critical(this,"Error","Cannot write file " + path);
     }
@@ -222,9 +244,10 @@ void MainWindow::on_loadSessions_triggered() {
 
 void MainWindow::on_setEditors_triggered()
 {
-    mClickHandler->onSetEditor();
+    mClickHandler->onSetEditor(QString());
 }
 
+#if 0
 void MainWindow::onReadStarted(QWidget* w) {
 
     //QFileInfo(path).baseName();
@@ -242,15 +265,19 @@ void MainWindow::onReadStarted(QWidget* w) {
     }
     ui->tabs->setTabText(index,name);
 }
+#endif
 
-void MainWindow::on_tabs_currentChanged(int)
+void MainWindow::on_tabs_currentChanged(int index)
 {
-    /*SessionWidget* widget = tab(index);
-    if (!widget) {
+    SessionWidget* session = tab(index);
+    if (!session) {
         qDebug() << "not SessionWidget at index" << index << ui->tabs->widget(index);
         return;
     }
-    widget->updateCompletions();*/
+    session->loadCollected();
+    QTimer::singleShot(0,[=](){
+        session->options()->fixLayout();
+    });
 }
 
 void MainWindow::on_removeAllSessions_triggered()
@@ -258,9 +285,10 @@ void MainWindow::on_removeAllSessions_triggered()
     while (ui->tabs->count() > 0) {
         on_removeSession_triggered();
     }
+    addSession();
 }
 
-void MainWindow::setCurrentTabMode(SearchOptionsWidget::Mode mode) {
+void MainWindow::setCurrentTabMode(Mode mode) {
     SessionWidget* tab = currentTab();
     if (!tab) {
         return;
@@ -268,14 +296,15 @@ void MainWindow::setCurrentTabMode(SearchOptionsWidget::Mode mode) {
     tab->setMode(mode);
 }
 
+
 void MainWindow::on_search_triggered()
 {
-    setCurrentTabMode(SearchOptionsWidget::ModeSearch);
+    setCurrentTabMode(Mode::Search);
 }
 
 void MainWindow::on_replace_triggered()
 {
-    setCurrentTabMode(SearchOptionsWidget::ModeReplace);
+    setCurrentTabMode(Mode::Preview);
 }
 
 void MainWindow::on_select_triggered()
@@ -285,4 +314,195 @@ void MainWindow::on_select_triggered()
         return;
     }
     tab->select();
+}
+
+
+
+void MainWindow::dragEnterEvent(QDragEnterEvent *event) {
+    QUrl url(event->mimeData()->text());
+    if (url.isValid() && url.scheme() == "file")
+        event->acceptProposedAction();
+}
+
+void MainWindow::dropEvent(QDropEvent *event) {
+    QString fileName = QUrl(event->mimeData()->text()).toLocalFile();
+    if (!QDir(fileName).exists()) {
+        return;
+    }
+    QJsonObject data;
+    data["path"] = fileName;
+    addSession(data);
+    ui->tabs->setCurrentIndex(ui->tabs->count()-1);
+}
+
+void MainWindow::onSave(Format format) {
+    SessionWidget* tab = currentTab();
+    if (!tab) {
+        return;
+    }
+    tab->save(format);
+}
+
+void MainWindow::on_saveAsText_triggered()
+{
+    onSave(Format::Text);
+}
+
+void MainWindow::on_saveAsHtml_triggered()
+{
+    onSave(Format::Html);
+}
+
+
+QString colorRepr(const QColor& color) {
+    int r,g,b,a;
+    color.getRgb(&r,&g,&b,&a);
+    if (a == 255) {
+        return QString("QColor(%1, %2, %3)").arg(r).arg(g).arg(b);
+    }
+    return QString("QColor(%1, %2, %3, %4)").arg(r).arg(g).arg(b).arg(a);
+}
+
+QString setPaletteColor(const QString& name, QPalette::ColorGroup group, QPalette::ColorRole role, const QColor& color) {
+
+    static QStringList roles_ = {
+        "QPalette::WindowText",
+        "QPalette::Button",
+        "QPalette::Light",
+        "QPalette::Midlight",
+        "QPalette::Dark",
+        "QPalette::Mid",
+        "QPalette::Text",
+        "QPalette::BrightText",
+        "QPalette::ButtonText",
+        "QPalette::Base",
+        "QPalette::Window",
+        "QPalette::Shadow",
+        "QPalette::Highlight",
+        "QPalette::HighlightedText",
+        "QPalette::Link",
+        "QPalette::LinkVisited",
+        "QPalette::AlternateBase",
+        "QPalette::NoRole",
+        "QPalette::ToolTipBase",
+        "QPalette::ToolTipText",
+        "QPalette::PlaceholderText"
+    };
+
+    static QStringList groups_ = {
+        "QPalette::Active",
+        "QPalette::Disabled",
+        "QPalette::Inactive"
+    };
+
+    if (group == QPalette::All) {
+        return QString("%1.setColor(%2,%3);").arg(name).arg(roles_[role]).arg(colorRepr(color));
+    }
+    return QString("%1.setColor(%2,%3,%4);").arg(name).arg(groups_[group]).arg(roles_[role]).arg(colorRepr(color));
+}
+
+void dumpPalette(const QString& fileName) {
+
+    QFile file(fileName);
+    if (!file.open(QIODevice::WriteOnly)) {
+        qDebug() << "cannot open" << fileName << "for writing";
+        return;
+    }
+    QTextStream stream(&file);
+
+    QList<QPalette::ColorGroup> groups = {QPalette::Active,
+                                          QPalette::Disabled,
+                                          QPalette::Inactive};
+    QStringList groups_ = {
+        "QPalette::Active",
+        "QPalette::Disabled",
+        "QPalette::Inactive"
+    };
+
+    QList<QPalette::ColorRole> roles = {QPalette::WindowText,
+                                        QPalette::Button,
+                                        QPalette::Light,
+                                        QPalette::Midlight,
+                                        QPalette::Dark,
+                                        QPalette::Mid,
+                                        QPalette::Text,
+                                        QPalette::BrightText,
+                                        QPalette::ButtonText,
+                                        QPalette::Base,
+                                        QPalette::Window,
+                                        QPalette::Shadow,
+                                        QPalette::Highlight,
+                                        QPalette::HighlightedText,
+                                        QPalette::Link,
+                                        QPalette::LinkVisited,
+                                        QPalette::AlternateBase,
+                                        QPalette::NoRole,
+                                        QPalette::ToolTipBase,
+                                        QPalette::ToolTipText,
+#ifdef HAS_PLACEHOLDER_TEXT
+                                        QPalette::PlaceholderText
+#endif
+                                       };
+
+    QStringList roles_ = {
+        "QPalette::WindowText",
+        "QPalette::Button",
+        "QPalette::Light",
+        "QPalette::Midlight",
+        "QPalette::Dark",
+        "QPalette::Mid",
+        "QPalette::Text",
+        "QPalette::BrightText",
+        "QPalette::ButtonText",
+        "QPalette::Base",
+        "QPalette::Window",
+        "QPalette::Shadow",
+        "QPalette::Highlight",
+        "QPalette::HighlightedText",
+        "QPalette::Link",
+        "QPalette::LinkVisited",
+        "QPalette::AlternateBase",
+        "QPalette::NoRole",
+        "QPalette::ToolTipBase",
+        "QPalette::ToolTipText",
+#ifdef HAS_PLACEHOLDER_TEXT
+        "QPalette::PlaceholderText"
+#endif
+    };
+
+    QPalette palette = qApp->palette();
+
+    for(QPalette::ColorRole role: roles) {
+        QColor c1 = palette.color(QPalette::Active, role);
+        QColor c2 = palette.color(QPalette::Disabled, role);
+        QColor c3 = palette.color(QPalette::Inactive, role);
+        QString name = "palette";
+        if (c1 == c2 && c2 == c3) {
+            stream << setPaletteColor(name, QPalette::All, role, c1) << "\n";
+        } else {
+            stream << setPaletteColor(name, QPalette::Active, role, c1) << "\n";
+            stream << setPaletteColor(name, QPalette::Disabled, role, c2) << "\n";
+            stream << setPaletteColor(name, QPalette::Inactive, role, c3) << "\n";
+        }
+    }
+
+    stream.flush();
+
+    qDebug() << fileName << "writen";
+}
+
+#include "stylehelper.h"
+
+void MainWindow::on_lightStyle_triggered()
+{
+    //dumpPalette("D:\\w\\light-palette.txt");
+    StyleHelper::setLightStyle();
+    mSettings->setStyle("light");
+}
+
+void MainWindow::on_darkStyle_triggered()
+{
+    StyleHelper::setDarkStyle();
+    //dumpPalette("D:\\w\\dark-palette.txt");
+    mSettings->setStyle("dark");
 }

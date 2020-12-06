@@ -4,6 +4,7 @@
 #include <QWidget>
 
 #include "rxbaseinput.h"
+#include "regexpreplacement.h"
 
 namespace Ui {
 class RXReplaceInput;
@@ -17,20 +18,21 @@ public:
     explicit RXReplaceInput(QWidget *parent = 0);
     ~RXReplaceInput();
 
-    QString value() const;
-    void setValue(const QString& value);
+    RegExpReplacement value() const;
+    void setValue(const RegExpReplacement& value);
     bool preserveCase() const;
     void setPreserveCase(bool value);
 
     bool validate(const QPalette &palette) override;
 
+    QWidgetList widgets() const;
 signals:
     void returnPressed();
-    void textChanged(QString);
-    void preserveCaseClicked(bool);
+    void valueChanged(RegExpReplacement);
 
 protected slots:
     void onClearValidation();
+    void onValueChanged();
 private:
     Ui::RXReplaceInput *ui;
 };

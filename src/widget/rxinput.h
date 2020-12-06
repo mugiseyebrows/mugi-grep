@@ -22,16 +22,20 @@ public:
     RegExp value() const;
     void setValue(const RegExp &value);
 
+    QWidgetList widgets() const;
 protected:
     Ui::RXInput *ui;
 
 signals:
     void returnPressed();
-    void textChanged();
-    void caseClicked(bool);
+    //void textChanged(RegExp);
+    //void caseClicked(bool);
+    void valueChanged(RegExp);
 
 protected slots:
     void onClearValidation();
+    //void onTextChanged();
+    void onValueChanged();
 };
 
 #endif // RXINPUT_H

@@ -13,27 +13,44 @@
 #include <QUrlQuery>
 #include <QMessageBox>
 #include <QAction>
+#include <QCheckBox>
 
 #include "widget/searchbrowser.h"
+#include "mode.h"
 
 #include "worker.h"
-#include "rxcollector.h"
+
 #include "searchid.h"
 #include "settings.h"
 #include <QMessageBox>
 #include "anchorclickhandler.h"
-#include "widget/selectfilesdialog.h"
+
 #include "widget/mainwindow.h"
+
+#include <QCompleter>
+#include <QStandardItemModel>
+#include <QHeaderView>
+#include <QTreeView>
+#include "searchtab.h"
+#include "fileio.h"
+#include "callonce.h"
+#include "countfilesmanager.h"
+
+#include "rxcollector.h"
+#include "searchnamehits.h"
+#include "completerhelper.h"
 
 #define RESULT_TAB_LIMIT 10
 
-SessionWidget::SessionWidget(QWidget *parent) :
+SessionWidget::SessionWidget(Settings *settings, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::SessionWidget),
-    mClickHandler(new AnchorClickHandler()),
-    mCacheFileList(0),
-    //mListenResultCurrentChanged(true),
-    mSetValues(true)
+    mClickHandler(new AnchorClickHandler(settings)),
+    mListenOptions(false),
+    mSettings(settings),
+    /*mReplacementChanged(new CallOnce("mReplacementChanged", 500, this)),*/
+    mGetListing(new CallOnce("mGetAllFiles", 500, this)),
+    mCountFilesManager(new CountFilesManager(this))
 {
     ui->setupUi(this);
 
@@ -44,27 +61,40 @@ SessionWidget::SessionWidget(QWidget *parent) :
 
     mWorker->moveToThread(mThread);
 
-    /*connect(this,SIGNAL(search(int,int,QString,RegExpPath,bool,RegExp,int,int,bool,QString)),
-            mWorker,SLOT(onSearch(int,int,QString,RegExpPath,bool,RegExp,int,int,bool,QString)));*/
-
     connect(this,SIGNAL(search(SearchParams)),mWorker,SLOT(onSearch(SearchParams)));
-
-    connect(this,SIGNAL(replace(int)),mWorker,SLOT(onReplace(int)));
-    connect(mWorker,SIGNAL(found(int,QString,int,int,int,QString)),
-            this,SLOT(onFound(int,QString,int,int,int,QString)));
     connect(this,SIGNAL(searchMore(int)),mWorker,SLOT(onSearchMore(int)));
-    connect(this,SIGNAL(finishSearch(int)),mWorker,SLOT(onFinishSearch(int)));
-    connect(ui->options,SIGNAL(clone()),this,SLOT(onClone()));
+    connect(mWorker,SIGNAL(found(int,SearchHits,SearchNameHits)),this,SLOT(onFound(int,SearchHits,SearchNameHits)));
+
+    connect(ui->options,SIGNAL(patternChanged(RegExp)),this,SLOT(onPatternChanged(RegExp)));
+    connect(ui->options,SIGNAL(filterChanged(RegExpPath)),this,SLOT(onFilterChanged(RegExpPath)));
+    connect(ui->options,SIGNAL(replacementChanged(RegExpReplacement)),this,SLOT(onReplacementChanged(RegExpReplacement)));
+    connect(ui->options,SIGNAL(pathChanged(QString)),this,SLOT(onPathChanged(QString)));
     connect(ui->options,SIGNAL(search()),this,SLOT(onSearch()));
+
+    //connect(this,SIGNAL(countFiles(CountFilesParams)),mWorker,SLOT(onCountFiles(CountFilesParams)));
+    //connect(mWorker,SIGNAL(filesCounted(CountFilesParams)),this,SLOT(onFilesCounted(CountFilesParams)));
+
     connect(ui->options,SIGNAL(preview()),this,SLOT(onPreview()));
     connect(ui->options,SIGNAL(replace()),this,SLOT(onReplace()));
-    connect(ui->options,SIGNAL(tabTitle(QString,bool)),this,SLOT(onTabTitle(QString,bool)));
-    connect(ui->options,SIGNAL(pathChanged(QString)),this,SLOT(onPathChanged(QString)));
-    connect(ui->progress,SIGNAL(canceled()),this,SLOT(onCanceled()));
+    connect(ui->progress,SIGNAL(canceled()),this,SLOT(onCancel()));
 
-    connect(this,SIGNAL(canReplace(int)),mWorker,SLOT(onCanReplace(int)));
-    connect(mWorker,SIGNAL(canReplace(int,bool)),this,SLOT(onCanReplace(int,bool)));
-    connect(mWorker,SIGNAL(replaced(int,int,int,QStringList)),this,SLOT(onReplaced(int,int,int,QStringList)));
+    connect(this,SIGNAL(replace(ReplaceParams)),mWorker,SLOT(onReplace(ReplaceParams)));
+    connect(mWorker,SIGNAL(replaced(ReplacedParams)),this,SLOT(onReplaced(ReplacedParams)));
+
+    //connect(mReplacementChanged,SIGNAL(call()),this,SLOT(onPreview()));
+    //connect(mCountFiles,SIGNAL(call()),this,SLOT(onCountFiles()));
+    connect(mGetListing,SIGNAL(call()),this,SLOT(onGetListing()));
+    connect(this,SIGNAL(getListing(GetListingParams)),mWorker,SLOT(onGetListing(GetListingParams)));
+    connect(mWorker,SIGNAL(listing(QString,QStringList)),this,SLOT(onListing(QString,QStringList)));
+
+    connect(mCountFilesManager,SIGNAL(filesCounted()),this,SLOT(onFilesCounted()));
+    connect(mCountFilesManager,SIGNAL(countFiles(CountFilesParams)),mWorker,SLOT(onCountFiles(CountFilesParams)));
+    connect(mWorker,SIGNAL(filesCounted(CountFilesParams)),mCountFilesManager,SLOT(onFilesCounted(CountFilesParams)));
+
+    connect(ui->options->cacheFileList(), SIGNAL(clicked(bool)), this, SLOT(onCacheFileListClicked(bool)));
+    connect(mWorker,SIGNAL(renamed(int,int)),this,SLOT(onRenamed(int,int)));
+
+    connect(this,SIGNAL(rename(RenameParams)),mWorker,SLOT(onRename(RenameParams)));
 
     mThread->start();
 
@@ -72,14 +102,129 @@ SessionWidget::SessionWidget(QWidget *parent) :
         ui->results->removeTab(0);
     }
 
-    ui->options->init(mWorker, mClickHandler);
+    //ui->options->init(mWorker, mClickHandler);
     ui->progress->init();
 
-    SearchBrowser* browser_ = new SearchBrowser();
+    /*SearchBrowser* browser_ = new SearchBrowser();
     mClickHandler->connectBrowser(browser_);
-    ui->results->addTab(browser_,QString());
+    ui->results->addTab(browser_,QString());*/
+    //connect(ui->options,SIGNAL())
 
-    ui->statusGroup->hide();
+    ui->progressGroup->hide();
+
+    ui->options->setMode(Mode::Search);
+
+    SearchTab* tab = createTab();
+    ui->results->addTab(tab,"");
+    mListenOptions = true;
+
+    //tab->textBrowser()->setText("test");
+
+    //RXCollector::instance()->load(ui->options->pathEdit());
+}
+
+void SessionWidget::onCacheFileListClicked(bool cacheFileList) {
+
+    if (cacheFileList) {
+        onFilesCounted();
+    } else {
+        ui->options->hideFileCount();
+    }
+}
+
+SearchTab* SessionWidget::createTab() {
+    SearchTab* tab = new SearchTab();
+    mClickHandler->connectBrowser(tab->textBrowser());
+    return tab;
+}
+
+void SessionWidget::copyToNewTab() {
+    SearchTab* tab = this->currentTab();
+    SearchTab* newTab = createTab();
+    newTab->setParams(tab->params());
+    newTab->setHits(tab->hits());
+    newTab->setNameHits(tab->nameHits());
+    newTab->setMode(tab->mode());
+    newTab->setDisplayOptions(tab->displayOptions());
+    newTab->trigRerender();
+    QString title = ui->results->tabText(ui->results->currentIndex());
+    ui->results->addTab(newTab, title);
+    tab->params().setId(-1);
+    tab->setHits(SearchHits());
+    if (tab->mode() == Mode::Replace) {
+        tab->setMode(Mode::Preview);
+    }
+    tab->trigRerender();
+    updateTabText(ui->results->currentIndex());
+    updateReplaceButton();
+}
+
+void SessionWidget::onPatternChanged(RegExp value) {
+    if (!mListenOptions) {
+        return;
+    }
+    SearchTab* tab = this->currentTab();
+    if (!tab) {
+        return;
+    }
+    if (tab->params().id() > -1) {
+        copyToNewTab();
+    }
+    tab->params().setPattern(value);
+    updateTabText(ui->results->currentIndex());
+}
+
+void SessionWidget::onFilterChanged(RegExpPath value) {
+    if (!mListenOptions) {
+        return;
+    }
+    SearchTab* tab = this->currentTab();
+    if (!tab) {
+        return;
+    }
+    if (tab->params().id() > -1) {
+        copyToNewTab();
+    }
+    tab->params().setFilter(value);
+
+    if (ui->options->cacheFileListIsChecked()) {
+        onFilesCounted();
+    }
+}
+
+void SessionWidget::onFilesCounted() {
+    QString path = ui->options->path();
+    RegExpPath filter = ui->options->filter();
+    //bool notBinary = ui->options->notBinary();
+    QPair<int,int> count = mCountFilesManager->count(path, filter);
+    ui->options->showFileCount(count.first, count.second);
+}
+
+void SessionWidget::onCountFiles() {
+    if (!ui->options->cacheFileListIsChecked()) {
+        ui->options->hideFileCount();
+        return;
+    }
+    onFilesCounted();
+}
+
+void SessionWidget::on_open_textChanged(QString)
+{
+    mGetListing->onPost();
+}
+
+void SessionWidget::onReplacementChanged(RegExpReplacement value) {
+    if (!mListenOptions) {
+        return;
+    }
+    SearchTab* tab = this->currentTab();
+    if (!tab) {
+        return;
+    }
+    tab->params().setReplacement(value);
+    /*if (tab->mode() == Mode::Preview && !tab->hits().isEmpty()) {
+        mReplacementChanged->onPost();
+    }*/
 }
 
 SessionWidget::~SessionWidget()
@@ -94,12 +239,15 @@ SessionWidget::~SessionWidget()
     delete ui;
 }
 
+#if 0
 void SessionWidget::setCacheFileList(QAction *action)
 {
     mCacheFileList = action;
     ui->options->setCacheFileList(action);
 }
+#endif
 
+#if 0
 void SessionWidget::onClone() {
     SearchBrowser* browser = currentTab();
     SearchBrowser* browser_ = new SearchBrowser();
@@ -120,25 +268,40 @@ void SessionWidget::onClone() {
         }
     }
 }
+#endif
 
 SearchOptionsWidget* SessionWidget::options() const{
     return ui->options;
 }
 
-void SessionWidget::setMode(SearchOptionsWidget::Mode mode)
+void SessionWidget::setMode(Mode mode)
 {
     ui->options->setMode(mode);
+    SearchTab* tab = currentTab();
+    if (!tab) {
+        return;
+    }
+    tab->setMode(mode);
+    updateReplaceButton();
+}
+
+void SessionWidget::updateReplaceButton()
+{
+    SearchTab* tab = currentTab();
+    bool enabled = tab && !tab->hits().isEmpty() && tab->mode() == Mode::Preview;
+    ui->options->setReplaceEnabled(enabled);
+    ui->options->setPreviewEnabled(tab->mode() == Mode::Preview);
 }
 
 void SessionWidget::select()
 {
-    ui->options->select();
+    //ui->options->select();
 }
 
 
 
 void SessionWidget::searchOrReplace(Worker::Action action) {
-
+#if 0
     SearchBrowser* browser = currentTab();
     if (browser->exp().isEmpty()) {
         return;
@@ -160,23 +323,94 @@ void SessionWidget::searchOrReplace(Worker::Action action) {
 
     emit search(params);
     ui->progress->started();
+#endif
 }
 
 void SessionWidget::onSearch() {
-    searchOrReplace(Worker::Search);
+
+    SearchTab* tab = currentTab();
+    if (tab->params().pattern().isEmpty()) {
+        return;
+    }
+
+    bool valid = ui->options->validate();
+    if (!valid) {
+        return;
+    }
+
+    ui->options->collect(Mode::Search);
+
+    mCancel = false;
+    //emit collect();
+    int searchId = SearchId::instance()->next();
+
+    tab->params().setId(searchId);
+    tab->params().setPath(ui->options->path());
+    tab->params().setCacheFileList(ui->options->cacheFileListIsChecked());
+    tab->hits().clear();
+    tab->nameHits().clear();
+    tab->trigRerender();
+
+    updateTabText(ui->results->currentIndex());
+
+    emit search(tab->params());
+    ui->progressGroup->show();
+    ui->progress->started();
+}
+
+void SessionWidget::updateTabText(int index) {
+
+    SearchTab* tab = this->tab(index);
+    if (!tab) {
+        return;
+    }
+    ui->results->setTabText(index, tabTitle(tab->params().pattern().include(), tab->params().id() > -1));
 }
 
 void SessionWidget::onPreview() {
-    searchOrReplace(Worker::Preview);
+    SearchTab* tab = currentTab();
+    if (!tab) {
+        return;
+    }
+    if (tab->mode() == Mode::Replace) {
+        // already replaced
+        return;
+    }
+    tab->setMode(Mode::Preview);
+    if (tab->params().id() < 0) {
+        if (tab->params().pattern().isEmpty()) {
+            return;
+        }
+        onSearch();
+    } else {
+        tab->trigRerender();
+    }
 }
 
 void SessionWidget::onReplace() {
-    SearchBrowser* browser = currentTab();
-    int searchId = browser->searchId();
-    emit replace(searchId);
+    SearchTab* tab = currentTab();
+    if (!tab) {
+        return;
+    }
+    bool renameFiles = ui->options->renameFiles();
+    ReplaceParams params = tab->replaceParams(renameFiles);
+    ui->options->collect(Mode::Replace);
+    emit replace(params);
+}
+
+void SessionWidget::onCancel() {
+    SearchTab* tab = currentTab();
+    if (!tab) {
+        return;
+    }
+    int id = tab->params().id();
+    if (id > -1) {
+        mCanceled.insert(id);
+    }
 }
 
 int SessionWidget::oldestTabIndex() { // todo test me
+#if 0
     int count = ui->results->count();
     if (count < 1) {
         return -1;
@@ -192,15 +426,17 @@ int SessionWidget::oldestTabIndex() { // todo test me
         }
     }
     return index;
+#endif
+    return -1;
 }
 
-void SessionWidget::onTabTitle(QString title, bool isExecuted) {
+QString SessionWidget::tabTitle(QString title, bool isExecuted) const {
     if (!isExecuted) {
         title = title + "*";
     }
     QFontMetrics fm(font());
     title = fm.elidedText(title,Qt::ElideMiddle,200);
-    ui->results->setTabText(ui->results->currentIndex(),title);
+    return title;
 }
 
 QString SessionWidget::path() const
@@ -208,134 +444,104 @@ QString SessionWidget::path() const
     return ui->options->path();
 }
 
-void SessionWidget::serialize(QJsonObject& json) const
+QJsonValue SessionWidget::serialize() const
 {
-    json["path"] = ui->options->path();
+    //json["path"] = ui->options->path();
+    return QJsonValue(ui->options->path());
 }
 
-void SessionWidget::deserialize(const QJsonObject &v)
+void SessionWidget::deserialize(const QJsonValue &v)
 {
-    ui->options->setPath(v.value("path").toString());
+    if (v.isNull()) {
+        return;
+    }
+    ui->options->setPath(v.toString());
 }
 
-void SessionWidget::updateCompletions()
+void SessionWidget::loadCollected()
 {
-    ui->options->updateCompletions();
-}
-
-void SessionWidget::save(const QString &path, const QString &text)
-{
-    QFile file(path);
-    file.open(QIODevice::WriteOnly);
-    QTextStream stream(&file);
-    stream.setCodec(QTextCodec::codecForName("UTF-8"));
-    stream << text;
-    stream.flush();
-    file.close();
+    mListenOptions = false;
+    ui->options->loadCollected();
+    mListenOptions = true;
 }
 
 void SessionWidget::onCanceled() {
     mCancel = true;
 }
 
-void SessionWidget::onCanReplace(int searchId, bool can)
-{
-    SearchBrowser* browser = currentTab();
-    if (!browser) {
+void SessionWidget::save(Format format) {
+
+    SearchTab* tab = currentTab();
+    if (!tab) {
         return;
     }
-    if (browser->searchId() != searchId) {
-        return;
-    }
-    ui->options->setCanReplace(can);
-}
 
-void SessionWidget::on_saveText_clicked()
-{
-    save(true);
-}
-
-void SessionWidget::on_saveHtml_clicked()
-{
-    save(false);
-}
-
-void SessionWidget::save(bool plain) {
-    SearchBrowser* browser = currentTab();
-    if (!browser) {
-        return;
-    }
-    QString filter = plain ? "Text (*.txt)" : "Html (*.html)";
+    QString filter = format == Format::Text ? "Text (*.txt)" : "Html (*.html)";
     QString path = QFileDialog::getSaveFileName(this,QString(),QString(),filter);
     if (path.isEmpty()) {
         return;
     }
-    save(path,plain ? browser->toPlainText() : browser->toHtml());
+
+    QString text = format == Format::Text ? tab->toPlainText() : tab->toHtml();
+
+    FileIO::writeLines(path, text);
 }
 
-SearchBrowser* SessionWidget::find(int searchId) {
+SearchTab* SessionWidget::find(int searchId) {
     int count = ui->results->count();
     for(int i=0;i<count;i++) {
-        SearchBrowser* browser = tab(i);
-        if (browser->searchId() == searchId) {
-            return browser;
+        SearchTab* tab = this->tab(i);
+        //qDebug() << "tabid" << tab->params().id();
+        if (tab->params().id() == searchId) {
+            return tab;
         }
     }
     return 0;
 }
 
-void SessionWidget::onFound(int searchId, QString res, int i, int t, int s, QString path)
-{
-
-    //qDebug() << searchId << res.size() << "chars" << i << t << s << path;
-
-    SearchBrowser* browser = find(searchId);
-
-    if (!browser) {
-        //qDebug() << "onFound error no browser";
-        return;
-    }
-
-    if (!res.isEmpty()) {
-        browser->append(res);
-    }
-
-    ui->statusGroup->show();
-
-    ui->progress->progress(i,t,s,path);
-
-    if (i < t && !mCancel) {
-        emit searchMore(searchId);
-    } else {
-        emit finishSearch(searchId);
-    }
-
-    if (mCancel) {
-        ui->progress->aborted();
-    }
-}
-
-SearchBrowser* SessionWidget::currentTab() {
+SearchTab* SessionWidget::currentTab() {
     return tab(ui->results->currentIndex());
 }
 
-SearchBrowser* SessionWidget::tab(int index) {
-    return qobject_cast<SearchBrowser*>(ui->results->widget(index));
+SearchTab* SessionWidget::tab(int index) {
+    return qobject_cast<SearchTab*>(ui->results->widget(index));
 }
 
 void SessionWidget::on_results_currentChanged(int index) {
 
+    if (index < 0) {
+        return;
+    }
+    SearchTab* tab = this->tab(index);
+    if (!tab) {
+        return;
+    }
+    mListenOptions = false;
+    ui->options->setPattern(tab->params().pattern());
+    ui->options->setFiler(tab->params().filter());
+    ui->options->setReplacement(tab->params().replacement());
+    ui->options->setMode(tab->mode());
+
+    if (ui->options->cacheFileListIsChecked()) {
+        onFilesCounted();
+    }
+
+    mListenOptions = true;
+
+    updateReplaceButton();
+
+#if 0
     /*if (!mListenResultCurrentChanged) {
         return;
     }*/
     //qDebug() << "on_results_currentChanged" << index << this;
-    SearchBrowser* browser = tab(index);
+    SearchTab* browser = tab(index);
     if (!browser) {
         //qDebug() << "not a browser at index" << index;
         return;
     }
     ui->options->setBrowser(browser,mSetValues);
-    ui->options->countMatchedFiles();
+    //ui->options->countMatchedFiles();
     mSetValues = true;
 
     ui->options->setCanReplace(false);
@@ -344,6 +550,31 @@ void SessionWidget::on_results_currentChanged(int index) {
         return;
     }
     emit canReplace(searchId);
+#endif
+}
+
+void SessionWidget::onFound(int searchId, SearchHits hits, SearchNameHits nameHits)
+{
+    SearchTab* tab = find(searchId);
+    if (!tab) {
+        qDebug() << "onFound find(searchId) == 0";
+        return;
+    }
+    tab->append(hits, nameHits);
+
+    ui->progressGroup->show();
+
+    if (hits.complete() > -1) {
+        ui->progress->progress(hits.complete(),hits.total(),hits.filtered(),hits.last());
+    }
+
+    if (!mCanceled.contains(searchId)) {
+        emit searchMore(searchId);
+    } else {
+        ui->progressGroup->hide();
+    }
+
+    updateReplaceButton();
 }
 
 void SessionWidget::onPathChanged(QString path)
@@ -352,18 +583,116 @@ void SessionWidget::onPathChanged(QString path)
         qDebug() << "cannot cast";
         return;
     }
+    if (path.isEmpty()) {
+        return;
+    }
+
+    //QLineEdit* edit = ui->options->pathEdit();
+
+
+#if 0
+    if (QDir(path).exists()) {
+        //qDebug() << "getAllFiles" << path;
+        emit getAllFiles(path);
+    }
+#endif
     mTabWidget->setTabText(mTabWidget->indexOf(this),QFileInfo(path).fileName());
 }
 
-void SessionWidget::onReplaced(int searchId,int files,int lines,QStringList notChanged) {
-    SearchBrowser* browser = currentTab();
-    if (browser->searchId() != searchId) {
+#include "renamedialog.h"
+#include "renameparams.h"
+
+void SessionWidget::onReplaced(ReplacedParams params) {
+    ui->progressGroup->show();
+    ui->progress->replaced(params.countFiles(), params.countLines());
+
+    SearchTab* tab = currentTab();
+    tab->hits().clearCache();
+
+    setMode(Mode::Replace);
+    updateReplaceButton();
+
+    if (params.renames().isEmpty())  {
         return;
     }
-    onCanReplace(searchId,false);
-    ui->progress->replaced(files, lines);
-    if (notChanged.isEmpty()) {
+
+    RenameDialog dialog(params.renames());
+    if (dialog.exec() == QDialog::Accepted) {
+
+        auto checked = dialog.checked();
+        emit rename(checked);
+    }
+
+}
+
+
+
+void SessionWidget::onListing(QString path, QStringList files) {
+
+    qDebug() << "SessionWidget::onListing" << path;
+
+    if (ui->options->path() != path) {
         return;
     }
-    QMessageBox::critical(this,"Error",QString("Failed to replace text in files:\n%1").arg(notChanged.join("\n")));
+
+    bool update = !mAllFiles.contains(path) || mAllFiles[path] != files;
+
+    mAllFiles[path] = files;
+
+    if (!update) {
+        return;
+    }
+
+    QCompleter* completer = ui->open->completer();
+    if (completer) {
+        completer->deleteLater();
+    }
+
+    QStandardItemModel* model = CompleterHelper::filesToModel(files, ui->open);
+    completer = CompleterHelper::modelToCompleter(model, 1, ui->open);
+    CompleterHelper::completerTreeViewPopup(completer, ui->open);
+
+    ui->open->setCompleter(completer);
+
+    if (!ui->open->text().isEmpty()) {
+        if (!completer->popup()->isVisible()) {
+            //completer->popup()->show();
+
+            completer->setCompletionPrefix(ui->open->text());
+
+            completer->complete();
+
+        }
+    }
+
+    connect(completer, SIGNAL(activated(QModelIndex)), this, SLOT(onCompleterActivated(QModelIndex)));
+}
+
+void SessionWidget::onCompleterActivated(QModelIndex index) {
+
+    const QAbstractItemModel* model = index.model();
+    //qDebug() << "data" << model->data(index) << model->data(model->index(index.row(),1));
+
+    QString path = model->data(model->index(index.row(),1)).toString();
+    QUrl url = QUrl::fromLocalFile(path);
+    mClickHandler->onAnchorClicked(url);
+}
+
+void SessionWidget::onGetListing() {
+    QString path = ui->options->path();
+    if (ui->options->cacheFileListIsChecked() && mAllFiles.contains(path)) {
+        return;
+    }
+    emit getListing(GetListingParams(path, ui->options->cacheFileListIsChecked()));
+    qDebug() << "emit getListing(path)";
+}
+
+void SessionWidget::onRenamed(int successful, int failed) {
+    ui->progressGroup->show();
+    ui->progress->renamed(successful, failed);
+}
+
+void SessionWidget::on_clear_clicked()
+{
+    ui->open->clear();
 }

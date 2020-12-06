@@ -12,7 +12,9 @@ public:
     QList<int> foreground() const;
     QList<int> background() const;
     void paintForeground(int start, int end, int color);
+    void paintForeground(int color);
     void paintBackground(int start, int end, int color);
+    void paintBackground(int color);
     ColoredLine mid(int pos, int length = -1) const;
     QList<ColoredLineSpan> spans() const;
 

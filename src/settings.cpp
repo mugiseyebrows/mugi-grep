@@ -11,18 +11,15 @@
 #include "jsonhelper.h"
 #include "regexppath.h"
 
-/*static*/
-Settings* Settings::mInstance = nullptr;
-
-Settings *Settings::instance()
-{
-    if (!mInstance)
-        mInstance = new Settings();
-    return mInstance;
-}
+#define IS_DEBUG false
 
 void Settings::load()
 {
+
+    if (IS_DEBUG) {
+        return;
+    }
+
     QString path = this->settingsPath();
     if (!QFile(path).exists()) {
 
@@ -52,12 +49,14 @@ void Settings::load()
     QJsonObject settings = doc.object();
 
     mSessions = settings.value("sessions").toArray();
-    mExps = settings.value("exps").toObject();
+    mPatterns = settings.value("patterns").toObject();
+    mPaths = settings.value("paths").toArray();
+    mStyle = settings.value("style").toString();
 
     QJsonArray editors = settings.value("editors").toArray();
 
     for(QJsonValue editor: editors) {
-        mEditors.append(Editor(editor.toObject()));
+        mEditors.append(Editor::fromJson(editor.toObject()));
     }
 }
 
@@ -76,8 +75,21 @@ QJsonArray Settings::sessions() const
     return mSessions;
 }
 
-QJsonObject Settings::exps() const {
-    return mExps;
+QJsonObject Settings::patterns() const {
+    return mPatterns;
+}
+
+QJsonArray Settings::paths() const {
+    return mPaths;
+}
+
+QString Settings::style() const
+{
+    return mStyle;
+}
+
+void Settings::setStyle(const QString& style) {
+    mStyle = style;
 }
 
 void Settings::setSessions(const QJsonArray &value)
@@ -85,25 +97,32 @@ void Settings::setSessions(const QJsonArray &value)
     mSessions = value;
 }
 
-void Settings::setExps(const QJsonObject &value)
+void Settings::setPatterns(const QJsonObject &value)
 {
-    mExps = value;
+    mPatterns = value;
+}
+
+void Settings::setPaths(const QJsonArray &value) {
+    mPaths = value;
 }
 
 void Settings::save()
 {
+    if (IS_DEBUG) {
+        return;
+    }
+
     QJsonObject settings;
 
     QJsonArray editors;
-    Editor editor;
-    foreach(editor,mEditors) {
-        QJsonObject editor_;
-        editor.toJson(editor_);
-        editors << editor_;
+    for(const Editor& editor: mEditors) {
+        editors << editor.toJson();
     }
     settings["editors"] = editors;
     settings["sessions"] = mSessions;
-    settings["exps"] = mExps;
+    settings["patterns"] = mPatterns;
+    settings["paths"] = mPaths;
+    settings["style"] = mStyle;
 
     QString path = this->settingsPath();
     saveJson(path, settings);
@@ -114,20 +133,19 @@ void Settings::save()
 QString Settings::editor(const QString &path) const
 {
 
-    if (mEditors.isEmpty())
+    if (mEditors.isEmpty()) {
         return QString();
+    }
 
     QString ext = RegExpPath::getExt(path);
 
-    Editor editor;
-    foreach(editor,mEditors) {
-        if (editor.exp().match(ext).hasMatch())
+    for(const Editor& editor: mEditors) {
+        if (editor.matches(ext)) {
             return editor.app();
+        }
     }
     return QString();
 }
-
-
 
 Settings::Settings()
 {
@@ -167,7 +185,8 @@ void Settings::fromModel(QAbstractItemModel *model)
     for(int i=0;i<model->rowCount();i++) {
         QString exts = model->data(model->index(i,0)).toString();
         QString app = model->data(model->index(i,1)).toString();
-        if (!exts.isEmpty() && !app.isEmpty())
-            mEditors.append( Editor(exts,app) );
+        if (!exts.isEmpty() && !app.isEmpty()) {
+            mEditors.append(Editor(exts,app));
+        }
     }
 }

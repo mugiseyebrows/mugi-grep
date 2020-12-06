@@ -10,6 +10,8 @@ namespace Ui {
 class RXPathInput;
 }
 
+class QCheckBox;
+
 class RXPathInput : public QWidget, public RXBaseInput
 {
     Q_OBJECT
@@ -28,10 +30,16 @@ public:
     void setExcludePathValue(const QString& value);
     void setExpludeExtValue(const QString& value);
 
+    QCheckBox* matchCaseCheckBox() const;
+
+    QCheckBox *notBinary();
+    QWidgetList widgets() const;
 protected slots:
     //void onTextChanged();
 
     void onClearValidation();
+    //void onTextChanged();
+    void onValueChanged();
 protected:
     bool mEmitTextChanged;
     QList<bool> mFocus;
@@ -39,8 +47,11 @@ protected:
     Ui::RXPathInput *ui;
 signals:
     void returnPressed();
-    void textChanged();
-    void caseClicked(bool);
+    //void textChanged(RegExpPath);
+    //void caseClicked(bool);
+
+    void valueChanged(RegExpPath);
+
 };
 
 #endif // RXPATHINPUT_H
