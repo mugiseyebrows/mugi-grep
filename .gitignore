@@ -18,3 +18,4 @@ bundle.cpp
 node_modules/
 *.cpp-*
 *.h-*
+mugi-grep-1.5.0-win32/
