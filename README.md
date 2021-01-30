@@ -47,7 +47,7 @@ git clone git@github.com:mugiseyebrows/mugi-grep.git
 
 
 
-## Linux GCC (Ubuntu)
+## Linux (Ubuntu) GCC 
 
 ```bash
 # install toolchain and qt
