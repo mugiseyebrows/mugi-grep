@@ -56,7 +56,7 @@ sudo apt install build-essential qtbase5-dev git
 git clone git@github.com:mugiseyebrows/mugi-grep.git
 cd mugi-grep
 qmake -qt=5
-make release
+make
 make clean
 sudo make install # installs to /usr/local/bin
 python desktop.py # copies icons, creates desktop file
