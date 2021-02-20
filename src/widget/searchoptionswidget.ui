@@ -145,7 +145,7 @@
   <customwidget>
    <class>LineEditAndCheckbox</class>
    <extends>QWidget</extends>
-   <header>src\widget\lineeditandcheckbox.h</header>
+   <header>src/widget/lineeditandcheckbox.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
