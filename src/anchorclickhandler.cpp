@@ -18,11 +18,12 @@
 namespace  {
 
 QString urlPath(const QUrl& url) {
-    QString path = url.path();
+    /*QString path = url.path();
     if (path.startsWith("/")) {
         path = path.mid(1);
     }
-    return path;
+    return path;*/
+    return url.toLocalFile();
 }
 
 QString urlLine(const QUrl& url, const QString& defaultValue) {
