@@ -117,7 +117,9 @@ protected:
 
     void setPreviewEnabled(bool enabled);
 
-    bool cacheFileListIsChecked() const;
+    bool cacheFileListChecked() const;
+
+    void setCacheFileListChecked(bool value);
 
     void fixLayout();
     //bool notBinary() const;

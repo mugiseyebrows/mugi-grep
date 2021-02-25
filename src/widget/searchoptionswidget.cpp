@@ -319,9 +319,14 @@ void SearchOptionsWidget::setPreviewEnabled(bool enabled) {
     ui->preview->setEnabled(enabled);
 }
 
-bool SearchOptionsWidget::cacheFileListIsChecked() const
+bool SearchOptionsWidget::cacheFileListChecked() const
 {
     return ui->path->checkBox()->isChecked();
+}
+
+void SearchOptionsWidget::setCacheFileListChecked(bool value)
+{
+    ui->path->checkBox()->setChecked(value);
 }
 
 QCheckBox* SearchOptionsWidget::cacheFileList() {

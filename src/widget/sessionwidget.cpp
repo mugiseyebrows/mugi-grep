@@ -187,7 +187,7 @@ void SessionWidget::onFilterChanged(RegExpPath value) {
     }
     tab->params().setFilter(value);
 
-    if (ui->options->cacheFileListIsChecked()) {
+    if (ui->options->cacheFileListChecked()) {
         onFilesCounted();
     }
 }
@@ -201,7 +201,7 @@ void SessionWidget::onFilesCounted() {
 }
 
 void SessionWidget::onCountFiles() {
-    if (!ui->options->cacheFileListIsChecked()) {
+    if (!ui->options->cacheFileListChecked()) {
         ui->options->hideFileCount();
         return;
     }
@@ -346,7 +346,7 @@ void SessionWidget::onSearch() {
 
     tab->params().setId(searchId);
     tab->params().setPath(ui->options->path());
-    tab->params().setCacheFileList(ui->options->cacheFileListIsChecked());
+    tab->params().setCacheFileList(ui->options->cacheFileListChecked());
     tab->hits().clear();
     tab->nameHits().clear();
     tab->trigRerender();
@@ -446,16 +446,19 @@ QString SessionWidget::path() const
 
 QJsonValue SessionWidget::serialize() const
 {
-    //json["path"] = ui->options->path();
-    return QJsonValue(ui->options->path());
+    QJsonObject obj;
+    obj["path"] = ui->options->path();
+    obj["cacheFileList"] = ui->options->cacheFileListChecked();
+    return obj;
 }
 
 void SessionWidget::deserialize(const QJsonValue &v)
 {
-    if (v.isNull()) {
-        return;
-    }
-    ui->options->setPath(v.toString());
+    QJsonObject obj = v.toObject();
+    QString path = obj["path"].toString();
+    bool cacheFileList = obj["cacheFileList"].toBool();
+    ui->options->setPath(path);
+    ui->options->setCacheFileListChecked(cacheFileList);
 }
 
 void SessionWidget::loadCollected()
@@ -522,7 +525,7 @@ void SessionWidget::on_results_currentChanged(int index) {
     ui->options->setReplacement(tab->params().replacement());
     ui->options->setMode(tab->mode());
 
-    if (ui->options->cacheFileListIsChecked()) {
+    if (ui->options->cacheFileListChecked()) {
         onFilesCounted();
     }
 
@@ -680,10 +683,10 @@ void SessionWidget::onCompleterActivated(QModelIndex index) {
 
 void SessionWidget::onGetListing() {
     QString path = ui->options->path();
-    if (ui->options->cacheFileListIsChecked() && mAllFiles.contains(path)) {
+    if (ui->options->cacheFileListChecked() && mAllFiles.contains(path)) {
         return;
     }
-    emit getListing(GetListingParams(path, ui->options->cacheFileListIsChecked()));
+    emit getListing(GetListingParams(path, ui->options->cacheFileListChecked()));
     qDebug() << "emit getListing(path)";
 }
 
