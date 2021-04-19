@@ -22,6 +22,7 @@
 #include "stylehelper.h"
 #include "renameparams.h"
 #include "searchnamehits.h"
+#include "style.h"
 
 int main(int argc, char *argv[])
 {
@@ -45,7 +46,12 @@ int main(int argc, char *argv[])
 
     Settings settings;
 
-    qApp->setStyle(QStyleFactory::create("Fusion"));
+    QStringList keys = QStyleFactory::keys();
+
+    QStyle* fusion = QStyleFactory::create("Fusion");
+    Style* style_ = new Style(fusion);
+
+    qApp->setStyle(style_);
 
     QString style = settings.style();
     if (style == "dark") {

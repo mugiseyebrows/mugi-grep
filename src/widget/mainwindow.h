@@ -71,6 +71,7 @@ protected slots:
     void on_search_triggered();
     void on_replace_triggered();
     void on_select_triggered();
+    void onTabClose(int index);
 
     // QWidget interface
 protected:

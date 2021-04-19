@@ -47,6 +47,7 @@ HEADERS += \
     src/searchcache.h \
     src/searchresultrenderer.h \
     src/searchtab.h \
+    src/style.h \
     src/stylehelper.h \
     src/widget/displayoptionswidget.h \
     src/widget/oneormanyeditors.h \
@@ -117,6 +118,7 @@ SOURCES += \
     src/searchdata.cpp \
     src/searchresultrenderer.cpp \
     src/searchtab.cpp \
+    src/style.cpp \
     src/stylehelper.cpp \
     src/widget/displayoptionswidget.cpp \
     src/widget/oneormanyeditors.cpp \

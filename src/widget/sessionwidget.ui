@@ -76,6 +76,9 @@
       </property>
       <item row="1" column="0" colspan="2">
        <widget class="QTabWidget" name="results">
+        <property name="tabsClosable">
+         <bool>true</bool>
+        </property>
         <widget class="QWidget" name="tab">
          <attribute name="title">
           <string>Tab 1</string>

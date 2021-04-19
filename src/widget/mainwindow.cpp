@@ -68,6 +68,7 @@ MainWindow::MainWindow(Settings *settings, QWidget *parent) :
         }
     }
 
+    connect(ui->tabs,SIGNAL(tabCloseRequested(int)),this,SLOT(onTabClose(int)));
 
     //qDebug() << 1;
 
@@ -505,4 +506,17 @@ void MainWindow::on_darkStyle_triggered()
     StyleHelper::setDarkStyle();
     //dumpPalette("D:\\w\\dark-palette.txt");
     mSettings->setStyle("dark");
+}
+
+void MainWindow::onTabClose(int index) {
+    if (ui->tabs->count() <= 1) {
+        return;
+    }
+    SessionWidget* session = tab(index);
+    if (!session) {
+        return;
+    }
+    session->onCanceled();
+    ui->tabs->removeTab(index);
+    session->deleteLater();
 }

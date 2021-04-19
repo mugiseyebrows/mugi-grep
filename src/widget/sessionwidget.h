@@ -132,6 +132,7 @@ public slots:
     void onGetListing();
     void onFilesCounted();
     void onRenamed(int, int);
+    void onTabClose(int index);
 protected slots:
 
     void onCompleterActivated(QModelIndex);

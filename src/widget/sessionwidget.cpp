@@ -96,6 +96,8 @@ SessionWidget::SessionWidget(Settings *settings, QWidget *parent) :
 
     connect(this,SIGNAL(rename(RenameParams)),mWorker,SLOT(onRename(RenameParams)));
 
+    connect(ui->results,SIGNAL(tabCloseRequested(int)),this,SLOT(onTabClose(int)));
+
     mThread->start();
 
     while(ui->results->count() > 0) {
@@ -720,4 +722,10 @@ void SessionWidget::onRenamed(int successful, int failed) {
 void SessionWidget::on_clear_clicked()
 {
     ui->open->clear();
+}
+
+void SessionWidget::onTabClose(int index) {
+    if (ui->results->count() > 1) {
+        ui->results->removeTab(index);
+    }
 }
