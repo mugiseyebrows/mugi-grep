@@ -157,6 +157,22 @@ void SessionWidget::copyToNewTab() {
     tab->trigRerender();
     updateTabText(ui->results->currentIndex());
     updateReplaceButton();
+
+    int count = ui->results->count();
+
+    if (count > RESULT_TAB_LIMIT) {
+        QDateTime minUpdated = this->tab(0)->updated();
+        int minIndex = 0;
+        for(int i=1;i<count;i++) {
+            QDateTime updated = this->tab(i)->updated();
+            if (updated < minUpdated) {
+                minUpdated = updated;
+                minIndex = i;
+            }
+        }
+        mQueedToRemove = minIndex;
+    }
+
 }
 
 void SessionWidget::onPatternChanged(RegExp value) {
@@ -356,6 +372,12 @@ void SessionWidget::onSearch() {
     emit search(tab->params());
     ui->progressGroup->show();
     ui->progress->started();
+
+    if (mQueedToRemove > -1) {
+        ui->results->removeTab(mQueedToRemove);
+        mQueedToRemove = -1;
+    }
+
 }
 
 void SessionWidget::updateTabText(int index) {
@@ -649,7 +671,7 @@ void SessionWidget::onListing(QString path, QStringList files) {
     }
 
     QStandardItemModel* model = CompleterHelper::filesToModel(files, ui->open);
-    completer = CompleterHelper::modelToCompleter(model, 1, ui->open);
+    completer = CompleterHelper::modelToCompleter(model, 0, ui->open);
     CompleterHelper::completerTreeViewPopup(completer, ui->open);
 
     ui->open->setCompleter(completer);

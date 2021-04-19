@@ -177,12 +177,13 @@ function SearchTab() {
         mode: 'Mode',
         params: 'SearchParams',
         hits: 'SearchHits',
-        nameHits: 'SearchNameHits'
+        nameHits: 'SearchNameHits',
+        updated: qt.QDateTime
     }
     
     let s = new CppSignature()
 
-    c.constructor_(s.signature({parent: pointer(qt.QWidget)}, {parent: 0}), {'QWidget': 'parent'},
+    c.constructor_(s.signature({parent: pointer(qt.QWidget)}, {parent: 0}), {'QWidget': 'parent', 'mUpdated': 'QDateTime::currentDateTime()'},
     `
     QVBoxLayout* layout = new QVBoxLayout();
     mTextBrowser = new QTextBrowser();
@@ -206,7 +207,8 @@ function SearchTab() {
     `)
 
     c.method('append',cpp.void, 'const SearchHits& hits, const SearchNameHits& nameHits',
-    `if (hits.isEmpty()) {
+    `mUpdated = QDateTime::currentDateTime();
+    if (hits.isEmpty()) {
         return;
     }
     int size = mHits.size();

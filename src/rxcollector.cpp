@@ -20,7 +20,7 @@
 
 RXCollector *RXCollector::mInstance = nullptr;
 
-#define COLLECTION_SIZE 20
+#define COLLECTION_SIZE 100
 
 RXCollector *RXCollector::instance()
 {
