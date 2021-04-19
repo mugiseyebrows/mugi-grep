@@ -21,11 +21,11 @@ public:
     }
 
     QString separatorColor() const {
-        return darkStyle ? "#74c69d" : "#2d6a4f";
+        return darkStyle ? "#ffffff" : "#000000";
     }
 
     QString linenumberColor() const {
-        return darkStyle ? "#e85d04" : "#dc2f02";
+        return darkStyle ? "#FFA95E" : "#FFA95E";
     }
 
     bool darkStyle;

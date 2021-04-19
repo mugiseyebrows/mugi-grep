@@ -103,6 +103,8 @@ protected:
 
     Settings* mSettings;
 
+    int mQueedToRemove;
+
 
 signals:
 

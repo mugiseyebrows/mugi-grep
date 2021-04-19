@@ -4,7 +4,8 @@
 #include <QTextBrowser>
 #include <QVBoxLayout>
 
-SearchTab::SearchTab(QWidget* parent) : QWidget(parent), mMode(Mode::Search) {
+SearchTab::SearchTab(QWidget* parent)
+    : QWidget(parent), mUpdated(QDateTime::currentDateTime()), mMode(Mode::Search) {
 
     QVBoxLayout* layout = new QVBoxLayout();
     mTextBrowser = new QTextBrowser();
@@ -38,6 +39,12 @@ void SearchTab::setHits(const SearchHits& value) {
 void SearchTab::setNameHits(const SearchNameHits& value) {
     mNameHits = value;
 }
+QDateTime SearchTab::updated() const {
+    return mUpdated;
+}
+void SearchTab::setUpdated(const QDateTime& value) {
+    mUpdated = value;
+}
 QTextBrowser* SearchTab::textBrowser() const {
     return mTextBrowser;
 }
@@ -57,6 +64,7 @@ void SearchTab::setRenderer(SearchResultRenderer* value) {
     mRenderer = value;
 }
 void SearchTab::append(const SearchHits& hits, const SearchNameHits& nameHits) {
+    mUpdated = QDateTime::currentDateTime();
     if (hits.isEmpty()) {
         return;
     }
