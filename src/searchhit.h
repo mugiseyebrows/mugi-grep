@@ -17,7 +17,7 @@ public:
               const LineContext& context = LineContext(), int lineCount = -1);
     QSet<int> siblings(int before, int after) const;
     void clearCache();
-    QString context(int line, bool signature) const;
+    LineContextItem context(int line) const;
     void read(int before, int after);
     QString path() const;
     void setPath(const QString& value);

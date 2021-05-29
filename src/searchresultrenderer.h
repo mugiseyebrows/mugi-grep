@@ -38,7 +38,7 @@ protected:
     void appendSearch(const SearchHits &hits);
     void appendPreview(const SearchHits &hits);
     void appendReplace(const SearchHits &hits);
-    QStringList fileNameLineNumber(const Colors &colors, bool showFileName, bool showLineNumber, const QString &relativePath, const QString &href, int lineNumber, const QString &separator);
+    //QStringList fileNameLineNumber(const Colors &colors, bool showFileName, bool showLineNumber, const QString &relativePath, const QString &href, int lineNumber, const QString &separator);
     QStringList fileNameLineNumberContext(const Colors &colors, bool showFileName, bool showLineNumber, const QString &relativePath, const QString &href, int lineNumber, const QString &separator);
 signals:
 

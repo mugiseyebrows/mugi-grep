@@ -404,14 +404,14 @@ void LineContext::init(const QString &path)
 
 }
 
-QString LineContext::context(int line, bool signature) const
+LineContextItem LineContext::context(int line) const
 {
      for(int i=0;i<mContext.size();i++) {
          if (mContext[i].contains(line)) {
-             return signature ? mContext[i].name : mContext[i].shortName;
+             return mContext[i];
          }
      }
-     return QString();
+     return LineContextItem();
 }
 
 void LineContext::dump()

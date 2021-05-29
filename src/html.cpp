@@ -21,6 +21,12 @@ QString Html::span(const QString &text_, const QString &color, const QString &ba
     return QString("<span %1>%2</span>").arg(style.toString()).arg(text);
 }
 
+QString Html::span(const QString &text_, const HtmlStyle& style) {
+    QString text = text_;
+    text.replace("<","&lt;").replace(">","&gt;");
+    return QString("<span %1>%2</span>").arg(style.toString()).arg(text);
+}
+
 QString Html::anchor(const QString &text, const QString& path, const QString& color)
 {
     HtmlStyle style;

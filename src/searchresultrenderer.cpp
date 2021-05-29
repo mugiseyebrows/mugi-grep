@@ -12,6 +12,169 @@
 #include "hunk.h"
 #include <QDir>
 #include "fileio.h"
+#include "html.h"
+#include "htmlstyle.h"
+
+QString fileHref(const QString& path, int lineNumber) {
+    return "file:///" + QDir::toNativeSeparators(path) +
+            "?line=" + QString::number(lineNumber + 1);
+}
+
+QStringList fileNameLineNumber(const Colors& colors, bool showFileName, bool showLineNumber,
+                                          const QString& relativePath, const QString& href,
+                                          int lineNumber, const QString& separator) {
+    QStringList cols;
+    if (showFileName) {
+        cols << Html::anchor(relativePath, href, colors.anchorColor()) << Html::span(separator, colors.separatorColor());
+    }
+    if (showLineNumber) {
+        cols << Html::span(QString::number(lineNumber), colors.linenumberColor()) << Html::span(separator, colors.separatorColor());
+    }
+    return cols;
+}
+
+QStringList fileNameLineNumberContext(const QString& color,
+                                      bool showFileName, bool showLineNumber,
+                                          const QString& relativePath,
+                                      const QString& href,
+                                          int lineNumber) {
+    QStringList cols;
+    QString separator = ":";
+    if (showFileName) {
+        cols << Html::anchor(relativePath, href, color) << Html::span(separator, color);
+        //cols << Html::anchor(relativePath, href, backgroundColor) << Html::span(separator, backgroundColor);
+    }
+    if (showLineNumber) {
+        cols << Html::span(QString::number(lineNumber), color) << Html::span(separator, color);
+    }
+    return cols;
+}
+
+class LineHit {
+public:
+    LineHit(int lineNumber, const QStringList& spans, bool matched) : lineNumber(lineNumber), spans(spans), matched(matched) {
+
+    }
+    int lineNumber;
+    QStringList spans;
+    bool matched;
+};
+
+class DivHit {
+public:
+
+    DivHit() {
+
+    }
+
+    DivHit(const QString absolutePath, const  QString relativePath)
+        : absolutePath(absolutePath), relativePath(relativePath) {
+
+    }
+
+    QList<LineHit> lines;
+    QString absolutePath;
+    QString relativePath;
+    QString backgroundColor;
+
+    bool isNull() const {
+        return absolutePath.isEmpty();
+    }
+
+    void append(const LineHit& hit) {
+        lines.append(hit);
+    }
+
+    QString render(const Colors& colors, bool showFileName, bool showLineNumber) const {
+        QStringList items;
+        for(int i=0;i<lines.size();i++) {
+            const LineHit& line = lines[i];
+            int lineNumber = line.lineNumber;
+            QString separator = line.matched ? ":" : "-";
+            QStringList cols = fileNameLineNumber(colors, showFileName, showLineNumber, relativePath, fileHref(absolutePath, lineNumber), lineNumber + 1, separator);
+            cols += line.spans;
+            if (i+1 < lines.size()) {
+                cols.append("\n");
+            }
+            items.append(cols.join(""));
+        }
+        HtmlStyle style;
+        style.backgroundColor(backgroundColor).whiteSpace(HtmlStyle::WhiteSpace::PreWrap);
+
+        QString style_ = style.toString();
+
+        return QString("<div %1>%2</div>").arg(style_).arg(items.join(""));
+    }
+};
+
+class DivContext {
+public:
+
+    DivContext() {
+
+    }
+
+    DivContext(const QString absolutePath, const  QString relativePath, int lineNumber, const QString& context)
+        : absolutePath(absolutePath), relativePath(relativePath), lineNumber(lineNumber), context(context) {
+
+    }
+
+    bool isNull() const {
+        return absolutePath.isEmpty();
+    }
+
+    QString absolutePath;
+    QString relativePath;
+    int lineNumber;
+    QString backgroundColor;
+    QString color;
+    QString context;
+
+    QString render(const Colors&, bool showFileName, bool showLineNumber) const {
+        HtmlStyle style;
+        if (!backgroundColor.isEmpty()) {
+            style.backgroundColor(backgroundColor);
+        }
+        style.color(color);
+        QStringList items = fileNameLineNumberContext(color, showFileName,
+                                                      showLineNumber, relativePath,
+                                                      fileHref(absolutePath, lineNumber), lineNumber + 1);
+        HtmlStyle bold;
+        bold.color(color).fontWeight(HtmlStyle::FontWeight::Bold);
+        items.append(Html::span(context, bold));
+        return QString("<div %1>%2</div>").arg(style.toString()).arg(items.join(""));
+    }
+};
+
+class Divs {
+public:
+    void append(const DivContext& context) {
+        divs.append(QPair<DivContext, DivHit>(context, DivHit()));
+    }
+
+    void append(const DivHit& hit) {
+        divs.append(QPair<DivContext, DivHit>(DivContext(), hit));
+    }
+
+    QString render(const Colors& colors, bool showFileName, bool showLineNumber) {
+        QStringList res;
+        for(int i=0;i<divs.size();i++) {
+            const auto& item = divs[i];
+            const DivContext& context = item.first;
+            const DivHit& hit = item.second;
+            if (!context.isNull()) {
+                res << context.render(colors, showFileName, showLineNumber);
+            } else {
+                res << hit.render(colors, showFileName, showLineNumber);
+            }
+
+        }
+        return res.join("");
+    }
+
+    QList<QPair<DivContext, DivHit> > divs;
+};
+
 
 SearchResultRenderer::SearchResultRenderer(QObject *parent) : QObject(parent), mTab(0), mZebra(false)
 {
@@ -31,11 +194,6 @@ QString sameCase(const QString& repl, const QString& orig) {
         return repl.toUpper();
     }
     return repl;
-}
-
-QString fileHref(const QString& path, int lineNumber) {
-    return "file:///" + QDir::toNativeSeparators(path) +
-            "?line=" + QString::number(lineNumber + 1);
 }
 
 QStringList SearchResultRenderer::toHtmlSpans(const ColoredLine& coloredLine,
@@ -148,19 +306,6 @@ QString withBackreferences(const QRegularExpressionMatch& m, const QVariantList&
     return result.join("");
 }
 
-QStringList SearchResultRenderer::fileNameLineNumber(const Colors& colors, bool showFileName, bool showLineNumber,
-                                          const QString& relativePath, const QString& href,
-                                          int lineNumber, const QString& separator) {
-    QStringList cols;
-    if (showFileName) {
-        cols << Html::anchor(relativePath, href, colors.anchorColor()) << Html::span(separator, colors.separatorColor());
-    }
-    if (showLineNumber) {
-        cols << Html::span(QString::number(lineNumber), colors.linenumberColor()) << Html::span(separator, colors.separatorColor());
-    }
-    return cols;
-}
-
 QStringList SearchResultRenderer::fileNameLineNumberContext(const Colors& colors, bool showFileName, bool showLineNumber,
                                           const QString& relativePath, const QString& href,
                                           int lineNumber, const QString& separator) {
@@ -237,6 +382,15 @@ void SearchResultRenderer::testDoZebra() {
     qDebug() << "testDoZebra passed";
 }
 
+QString rtrimed(const QString& line) {
+
+    QString line_ = line;
+    line_.remove(QRegularExpression("\\s+$"));
+    return line_;
+}
+
+
+
 void SearchResultRenderer::appendSearch(const SearchHits& hits) {
     RegExp pattern = hits.pattern();
 
@@ -252,7 +406,9 @@ void SearchResultRenderer::appendSearch(const SearchHits& hits) {
 
     Colors colors(linesBefore > 0 || linesAfter > 0);
 
-    HtmlDivs divs;
+    //HtmlDivs divs;
+
+    Divs divs;
 
     for (int j = 0; j < hits.size(); j++) {
 
@@ -260,7 +416,7 @@ void SearchResultRenderer::appendSearch(const SearchHits& hits) {
         QSet<int> siblings = hit.siblings(linesBefore, linesAfter);
         QList<int> matched = hit.hits();
 
-        QMap<int, bool> zebra = doZebra(linesBefore, linesAfter, matched, &mZebra);
+        //QMap<int, bool> zebra = doZebra(linesBefore, linesAfter, matched, &mZebra);
 
         int min_ = matched[0] - linesBefore;
         int max_ = matched.last() + linesAfter;
@@ -270,7 +426,100 @@ void SearchResultRenderer::appendSearch(const SearchHits& hits) {
         QString mPath = hit.path();
         QString mRelativePath = hit.relativePath();
 
+        QList<QList<int> > blocks;
+        QList<int> block;
 
+        for (int i = min_; i <= max_; i++) {
+            if (matched.contains(i) || siblings.contains(i)) {
+                block.append(i);
+            } else {
+                // flush
+                if (block.size() > 0) {
+                    blocks.append(block);
+                    block = {};
+                }
+            }
+        }
+        if (block.size() > 0) {
+            blocks.append(block);
+            block = {};
+        }
+
+
+
+        for (int i=0;i<blocks.size();i++) {
+
+            block = blocks[i];
+
+            QString backgroundColor;
+            QString contextColor;
+
+            if (linesBefore > 0 || linesAfter > 0) {
+                backgroundColor = mZebra ? colors.grayZebraColors[0] : colors.grayZebraColors[1];
+                contextColor = mZebra ? colors.grayZebraColors[1] : colors.grayZebraColors[0];
+                mZebra = !mZebra;
+            } else {
+                contextColor = colors.alternateBaseColor();
+            }
+
+            if (showContext) {
+                int lineNumber = block[0];
+                LineContextItem context = hit.context(lineNumber);
+                if (!context.isNull()) {
+                    lineNumber = context.begin;
+                    QString text = signature ? context.name : context.shortName;
+                    DivContext div(hit.path(), hit.relativePath(), lineNumber, text);
+                    div.backgroundColor = backgroundColor;
+                    div.color = contextColor;
+                    divs.append(div);
+                }
+            }
+
+            DivHit divHit(hit.path(), hit.relativePath());
+            divHit.backgroundColor = backgroundColor;
+
+            for (int k=0;k<block.size();k++) {
+                int lineNumber = block[k];
+
+                QString line = rtrimed(lines.value(lineNumber));
+
+                if (matched.contains(lineNumber)) {
+
+                    ColoredLine coloredLine(line);
+                    QRegularExpression regexp = pattern.includeExp();
+                    QRegularExpressionMatchIterator it = regexp.globalMatch(line);
+
+                    while (it.hasNext()) {
+                        QRegularExpressionMatch m = it.next();
+                        int jmax = qMin(m.lastCapturedIndex(), colors.backgroundColors.size() - 1);
+                        for (int j = 1; j <= jmax; j++) {
+                            coloredLine.paintBackground(m.capturedStart(j), m.capturedEnd(j), j);
+                        }
+                        int start = m.capturedStart();
+                        int end = m.capturedEnd();
+                        coloredLine.paintForeground(start, end, 1);
+                    }
+
+                    QStringList spans = toHtmlSpans(coloredLine, colors.backgroundColors);
+                    divHit.append(LineHit(lineNumber, spans, true));
+
+                } else {
+
+                    ColoredLine coloredLine(line);
+                    QStringList spans = toHtmlSpans(coloredLine, colors.backgroundColors);
+                    divHit.append(LineHit(lineNumber, spans, false));
+                }
+            }
+
+            divs.append(divHit);
+        }
+
+    }
+
+    mTab->textBrowser()->append(divs.render(colors, showFileName, showLineNumber));
+
+
+#if 0
         for (int i = min_; i <= max_; i++) {
 
             bool addContext = showContext
@@ -373,6 +622,8 @@ void SearchResultRenderer::appendSearch(const SearchHits& hits) {
     dump(QString("D:\\w\\%1.html").arg(i), html);*/
 
     mTab->textBrowser()->append(html);
+
+#endif
 }
 
 

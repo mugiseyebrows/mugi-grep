@@ -5,13 +5,18 @@
 
 class LineContextItem {
 public:
-    LineContextItem() {}
+    LineContextItem() : begin(-1), end(-1) {}
     LineContextItem(const QString& name, const QString& shortName, int begin, int end) : name(name), shortName(shortName), begin(begin), end(end) {
 
     }
     bool contains(int line) const {
-        return begin <= line && line <= end;
+        return begin < line && line < end;
     }
+
+    bool isNull() {
+        return begin < 0;
+    }
+
     QString name;
     QString shortName;
     int begin;
@@ -25,7 +30,7 @@ public:
 
     void init(const QString& path);
 
-    QString context(int line, bool signature) const;
+    LineContextItem context(int line) const;
 
     void dump();
 

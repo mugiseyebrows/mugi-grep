@@ -58,8 +58,8 @@ QSet<int> SearchHit::siblings(int before, int after) const {
 void SearchHit::clearCache() {
     mCache = QMap<int, QString>();
 }
-QString SearchHit::context(int line, bool signature) const {
-    return mContext.context(line, signature);
+LineContextItem SearchHit::context(int line) const {
+    return mContext.context(line);
 }
 void SearchHit::read(int before, int after) {
 

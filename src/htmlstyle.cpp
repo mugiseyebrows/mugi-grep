@@ -1,6 +1,7 @@
 #include "htmlstyle.h"
 
-HtmlStyle::HtmlStyle() : mFontWeight(FontWeight::Undefined), mTextDecoration(TextDecoration::Undefined) {
+HtmlStyle::HtmlStyle() : mFontWeight(FontWeight::Undefined),
+    mTextDecoration(TextDecoration::Undefined), mWhiteSpace(WhiteSpace::Undefined) {
 
 }
 
@@ -19,15 +20,19 @@ HtmlStyle &HtmlStyle::fontWeight(HtmlStyle::FontWeight value) {
     return *this;
 }
 
+HtmlStyle &HtmlStyle::whiteSpace(HtmlStyle::WhiteSpace whiteSpace)
+{
+    mWhiteSpace = whiteSpace;
+    return *this;
+}
+
 HtmlStyle &HtmlStyle::textDecoration(HtmlStyle::TextDecoration value) {
     mTextDecoration = value;
     return *this;
 }
 
 QString HtmlStyle::toString() const {
-    if (mColor.isEmpty() && mBackgroundColor.isEmpty() && mFontWeight == FontWeight::Undefined) {
-        return QString();
-    }
+
     QStringList props;
     if (!mColor.isEmpty()) {
         props.append(QString("color: %1").arg(mColor));
@@ -43,5 +48,14 @@ QString HtmlStyle::toString() const {
         static QMap<TextDecoration, QString> m = {{TextDecoration::None, "none"}};
         props.append(QString("text-decoration: %1").arg(m[mTextDecoration]));
     }
+    if (mWhiteSpace != WhiteSpace::Undefined) {
+        static QMap<WhiteSpace, QString> m = {{WhiteSpace::PreWrap, "pre-wrap"}};
+        props.append(QString("white-space: %1").arg(m[mWhiteSpace]));
+    }
+
+    if (props.isEmpty()) {
+        return QString();
+    }
+
     return QString("style=\"%1\"").arg(props.join("; "));
 }

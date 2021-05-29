@@ -17,11 +17,18 @@ public:
         None
     };
 
+    enum class WhiteSpace {
+        Undefined,
+        PreWrap,
+    };
+
     HtmlStyle();
 
     HtmlStyle& color(const QString& color);
     HtmlStyle& backgroundColor(const QString& color);
     HtmlStyle& fontWeight(FontWeight value);
+
+    HtmlStyle& whiteSpace(WhiteSpace whiteSpace);
 
     HtmlStyle& textDecoration(TextDecoration value);
 
@@ -31,6 +38,8 @@ public:
     QString mBackgroundColor;
     FontWeight mFontWeight;
     TextDecoration mTextDecoration;
+    WhiteSpace mWhiteSpace;
+
 };
 
 
