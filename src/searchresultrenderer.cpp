@@ -161,6 +161,20 @@ QStringList SearchResultRenderer::fileNameLineNumber(const Colors& colors, bool 
     return cols;
 }
 
+QStringList SearchResultRenderer::fileNameLineNumberContext(const Colors& colors, bool showFileName, bool showLineNumber,
+                                          const QString& relativePath, const QString& href,
+                                          int lineNumber, const QString& separator) {
+    QStringList cols;
+    if (showFileName) {
+        //cols << Html::anchor(relativePath, href, "gray") << Html::span(separator, "gray");
+        cols << Html::span(relativePath, "white") << Html::span(separator, "white");
+    }
+    if (showLineNumber) {
+        cols << Html::span(QString::number(lineNumber), "white") << Html::span(separator, "white");
+    }
+    return cols;
+}
+
 QMap<int, bool> SearchResultRenderer::doZebra(int before, int after, const QList<int>& matched, bool* initial) {
 
 
@@ -233,6 +247,8 @@ void SearchResultRenderer::appendSearch(const SearchHits& hits) {
     bool onlyMatched = !options.wholeLine();
     bool showFileName = options.fileName();
     bool showLineNumber = options.lineNumber();
+    bool showContext = options.context();
+    bool signature = options.signature();
 
     Colors colors(linesBefore > 0 || linesAfter > 0);
 
@@ -247,14 +263,37 @@ void SearchResultRenderer::appendSearch(const SearchHits& hits) {
         QMap<int, bool> zebra = doZebra(linesBefore, linesAfter, matched, &mZebra);
 
         int min_ = matched[0] - linesBefore;
-        int max_ = matched[matched.size()-1] + linesAfter;
+        int max_ = matched.last() + linesAfter;
 
         QMap<int, QString> lines = hit.cache();
 
         QString mPath = hit.path();
         QString mRelativePath = hit.relativePath();
 
+
         for (int i = min_; i <= max_; i++) {
+
+            bool addContext = showContext
+                    && (matched.contains(i) || siblings.contains(i))
+                    && !(matched.contains(i-1) || siblings.contains(i-1));
+
+            if (addContext) {
+                QString context = hit.context(i, signature);
+                if (context.isEmpty()) {
+                    int j = i;
+                    while (!matched.contains(j)) {
+                        j += 1;
+                    }
+                    context = hit.context(j, signature);
+                }
+                if (!context.isEmpty()) {
+                    QStringList cols = fileNameLineNumberContext(colors, showFileName, showLineNumber,
+                                                                      mRelativePath,
+                                                                      fileHref(mPath, i), i + 1, ":");
+                    cols.append(context);
+                    divs.appendContext(cols.join(""));
+                }
+            }
 
             if (matched.contains(i)) {
 
@@ -306,7 +345,7 @@ void SearchResultRenderer::appendSearch(const SearchHits& hits) {
 
             } else if (siblings.contains(i)) {
 
-                QString line = lines[i];
+                QString line = lines.value(i);
 
                 QString href = fileHref(mPath, i + 1);
 

@@ -23,6 +23,7 @@
 #include "renameparams.h"
 #include "searchnamehits.h"
 #include "style.h"
+#include "linecontext.h"
 
 int main(int argc, char *argv[])
 {
@@ -60,22 +61,22 @@ int main(int argc, char *argv[])
         StyleHelper::setLightStyle();
     }
 
-
     //
-
     /*a.setStyle("Windows");
     QStringList keys = QStyleFactory::keys();
     qDebug() << keys[0];*/
-
     //RegExpPath::test();
     //RegExp::test();
-
     //SearchResultRenderer::testDoZebra();
 
     MainWindow w(&settings);
     w.show();
 
+    if (a.applicationDirPath().endsWith("debug")) {
+        LineContext::testParseCpp();
+    }
+
     //SearchCache::testTokenize();
-    
+
     return a.exec();
 }

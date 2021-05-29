@@ -5,9 +5,9 @@ DisplayOptions::DisplayOptions()
     : mLinesBefore(0), mLinesAfter(0), mFileName(true), mLineNumber(true), mWholeLine(true) {
 }
 DisplayOptions::DisplayOptions(int linesBefore, int linesAfter, bool fileName, bool lineNumber,
-                               bool wholeLine)
+                               bool wholeLine, bool context, bool signature)
     : mLinesBefore(linesBefore), mLinesAfter(linesAfter), mFileName(fileName),
-      mLineNumber(lineNumber), mWholeLine(wholeLine) {
+      mLineNumber(lineNumber), mWholeLine(wholeLine), mContext(context), mSignature(signature) {
 }
 int DisplayOptions::linesBefore() const {
     return mLinesBefore;
@@ -38,4 +38,16 @@ bool DisplayOptions::wholeLine() const {
 }
 void DisplayOptions::setWholeLine(bool value) {
     mWholeLine = value;
+}
+bool DisplayOptions::context() const {
+    return mContext;
+}
+void DisplayOptions::setContext(bool value) {
+    mContext = value;
+}
+bool DisplayOptions::signature() const {
+    return mSignature;
+}
+void DisplayOptions::setSignature(bool value) {
+    mSignature = value;
 }

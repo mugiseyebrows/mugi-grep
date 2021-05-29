@@ -18,6 +18,15 @@ void HtmlDivs::append(const QString &line, const QString &backgoundColor) {
     mBackgroundColor = backgoundColor;
 }
 
+void HtmlDivs::appendContext(const QString& name) {
+    if (name.isEmpty()) {
+        return;
+    }
+    HtmlStyle style;
+    style.color("gray");
+    mLines.append(QString("<span %1>%2</span>").arg(style.toString()).arg(name));
+}
+
 void HtmlDivs::close() {
     if (mLines.isEmpty()) {
         return;

@@ -6,11 +6,12 @@
 #include <QTextCodec>
 #include <QTextStream>
 
-SearchHit::SearchHit() {
+SearchHit::SearchHit() : mLineCount(-1) {
 }
 SearchHit::SearchHit(const QString& path, const QString& relativePath, const QList<int>& hits,
-                     const QMap<int, QString>& cache)
-    : mPath(path), mRelativePath(relativePath), mHits(hits), mCache(cache) {
+                     const QMap<int, QString>& cache, const LineContext& context, int lineCount)
+    : mPath(path), mRelativePath(relativePath), mHits(hits), mCache(cache), mContext(context),
+      mLineCount(lineCount) {
 }
 QString SearchHit::path() const {
     return mPath;
@@ -36,12 +37,18 @@ QMap<int, QString> SearchHit::cache() const {
 void SearchHit::setCache(const QMap<int, QString>& value) {
     mCache = value;
 }
+LineContext SearchHit::context() const {
+    return mContext;
+}
+void SearchHit::setContext(const LineContext& value) {
+    mContext = value;
+}
 QSet<int> SearchHit::siblings(int before, int after) const {
 
     QSet<int> result;
     foreach (int line, mHits) {
         for (int i = line - before; i <= line + after; i++) {
-            if (i != line) {
+            if (i != line && (mLineCount < 0 || i < mLineCount)) {
                 result.insert(i);
             }
         }
@@ -50,6 +57,9 @@ QSet<int> SearchHit::siblings(int before, int after) const {
 }
 void SearchHit::clearCache() {
     mCache = QMap<int, QString>();
+}
+QString SearchHit::context(int line, bool signature) const {
+    return mContext.context(line, signature);
 }
 void SearchHit::read(int before, int after) {
 
@@ -77,4 +87,7 @@ void SearchHit::read(int before, int after) {
         }
         i++;
     }
+    mLineCount = i;
+    file.close();
+    mContext.init(mPath);
 }

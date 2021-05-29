@@ -22,6 +22,7 @@ public:
 
     void clear();
 
+    void appendContext(const QString &name);
 protected:
 
     QStringList mLines;

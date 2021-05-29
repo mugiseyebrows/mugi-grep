@@ -30,6 +30,7 @@ HEADERS += \
     src/getlistingparams.h \
     src/htmldivs.h \
     src/htmlstyle.h \
+    src/linecontext.h \
     src/mode.h \
     src/model/checklistmodel.h \
     src/regexpreplacement.h \
@@ -101,6 +102,7 @@ SOURCES += \
     src/getlistingparams.cpp \
     src/htmldivs.cpp \
     src/htmlstyle.cpp \
+    src/linecontext.cpp \
     src/mode.cpp \
     src/model/checklistmodel.cpp \
     src/regexpreplacement.cpp \

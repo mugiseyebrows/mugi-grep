@@ -9,22 +9,31 @@ function SearchHit() {
         path: qt.QString,
         relativePath: qt.QString,
         hits: 'QList<int>',
-        cache: 'QMap<int, QString>'
+        cache: 'QMap<int, QString>',
+        context: 'LineContext',
+        lineCount: cpp.int,
     }
+    
+    for (let k in m) {
+        var g = ['lineCount'].indexOf(k) < 0
+        c.member(mName(k), m[k], {lineCount: -1}[k], {getter: g, setter: g})
+    }
+
     c.constructor_()
 
     let s = new CppSignature()
 
-    c.constructor_(s.signature(m, {cache: 'QMap<int, QString>()'}))
-    for (let k in m) {
-        c.member(mName(k), m[k])
-    }
+    c.constructor_(s.signature(m, {
+        cache: 'QMap<int, QString>()',
+        context: 'LineContext()',
+        lineCount: -1
+    }))
 
     c.method('siblings', 'QSet<int>', {before: cpp.int, after: cpp.int}, `
     QSet<int> result;
     foreach (int line, mHits) {
         for (int i = line - before; i <= line + after; i++) {
-            if (i!=line) {
+            if (i != line && (mLineCount < 0 || i < mLineCount)) {
                 result.insert(i);
             }
         }
@@ -33,6 +42,9 @@ function SearchHit() {
     `).const_()
 
     c.method('clearCache', cpp.void, '', 'mCache = QMap<int, QString>();')
+
+    c.method('context', qt.QString, 'int line, bool signature', 
+    'return mContext.context(line, signature);').const_()
 
     c.method('read', cpp.void, {before: cpp.int, after: cpp.int}, `
     QSet<int> keys = mCache.keys().toSet();
@@ -59,8 +71,12 @@ function SearchHit() {
         }
         i++;
     }
+    mLineCount = i;
+    file.close();
+    mContext.init(mPath);
     `)
     c.include('QMetaType', true, true)
+    c.include('LineContext',true)
     c.metatype()
     c.write(src)
 }
@@ -380,7 +396,9 @@ function DisplayOptions() {
         linesAfter: cpp.int,
         fileName: cpp.bool,
         lineNumber: cpp.bool,
-        wholeLine: cpp.bool
+        wholeLine: cpp.bool,
+        context: cpp.bool,
+        signature: cpp.bool
     }
     c.constructor_()
     c.constructor_(m)

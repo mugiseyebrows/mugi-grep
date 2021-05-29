@@ -12,6 +12,8 @@ DisplayOptionsWidget::DisplayOptionsWidget(QWidget *parent) :
     connect(ui->wholeLine,SIGNAL(clicked()),this,SLOT(onChanged()));
     connect(ui->linesBefore,SIGNAL(valueChanged(int)),this,SLOT(onChanged()));
     connect(ui->linesAfter,SIGNAL(valueChanged(int)),this,SLOT(onChanged()));
+    connect(ui->context,SIGNAL(clicked()),this,SLOT(onChanged()));
+    connect(ui->signature,SIGNAL(clicked()),this,SLOT(onChanged()));
 }
 
 void DisplayOptionsWidget::on_reset_clicked() {
@@ -47,7 +49,9 @@ DisplayOptions DisplayOptionsWidget::options() const
                           ui->linesAfter->value(),
                           ui->fileName->isChecked(),
                           ui->lineNumber->isChecked(),
-                          ui->wholeLine->isChecked());
+                          ui->wholeLine->isChecked(),
+                          ui->context->isChecked(),
+                          ui->signature->isChecked());
 }
 
 void DisplayOptionsWidget::setOptions(const DisplayOptions &options)
@@ -58,6 +62,8 @@ void DisplayOptionsWidget::setOptions(const DisplayOptions &options)
     ui->fileName->setChecked(options.fileName());
     ui->lineNumber->setChecked(options.lineNumber());
     ui->wholeLine->setChecked(options.wholeLine());
+    ui->context->setChecked(options.context());
+    ui->signature->setChecked(options.signature());
     mActive = true;
     emit optionsChanged();
 }

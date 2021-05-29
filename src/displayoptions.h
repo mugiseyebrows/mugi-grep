@@ -6,7 +6,8 @@ class DisplayOptions {
 
 public:
     DisplayOptions();
-    DisplayOptions(int linesBefore, int linesAfter, bool fileName, bool lineNumber, bool wholeLine);
+    DisplayOptions(int linesBefore, int linesAfter, bool fileName, bool lineNumber, bool wholeLine,
+                   bool context, bool signature);
     int linesBefore() const;
     void setLinesBefore(int value);
     int linesAfter() const;
@@ -17,6 +18,10 @@ public:
     void setLineNumber(bool value);
     bool wholeLine() const;
     void setWholeLine(bool value);
+    bool context() const;
+    void setContext(bool value);
+    bool signature() const;
+    void setSignature(bool value);
 
 protected:
     int mLinesBefore;
@@ -24,6 +29,8 @@ protected:
     bool mFileName;
     bool mLineNumber;
     bool mWholeLine;
+    bool mContext;
+    bool mSignature;
 };
 
 #endif // DISPLAYOPTIONS_H

@@ -27,6 +27,26 @@
     <number>0</number>
    </property>
    <item>
+    <widget class="QCheckBox" name="context">
+     <property name="text">
+      <string>context</string>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="signature">
+     <property name="text">
+      <string>signature</string>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QCheckBox" name="fileName">
      <property name="text">
       <string>filename</string>
