@@ -43,7 +43,7 @@ protected:
     QList<LineContextItem> mContext;
 
     void parseCpp(const QString &path);
-    void parsePy(const QString &path);
+    void parsePython(const QString &path);
 };
 
 #endif // LINECONTEXT_H

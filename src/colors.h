@@ -28,6 +28,10 @@ public:
         return darkStyle ? "#FFA95E" : "#FFA95E";
     }
 
+    QString contextColor() const {
+        return darkStyle ? "#5EEEFF" : "#00E5FF";
+    }
+
     bool darkStyle;
     QPalette palette;
     QStringList backgroundColors;

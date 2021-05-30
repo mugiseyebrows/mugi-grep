@@ -33,6 +33,8 @@ HEADERS += \
     src/linecontext.h \
     src/mode.h \
     src/model/checklistmodel.h \
+    src/parse/parsecpp.h \
+    src/parse/parsepython.h \
     src/regexpreplacement.h \
     src/renamedialog.h \
     src/renameparams.h \
@@ -105,6 +107,8 @@ SOURCES += \
     src/linecontext.cpp \
     src/mode.cpp \
     src/model/checklistmodel.cpp \
+    src/parse/parsecpp.cpp \
+    src/parse/parsepython.cpp \
     src/regexpreplacement.cpp \
     src/renamedialog.cpp \
     src/renameparams.cpp \

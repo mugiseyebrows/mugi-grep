@@ -140,7 +140,7 @@ public:
                                                       showLineNumber, relativePath,
                                                       fileHref(absolutePath, lineNumber), lineNumber + 1);
         HtmlStyle bold;
-        bold.color(color).fontWeight(HtmlStyle::FontWeight::Bold);
+        bold.color(color);//.fontWeight(HtmlStyle::FontWeight::Bold);
         items.append(Html::span(context, bold));
         return QString("<div %1>%2</div>").arg(style.toString()).arg(items.join(""));
     }
@@ -452,17 +452,14 @@ void SearchResultRenderer::appendSearch(const SearchHits& hits) {
             block = blocks[i];
 
             QString backgroundColor;
-            QString contextColor;
+            QString contextColor = colors.contextColor();
 
             if (linesBefore > 0 || linesAfter > 0) {
                 backgroundColor = mZebra ? colors.grayZebraColors[0] : colors.grayZebraColors[1];
                 //contextColor = mZebra ? colors.grayZebraColors[1] : colors.grayZebraColors[0];
                 mZebra = !mZebra;
-
-                contextColor = "#5EEEFF";
             } else {
                 //contextColor = colors.alternateBaseColor();
-                contextColor = "#5EEEFF";
             }
 
             if (showContext) {
@@ -520,115 +517,7 @@ void SearchResultRenderer::appendSearch(const SearchHits& hits) {
     }
 
     mTab->textBrowser()->append(divs.render(colors, showFileName, showLineNumber));
-
-
-#if 0
-        for (int i = min_; i <= max_; i++) {
-
-            bool addContext = showContext
-                    && (matched.contains(i) || siblings.contains(i))
-                    && !(matched.contains(i-1) || siblings.contains(i-1));
-
-            if (addContext) {
-                QString context = hit.context(i, signature);
-                if (context.isEmpty()) {
-                    int j = i;
-                    while (!matched.contains(j)) {
-                        j += 1;
-                    }
-                    context = hit.context(j, signature);
-                }
-                if (!context.isEmpty()) {
-                    QStringList cols = fileNameLineNumberContext(colors, showFileName, showLineNumber,
-                                                                      mRelativePath,
-                                                                      fileHref(mPath, i), i + 1, ":");
-                    cols.append(context);
-                    divs.appendContext(cols.join(""));
-                }
-            }
-
-            if (matched.contains(i)) {
-
-                QString line = lines[i];
-
-                QRegularExpression regexp = pattern.includeExp();
-
-                QRegularExpressionMatchIterator it = regexp.globalMatch(line);
-
-                if (onlyMatched) {
-                    // each match on new line
-                    while (it.hasNext()) {
-                        QStringList cols = fileNameLineNumber(colors, showFileName, showLineNumber,
-                                                              mRelativePath,
-                                                              fileHref(mPath, i), i + 1, ":");
-                        QRegularExpressionMatch m = it.next();
-                        ColoredLine coloredLine(line);
-                        int jmax = qMin(m.lastCapturedIndex(), colors.backgroundColors.size() - 1);
-                        for (int j = 1; j <= jmax; j++) {
-                            coloredLine.paintBackground(m.capturedStart(j), m.capturedEnd(j), j);
-                        }
-                        coloredLine.paintForeground(m.capturedStart(), m.capturedEnd(), 1);
-                        cols << toHtmlSpans(coloredLine.mid(m.capturedStart(), m.capturedLength()),
-                                            colors.backgroundColors);
-
-                        divs.append(cols.join(""), zebra[i] ? colors.grayZebraColors[0] : colors.grayZebraColors[1]);
-
-                    }
-                } else {
-                    // all matches on one line
-                    QStringList cols = fileNameLineNumber(colors, showFileName, showLineNumber,
-                                                          mRelativePath, fileHref(mPath, i), i + 1, ":");
-                    ColoredLine coloredLine(line);
-
-                    while (it.hasNext()) {
-                        QRegularExpressionMatch m = it.next();
-                        int jmax = qMin(m.lastCapturedIndex(), colors.backgroundColors.size() - 1);
-                        for (int j = 1; j <= jmax; j++) {
-                            coloredLine.paintBackground(m.capturedStart(j), m.capturedEnd(j), j);
-                        }
-                        int start = m.capturedStart();
-                        int end = m.capturedEnd();
-                        coloredLine.paintForeground(start, end, 1);
-                    }
-                    cols << toHtmlSpans(coloredLine, colors.backgroundColors);
-
-                    divs.append(cols.join(""), zebra[i] ? colors.grayZebraColors[0] : colors.grayZebraColors[1]);
-                }
-
-            } else if (siblings.contains(i)) {
-
-                QString line = lines.value(i);
-
-                QString href = fileHref(mPath, i + 1);
-
-                QStringList cols = fileNameLineNumber(colors, showFileName, showLineNumber, mRelativePath, href, i + 1, "-");
-
-                ColoredLine coloredLine(line);
-
-                cols << toHtmlSpans(coloredLine, colors.backgroundColors);
-
-                divs.append(cols.join(""), zebra[i] ? colors.grayZebraColors[0] : colors.grayZebraColors[1]);
-            }
-        }
-    }
-    //QString html = res.join("<br/>");
-
-    divs.close();
-
-    QString html = divs.divs().join("");
-
-    if (html.isEmpty()) {
-        return;
-    }
-
-    /*static int i = 0;
-    dump(QString("D:\\w\\%1.html").arg(i), html);*/
-
-    mTab->textBrowser()->append(html);
-
-#endif
 }
-
 
 int backreferenceLength(const QString& replacement, int pos) {
     if (replacement[pos] == '\\' && pos + 1 < replacement.size() && replacement[pos+1].isDigit()) {
