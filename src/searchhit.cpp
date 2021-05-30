@@ -47,8 +47,10 @@ QSet<int> SearchHit::siblings(int before, int after) const {
 
     QSet<int> result;
     foreach (int line, mHits) {
-        for (int i = line - before; i <= line + after; i++) {
-            if (i != line && (mLineCount < 0 || i < mLineCount)) {
+        int begin = qMax(0, line - before);
+        int end = mLineCount > -1 ? qMin(mLineCount - 1, line + after) : line + after;
+        for (int i = begin; i <= end; i++) {
+            if (i != line) {
                 result.insert(i);
             }
         }
