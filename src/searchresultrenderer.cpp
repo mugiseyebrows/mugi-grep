@@ -456,10 +456,13 @@ void SearchResultRenderer::appendSearch(const SearchHits& hits) {
 
             if (linesBefore > 0 || linesAfter > 0) {
                 backgroundColor = mZebra ? colors.grayZebraColors[0] : colors.grayZebraColors[1];
-                contextColor = mZebra ? colors.grayZebraColors[1] : colors.grayZebraColors[0];
+                //contextColor = mZebra ? colors.grayZebraColors[1] : colors.grayZebraColors[0];
                 mZebra = !mZebra;
+
+                contextColor = "#5EEEFF";
             } else {
-                contextColor = colors.alternateBaseColor();
+                //contextColor = colors.alternateBaseColor();
+                contextColor = "#5EEEFF";
             }
 
             if (showContext) {

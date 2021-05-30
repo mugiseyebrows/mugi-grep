@@ -74,6 +74,7 @@ int main(int argc, char *argv[])
 
     if (a.applicationDirPath().endsWith("debug")) {
         LineContext::testParseCpp();
+        LineContext::testParsePy();
     }
 
     //SearchCache::testTokenize();

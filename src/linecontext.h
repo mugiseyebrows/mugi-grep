@@ -36,6 +36,7 @@ public:
 
     static void testParseCpp();
 
+    static void testParsePy();
 protected:
 
     bool mInit;
