@@ -89,7 +89,8 @@ HEADERS += \
     src/coloredlinespan.h \
     src/hunk.h \
     src/widget/lineeditandcheckbox.h \
-    src/completerhelper.h
+    src/completerhelper.h \
+    src/log.h
 
 SOURCES += \
     src/boolmap.cpp \
@@ -163,7 +164,8 @@ SOURCES += \
     src/coloredlinespan.cpp \
     src/hunk.cpp \
     src/widget/lineeditandcheckbox.cpp \
-    src/completerhelper.cpp
+    src/completerhelper.cpp \
+    src/log.cpp
 
 FORMS += \
     src/editorsdialog.ui \
