@@ -50,7 +50,8 @@ SessionWidget::SessionWidget(Settings *settings, QWidget *parent) :
     mSettings(settings),
     /*mReplacementChanged(new CallOnce("mReplacementChanged", 500, this)),*/
     mGetListing(new CallOnce("mGetAllFiles", 500, this)),
-    mCountFilesManager(new CountFilesManager(this))
+    mCountFilesManager(new CountFilesManager(this)),
+    mQueedToRemove(-1)
 {
     ui->setupUi(this);
 
@@ -362,16 +363,19 @@ void SessionWidget::onSearch() {
     //emit collect();
     int searchId = SearchId::instance()->next();
 
-    tab->params().setId(searchId);
-    tab->params().setPath(ui->options->path());
-    tab->params().setCacheFileList(ui->options->cacheFileListChecked());
+    SearchParams& params = tab->params();
+
+    params.setId(searchId);
+    params.setPath(ui->options->path());
+    params.setCacheFileList(ui->options->cacheFileListChecked());
     tab->hits().clear();
     tab->nameHits().clear();
     tab->trigRerender();
 
     updateTabText(ui->results->currentIndex());
 
-    emit search(tab->params());
+    emit search(params);
+
     ui->progressGroup->show();
     ui->progress->started();
 
