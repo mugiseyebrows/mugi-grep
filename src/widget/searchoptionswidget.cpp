@@ -300,6 +300,20 @@ void SearchOptionsWidget::setReplaceEnabled(bool enabled)
     ui->replace->setEnabled(enabled);
 }
 
+void SearchOptionsWidget::setViewOptions(const ViewOptions &options)
+{
+    mViewOptions = options;
+    ui->pattern->setChildVisible(options.search(), options.search());
+    ui->filter->setVisible(options.filter());
+    ui->filter->notBinary()->setVisible(options.filter());
+    ui->filterLabel->setVisible(options.filter());
+    ui->path->checkBox()->setVisible(options.cache());
+}
+
+ViewOptions SearchOptionsWidget::viewOptions() const {
+    return mViewOptions;
+}
+
 void SearchOptionsWidget::showFileCount(int filtered, int total)
 {
     if (filtered < 0) {

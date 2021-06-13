@@ -1,4 +1,4 @@
-const {CppClass, cpp, qt, mName, CppSignature, pointer, constRef, ref, sc} = require('mugicpp')
+const {CppClass, cpp, qt, mName, CppSignature, pointer, constRef, ref, sc, capitalized} = require('mugicpp')
 const path = require('path')
 
 let src = path.join(__dirname, 'src')
@@ -32,8 +32,10 @@ function SearchHit() {
     c.method('siblings', 'QSet<int>', {before: cpp.int, after: cpp.int}, `
     QSet<int> result;
     foreach (int line, mHits) {
-        for (int i = line - before; i <= line + after; i++) {
-            if (i != line && (mLineCount < 0 || i < mLineCount)) {
+        int begin = qMax(0, line - before);
+        int end = mLineCount > -1 ? qMin(mLineCount - 1, line + after) : line + after;
+        for (int i = begin; i <= end; i++) {
+            if (i != line) {
                 result.insert(i);
             }
         }
@@ -43,8 +45,8 @@ function SearchHit() {
 
     c.method('clearCache', cpp.void, '', 'mCache = QMap<int, QString>();')
 
-    c.method('context', qt.QString, 'int line, bool signature', 
-    'return mContext.context(line, signature);').const_()
+    c.method('context', 'LineContextItem', 'int line', 
+    'return mContext.context(line);').const_()
 
     c.method('read', cpp.void, {before: cpp.int, after: cpp.int}, `
     QSet<int> keys = mCache.keys().toSet();
@@ -269,6 +271,8 @@ function SearchTab() {
     c.method('toPlainText', qt.QString, '', 'return mTextBrowser->toPlainText();').const_()
     c.method('toHtml', qt.QString, '', 'return mTextBrowser->toHtml();').const_()
 
+    c.method('setViewOptions',cpp.void, 'const ViewOptions& options', 'mDisplayOptionsWidget->setVisible(options.display());')
+
     c.include('SearchHits')
     c.include('SearchNameHits')
     c.include('SearchParams')
@@ -278,6 +282,7 @@ function SearchTab() {
     c.include('Mode')
     c.include('DisplayOptionsWidget')
     c.include('SearchResultRenderer')
+    c.include('ViewOptions')
 
     c.qobject()
     c.write(src)
@@ -584,6 +589,51 @@ function ReplacedParams() {
     c.write(src)
 }
 
+function ViewOptions() {
+    let c = new CppClass('ViewOptions')
+    let m = {
+        search: cpp.bool,
+        filter: cpp.bool,
+        display: cpp.bool,
+        navigate: cpp.bool,
+        cache: cpp.bool
+    }
+    let d = {
+        search: 'false',
+        filter: 'false',
+        display: 'false',
+        navigate: 'false',
+        cache: 'false'
+    }
+
+    c.constructor_()
+    c.constructor_(m)
+    for (let k in m) {
+        c.member(mName(k), m[k], d[k])
+    }
+    for (let k in m) {
+        c.method(`toggle${capitalized(k)}`,cpp.void, '', `${mName(k)} = !${mName(k)};`)
+    }
+
+    var imp = []
+    for (let k in m) {
+        imp.push(mName(k))
+    }
+
+    c.method('all',cpp.bool, '', 'return ' + imp.join(' && ') + ';').const_()
+
+    imp = []
+    for (let k in m) {
+        imp.push(mName(k) + '= value;\n')
+    }
+
+    c.method('setAll', cpp.void, 'bool value', imp.join(""))
+
+    c.metatype()
+    c.include('QMetaType', true, true)
+    c.write(src)
+}
+
 // todo mugicpp metatype: add include QMetaType
 // todo mugicpp incude class Foo if ref or pointer
 // todo mugicpp canSpawn
@@ -605,3 +655,4 @@ GetListingParams()
 Editor()
 RenameParams()
 ReplacedParams()
+ViewOptions()

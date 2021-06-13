@@ -100,9 +100,15 @@
     <addaction name="saveAsText"/>
     <addaction name="saveAsHtml"/>
    </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>&amp;View</string>
+    </property>
+   </widget>
    <addaction name="menuSession"/>
    <addaction name="menuAction"/>
    <addaction name="menuSettings"/>
+   <addaction name="menuView"/>
    <addaction name="menuResults"/>
   </widget>
   <action name="addSession">

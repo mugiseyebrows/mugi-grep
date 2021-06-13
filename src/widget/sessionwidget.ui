@@ -98,25 +98,7 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <item>
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Open</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="open"/>
-     </item>
-     <item>
-      <widget class="QPushButton" name="clear">
-       <property name="text">
-        <string>clear</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    <widget class="NavWidget" name="navigate" native="true"/>
    </item>
   </layout>
  </widget>
@@ -131,6 +113,12 @@
    <class>SearchProgressWidget</class>
    <extends>QWidget</extends>
    <header>widget/searchprogresswidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>NavWidget</class>
+   <extends>QWidget</extends>
+   <header>widget/navwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

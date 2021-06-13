@@ -112,3 +112,6 @@ QString SearchTab::toPlainText() const {
 QString SearchTab::toHtml() const {
     return mTextBrowser->toHtml();
 }
+void SearchTab::setViewOptions(const ViewOptions& options) {
+    mDisplayOptionsWidget->setVisible(options.display());
+}

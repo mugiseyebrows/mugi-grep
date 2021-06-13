@@ -55,6 +55,8 @@ MainWindow::MainWindow(Settings *settings, QWidget *parent) :
 
     } else {
 
+        mViewOptions = deserealizeViewOptions(mSettings->viewOptions());
+
         RXCollector* collector = RXCollector::instance();
 
         collector->deserializePatterns(mSettings->patterns());
@@ -66,6 +68,8 @@ MainWindow::MainWindow(Settings *settings, QWidget *parent) :
         } else {
             addSession();
         }
+
+        initViewOptionsMenu();
     }
 
     connect(ui->tabs,SIGNAL(tabCloseRequested(int)),this,SLOT(onTabClose(int)));
@@ -99,6 +103,7 @@ void MainWindow::closeEvent(QCloseEvent * e)
         mSettings->setSessions(serializeSessions());
         mSettings->setPatterns(RXCollector::instance()->serializePatterns());
         mSettings->setPaths(RXCollector::instance()->serializePaths());
+        mSettings->setViewOptions(serializeViewOptions());
         mSettings->save();
     }
 
@@ -126,9 +131,31 @@ void MainWindow::addSession(const QJsonValue &v) {
     session->deserialize(v);
 
     session->loadCollected();
+
+    session->setViewOptions(mViewOptions);
+
+    connect(session, SIGNAL(viewOptionsChanged(ViewOptions)),this,SLOT(onViewOptionsChanged(ViewOptions)));
+
     /*connect(session,&SessionWidget::collect,[=](){
         mCompleterModelManager->onCollect(session->options(), ui->tabs);
     });*/
+}
+
+void MainWindow::onViewOptionsChanged(ViewOptions options) {
+    mViewOptions = options;
+    auto* tab = currentTab();
+    if (!tab) {
+        return;
+    }
+
+    mViewOptionCache->setChecked(options.cache());
+    mViewOptionSearch->setChecked(options.search());
+    mViewOptionFilter->setChecked(options.filter());
+    mViewOptionDisplay->setChecked(options.display());
+    mViewOptionNavigate->setChecked(options.navigate());
+    mViewOptionAll->setChecked(options.all());
+
+    tab->setViewOptions(options);
 }
 
 void MainWindow::removeSession() {
@@ -167,6 +194,28 @@ QJsonArray MainWindow::serializeSessions() const
     }
     return result;
 }
+
+QJsonObject MainWindow::serializeViewOptions() const {
+    ViewOptions opt = mViewOptions;
+    QJsonObject obj;
+    obj["search"] = opt.search();
+    obj["filter"] = opt.filter();
+    obj["display"] = opt.display();
+    obj["navigate"] = opt.navigate();
+    obj["cache"] = opt.cache();
+    return obj;
+}
+
+ViewOptions MainWindow::deserealizeViewOptions(const QJsonObject& obj) {
+    ViewOptions opt;
+    opt.setSearch(obj["search"].toBool());
+    opt.setFilter(obj["filter"].toBool());
+    opt.setDisplay(obj["display"].toBool());
+    opt.setNavigate(obj["navigate"].toBool());
+    opt.setCache(obj["cache"].toBool());
+    return opt;
+}
+
 
 void MainWindow::deserealizeSessions(const QJsonArray& vl)
 {
@@ -279,6 +328,7 @@ void MainWindow::on_tabs_currentChanged(int index)
     QTimer::singleShot(0,[=](){
         session->options()->fixLayout();
     });
+    session->setViewOptions(mViewOptions);
 }
 
 void MainWindow::on_removeAllSessions_triggered()
@@ -295,6 +345,65 @@ void MainWindow::setCurrentTabMode(Mode mode) {
         return;
     }
     tab->setMode(mode);
+}
+
+#include <QAction>
+
+void MainWindow::initViewOptionsMenu()
+{
+    ViewOptions options = mViewOptions;
+
+    QMenu* menu = ui->menuView;
+
+    mViewOptionCache = menu->addAction("Cache");
+    mViewOptionCache->setCheckable(true);
+    mViewOptionCache->setChecked(options.cache());
+
+    mViewOptionSearch = menu->addAction("Find");
+    mViewOptionSearch->setCheckable(true);
+    mViewOptionSearch->setChecked(options.search());
+
+    mViewOptionFilter = menu->addAction("File filter");
+    mViewOptionFilter->setCheckable(true);
+    mViewOptionFilter->setChecked(options.filter());
+
+    mViewOptionDisplay = menu->addAction("Display");
+    mViewOptionDisplay->setCheckable(true);
+    mViewOptionDisplay->setChecked(options.display());
+
+    mViewOptionNavigate = menu->addAction("Navigate");
+    mViewOptionNavigate->setCheckable(true);
+    mViewOptionNavigate->setChecked(options.navigate());
+
+    mViewOptionAll = menu->addAction("All");
+    mViewOptionAll->setCheckable(true);
+    mViewOptionAll->setChecked(options.all());
+
+    connect(mViewOptionCache,&QAction::triggered,[=](bool checked){
+        mViewOptions.setCache(checked);
+        onViewOptionsChanged(mViewOptions);
+    });
+    connect(mViewOptionSearch,&QAction::triggered,[=](bool checked){
+        mViewOptions.setSearch(checked);
+        onViewOptionsChanged(mViewOptions);
+    });
+    connect(mViewOptionFilter,&QAction::triggered,[=](bool checked){
+        mViewOptions.setFilter(checked);
+        onViewOptionsChanged(mViewOptions);
+    });
+    connect(mViewOptionDisplay,&QAction::triggered,[=](bool checked){
+        mViewOptions.setDisplay(checked);
+        onViewOptionsChanged(mViewOptions);
+    });
+    connect(mViewOptionNavigate,&QAction::triggered,[=](bool checked){
+        mViewOptions.setNavigate(checked);
+        onViewOptionsChanged(mViewOptions);
+    });
+    connect(mViewOptionAll,&QAction::triggered,[=](bool checked){
+        mViewOptions.setAll(checked);
+        onViewOptionsChanged(mViewOptions);
+    });
+
 }
 
 

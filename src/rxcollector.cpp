@@ -16,7 +16,9 @@
 #include <QLineEdit>
 #include <QDir>
 
-#define log(msg)  qDebug() << msg
+//#define log(msg)  qDebug() << msg
+
+#define log(msg)
 
 RXCollector *RXCollector::mInstance = nullptr;
 

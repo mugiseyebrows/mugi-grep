@@ -23,6 +23,9 @@ public:
     void setValue(const RegExp &value);
 
     QWidgetList widgets() const;
+
+    void setChildVisible(bool exclude, bool matchCase);
+
 protected:
     Ui::RXInput *ui;
 

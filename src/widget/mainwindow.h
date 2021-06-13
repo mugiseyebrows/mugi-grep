@@ -8,6 +8,7 @@
 #include "searchoptionswidget.h"
 #include "mode.h"
 #include "format.h"
+#include "viewoptions.h"
 
 class SessionWidget;
 class QSignalMapper;
@@ -41,6 +42,10 @@ public:
     QJsonArray serializeSessions() const;
     void setCurrentTabMode(Mode mode);
 
+    void initViewOptionsMenu();
+
+public slots:
+    void onViewOptionsChanged(ViewOptions options);
 protected:
 
     Ui::MainWindow *ui;
@@ -48,6 +53,14 @@ protected:
     AnchorClickHandler* mClickHandler;
     CompleterModelManager* mCompleterModelManager;
     Settings* mSettings;
+    ViewOptions mViewOptions;
+
+    QAction* mViewOptionCache;
+    QAction* mViewOptionSearch;
+    QAction* mViewOptionFilter;
+    QAction* mViewOptionDisplay;
+    QAction* mViewOptionNavigate;
+    QAction* mViewOptionAll;
 
 signals:
     void editorSet();
@@ -79,6 +92,8 @@ protected:
     void dropEvent(QDropEvent *event);
 
     void onSave(Format format);
+    QJsonObject serializeViewOptions() const;
+    ViewOptions deserealizeViewOptions(const QJsonObject &obj);
 private slots:
     void on_saveAsText_triggered();
     void on_saveAsHtml_triggered();

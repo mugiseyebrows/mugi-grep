@@ -14,28 +14,26 @@
 #include <QMessageBox>
 #include <QAction>
 #include <QCheckBox>
+#include <QLineEdit>
+#include <QMenu>
+#include <QAction>
+#include <QMessageBox>
+#include <QStandardItemModel>
+#include <QCompleter>
+#include <QHeaderView>
+#include <QTreeView>
 
 #include "widget/searchbrowser.h"
 #include "mode.h"
-
 #include "worker.h"
-
 #include "searchid.h"
 #include "settings.h"
-#include <QMessageBox>
 #include "anchorclickhandler.h"
-
 #include "widget/mainwindow.h"
-
-#include <QCompleter>
-#include <QStandardItemModel>
-#include <QHeaderView>
-#include <QTreeView>
 #include "searchtab.h"
 #include "fileio.h"
 #include "callonce.h"
 #include "countfilesmanager.h"
-
 #include "rxcollector.h"
 #include "searchnamehits.h"
 #include "completerhelper.h"
@@ -124,6 +122,62 @@ SessionWidget::SessionWidget(Settings *settings, QWidget *parent) :
     //tab->textBrowser()->setText("test");
 
     //RXCollector::instance()->load(ui->options->pathEdit());
+
+    setContextMenuPolicy(Qt::CustomContextMenu);
+
+    connect(this,&QWidget::customContextMenuRequested, [=](const QPoint& point) {
+
+        ViewOptions options = viewOptions();
+
+        QMenu menu(this);
+        menu.addSection("View options");
+
+        QAction* cache = menu.addAction("Cache");
+        cache->setCheckable(true);
+        cache->setChecked(options.cache());
+
+        QAction* search = menu.addAction("Find");
+        search->setCheckable(true);
+        search->setChecked(options.search());
+
+        QAction* filter = menu.addAction("File filter");
+        filter->setCheckable(true);
+        filter->setChecked(options.filter());
+
+        QAction* display = menu.addAction("Display");
+        display->setCheckable(true);
+        display->setChecked(options.display());
+
+        QAction* navigate = menu.addAction("Navigate");
+        navigate->setCheckable(true);
+        navigate->setChecked(options.navigate());
+
+        QAction* all = menu.addAction("All");
+        all->setCheckable(true);
+        all->setChecked(options.all());
+
+        QAction* action = menu.exec(mapToGlobal(point));
+
+        if (action == cache) {
+            options.toggleCache();
+        } else if (action == search) {
+            options.toggleSearch();
+        } else if (action == filter) {
+            options.toggleFilter();
+        } else if (action == display) {
+            options.toggleDisplay();
+        } else if (action == navigate) {
+            options.toggleNavigate();
+        } else if (action == all) {
+            options.setAll(!options.all());
+        } else {
+            return;
+        }
+
+        emit viewOptionsChanged(options);
+
+    });
+
 }
 
 void SessionWidget::onCacheFileListClicked(bool cacheFileList) {
@@ -518,6 +572,20 @@ void SessionWidget::save(Format format) {
     FileIO::writeLines(path, text);
 }
 
+void SessionWidget::setViewOptions(const ViewOptions &options)
+{
+    ui->options->setViewOptions(options);
+    SearchTab* tab = currentTab();
+    ui->navigate->setVisible(options.navigate());
+    if (tab) {
+        tab->setViewOptions(options);
+    }
+}
+
+ViewOptions SessionWidget::viewOptions() const {
+    return ui->options->viewOptions();
+}
+
 SearchTab* SessionWidget::find(int searchId) {
     int count = ui->results->count();
     for(int i=0;i<count;i++) {
@@ -547,6 +615,9 @@ void SessionWidget::on_results_currentChanged(int index) {
     if (!tab) {
         return;
     }
+
+    tab->setViewOptions(ui->options->viewOptions());
+
     mListenOptions = false;
     ui->options->setPattern(tab->params().pattern());
     ui->options->setFiler(tab->params().filter());
@@ -674,22 +745,24 @@ void SessionWidget::onListing(QString path, QStringList files) {
         return;
     }
 
-    QCompleter* completer = ui->open->completer();
+    QLineEdit* open = ui->navigate->open();
+
+    QCompleter* completer = open->completer();
     if (completer) {
         completer->deleteLater();
     }
 
-    QStandardItemModel* model = CompleterHelper::filesToModel(files, ui->open);
-    completer = CompleterHelper::modelToCompleter(model, 0, ui->open);
-    CompleterHelper::completerTreeViewPopup(completer, ui->open);
+    QStandardItemModel* model = CompleterHelper::filesToModel(files, open);
+    completer = CompleterHelper::modelToCompleter(model, 0, open);
+    CompleterHelper::completerTreeViewPopup(completer, open);
 
-    ui->open->setCompleter(completer);
+    open->setCompleter(completer);
 
-    if (!ui->open->text().isEmpty()) {
+    if (!open->text().isEmpty()) {
         if (!completer->popup()->isVisible()) {
             //completer->popup()->show();
 
-            completer->setCompletionPrefix(ui->open->text());
+            completer->setCompletionPrefix(open->text());
 
             completer->complete();
 
@@ -721,11 +794,6 @@ void SessionWidget::onGetListing() {
 void SessionWidget::onRenamed(int successful, int failed) {
     ui->progressGroup->show();
     ui->progress->renamed(successful, failed);
-}
-
-void SessionWidget::on_clear_clicked()
-{
-    ui->open->clear();
 }
 
 void SessionWidget::onTabClose(int index) {

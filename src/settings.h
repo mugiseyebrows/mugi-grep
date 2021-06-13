@@ -40,6 +40,9 @@ public:
     QString style() const;
 
     void setStyle(const QString &style);
+
+    void setViewOptions(const QJsonObject &value);
+    QJsonObject viewOptions() const;
 protected:
 
     QList<Editor> mEditors;
@@ -48,6 +51,8 @@ protected:
     QJsonArray mSessions;
     QJsonObject mPatterns;
     QJsonArray mPaths;
+    QJsonObject mViewOptions;
+
     QString mDir;
     QString mStyle;
 

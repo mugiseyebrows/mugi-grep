@@ -6,6 +6,7 @@
 #include "regexp.h"
 #include "regexpreplacement.h"
 #include "mode.h"
+#include "viewoptions.h"
 
 class SearchBrowser;
 class Worker;
@@ -49,6 +50,8 @@ public:
     //void setCacheFileList(QAction* action);
 
     void setReplaceEnabled(bool enabled);
+
+    void setViewOptions(const ViewOptions& options);
 
 #if 0
     void setActive(bool active);
@@ -125,6 +128,7 @@ protected:
     //bool notBinary() const;
     QCheckBox *cacheFileList();
     QWidgetList widgets();
+    ViewOptions viewOptions() const;
 public slots:
     void on_select_clicked();
 protected slots:
@@ -146,6 +150,7 @@ protected:
     Ui::SearchOptionsWidget *ui;
     //bool mActive;
     Mode mMode;
+    ViewOptions mViewOptions;
 
 };
 

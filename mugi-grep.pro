@@ -52,7 +52,9 @@ HEADERS += \
     src/searchtab.h \
     src/style.h \
     src/stylehelper.h \
+    src/viewoptions.h \
     src/widget/displayoptionswidget.h \
+    src/widget/navwidget.h \
     src/widget/oneormanyeditors.h \
     src/worker.h \
     src/utils.h \
@@ -127,7 +129,9 @@ SOURCES += \
     src/searchtab.cpp \
     src/style.cpp \
     src/stylehelper.cpp \
+    src/viewoptions.cpp \
     src/widget/displayoptionswidget.cpp \
+    src/widget/navwidget.cpp \
     src/widget/oneormanyeditors.cpp \
     src/worker.cpp \
     src/utils.cpp \
@@ -171,6 +175,7 @@ FORMS += \
     src/editorsdialog.ui \
     src/renamedialog.ui \
     src/widget/displayoptionswidget.ui \
+    src/widget/navwidget.ui \
     src/widget/oneormanyeditors.ui \
     src/widget/sessionwidget.ui \
     src/widget/searchoptionswidget.ui \

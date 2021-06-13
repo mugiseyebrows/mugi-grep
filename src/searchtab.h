@@ -14,6 +14,7 @@ class QTextBrowser;
 #include "searchparams.h"
 #include "searchresultrenderer.h"
 #include "utils.h"
+#include "viewoptions.h"
 
 class SearchTab : public QWidget {
     Q_OBJECT
@@ -31,6 +32,7 @@ public:
     ReplaceParams replaceParams(bool renameFiles);
     QString toPlainText() const;
     QString toHtml() const;
+    void setViewOptions(const ViewOptions& options);
     Mode mode() const;
     void setParams(const SearchParams& value);
     void setHits(const SearchHits& value);

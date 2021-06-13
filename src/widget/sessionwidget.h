@@ -21,6 +21,7 @@
 #include "getlistingparams.h"
 #include "searchnamehits.h"
 #include "renameparams.h"
+#include "viewoptions.h"
 
 namespace Ui {
 class SessionWidget;
@@ -73,6 +74,9 @@ public:
 
     void save(Format format);
 
+    void setViewOptions(const ViewOptions& options);
+
+    ViewOptions viewOptions() const;
 protected:
 
     Worker* mWorker;
@@ -126,6 +130,8 @@ signals:
 
     void rename(RenameParams);
 
+    void viewOptionsChanged(ViewOptions);
+
 public slots:
     void onCanceled();
     void onCountFiles();
@@ -158,8 +164,6 @@ protected slots:
     void on_open_textChanged(QString);
 
     void onCacheFileListClicked(bool cacheFileList);
-private slots:
-    void on_clear_clicked();
 
 private:
     Ui::SessionWidget *ui;

@@ -52,6 +52,7 @@ void Settings::load()
     mPatterns = settings.value("patterns").toObject();
     mPaths = settings.value("paths").toArray();
     mStyle = settings.value("style").toString();
+    mViewOptions = settings.value("view").toObject();
 
     QJsonArray editors = settings.value("editors").toArray();
 
@@ -83,6 +84,10 @@ QJsonArray Settings::paths() const {
     return mPaths;
 }
 
+QJsonObject Settings::viewOptions() const {
+    return mViewOptions;
+}
+
 QString Settings::style() const
 {
     return mStyle;
@@ -106,6 +111,10 @@ void Settings::setPaths(const QJsonArray &value) {
     mPaths = value;
 }
 
+void Settings::setViewOptions(const QJsonObject &value) {
+    mViewOptions = value;
+}
+
 void Settings::save()
 {
     if (IS_DEBUG) {
@@ -123,6 +132,7 @@ void Settings::save()
     settings["patterns"] = mPatterns;
     settings["paths"] = mPaths;
     settings["style"] = mStyle;
+    settings["view"] = mViewOptions;
 
     QString path = this->settingsPath();
     saveJson(path, settings);

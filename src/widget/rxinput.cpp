@@ -29,6 +29,13 @@ QWidgetList RXInput::widgets() const {
     return QWidgetList {ui->include, ui->exclude, ui->matchCase};
 }
 
+void RXInput::setChildVisible(bool exclude, bool matchCase)
+{
+    ui->exclude->setVisible(exclude);
+    ui->label->setVisible(exclude);
+    ui->matchCase->setVisible(matchCase);
+}
+
 RXInput::~RXInput()
 {
     delete ui;
