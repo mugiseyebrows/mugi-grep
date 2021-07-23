@@ -108,11 +108,12 @@ QString findAppDataRoaming() {
 }
 
 QString findAppDataLocal() {
-    QString path = findAppDataRoaming();
-    if (path.isEmpty()) {
+    QString roaming = findAppDataRoaming();
+    if (roaming.isEmpty()) {
         return QString();
     }
-    QString local = QDir(QDir(path).dirName()).filePath("Local");
+
+    QString local = pathJoin({roaming, "..", "Local"});
     if (exists(local)) {
         return local;
     }
