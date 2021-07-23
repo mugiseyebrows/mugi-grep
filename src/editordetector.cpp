@@ -41,10 +41,12 @@ QString findInPath(const QString &fileName)
     return QString();
 }
 
-
-
-QString pathJoin(const QString& path1, const QString& path2) {
-    return QDir(path1).filePath(path2);
+QString pathJoin(const QStringList path) {
+    QDir dir(path[0]);
+    for(int i=1;i<path.size();i++) {
+        dir = QDir(dir.filePath(path[i]));
+    }
+    return dir.path();
 }
 
 bool exists(const QString& path) {
@@ -57,7 +59,7 @@ QString existing(const QStringList& bases, const QString& path) {
         if (base.isEmpty()) {
             continue;
         }
-        QString path_ = pathJoin(base, path);
+        QString path_ = pathJoin({base, path});
         if (exists(path_)) {
             return QDir::toNativeSeparators(path_);
         }
@@ -98,7 +100,7 @@ QString findAppDataRoaming() {
     if (profile.isEmpty()) {
         return QString();
     }
-    path = pathJoin(profile,"AppData\\Roaming");
+    path = pathJoin({profile,"AppData\\Roaming"});
     if (exists(path)) {
         return path;
     }
@@ -195,13 +197,13 @@ QList<Editor> EditorDetector::detect()
         }
     }
 
-    QString startMenuQt = pathJoin(appDataRoaming, "Microsoft\\Windows\\Start Menu\\Programs\\Qt");
+    QString startMenuQt = pathJoin({appDataRoaming, "Microsoft\\Windows\\Start Menu\\Programs\\Qt"});
     if (exists(startMenuQt)) {
         QStringList files = QDir(startMenuQt).entryList(QDir::Files);
         QRegularExpression rxQtCreator("Qt Creator",QRegularExpression::CaseInsensitiveOption);
         for(const QString& name: files) {
             if (rxQtCreator.match(name).hasMatch()) {
-                QString path = QFile::symLinkTarget(pathJoin(startMenuQt, name));
+                QString path = QFile::symLinkTarget(pathJoin({startMenuQt, name}));
                 if (exists(path)) {
                     qtCreator = path;
                 }
