@@ -153,8 +153,14 @@ QList<Editor> EditorDetector::detect()
 
     QString vsCode1 = existing({programFiles32, programFiles64, appDataLocal}, "Microsoft VS Code\\Code.exe");
 
+    QString vsCode2 = existing({appDataLocal}, "Programs\\Microsoft VS Code\\Code.exe");
+
     if (!vsCode1.isEmpty()) {
         vsCode = vsCode1;
+    }
+
+    if (!vsCode2.isEmpty()) {
+        vsCode = vsCode2;
     }
 
     QString geany1 = existing({programFiles32, programFiles64}, "Geany\\bin\\geany.exe");
