@@ -21,20 +21,6 @@ void Settings::load()
     }
 
     QString path = this->settingsPath();
-    if (!QFile(path).exists()) {
-
-        QDir dir(qApp->applicationDirPath());
-        if (dir.dirName() == "debug") {
-            dir.cdUp();
-        }
-
-#ifdef Q_OS_WIN
-        path = dir.filePath("settings.win32.json");
-#endif
-#ifdef Q_OS_LINUX
-        path = dir.filePath("settings.linux.json");
-#endif
-    }
 
     if (!QFile(path).exists()) {
         return;
