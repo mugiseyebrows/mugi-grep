@@ -33,6 +33,14 @@ QString Environment::searchInPath(const QString& name) const {
             return filePath;
         }
     }
+    if (name == "explorer.exe") {
+        QByteArray root = qgetenv("SystemRoot");
+        QString windows = root.isEmpty() ? "C:\\windows" : QString::fromUtf8(root);
+        QString path = QDir(windows).filePath("explorer.exe");
+        if (QFile::exists(path)) {
+            return path;
+        }
+    }
     return QString();
 }
 
