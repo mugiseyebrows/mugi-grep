@@ -204,6 +204,17 @@ QList<Editor> EditorDetector::detect()
         }
     }
 
+    {
+        QString regKey = "HKEY_CURRENT_USER\\Software\\Classes\\QtProject.QtCreator.c\\shell\\Open\\Command";
+        QSettings settings(regKey, QSettings::NativeFormat);
+        QString value = settings.value(".").toString();
+        QString name = "qtcreator.exe";
+        int index = value.indexOf(name);
+        if (index > -1) {
+            qtCreator = value.mid(0, index + name.size());
+        }
+    }
+    
     QString startMenuQt = pathJoin({appDataRoaming, "Microsoft\\Windows\\Start Menu\\Programs\\Qt"});
     if (exists(startMenuQt)) {
         QStringList files = QDir(startMenuQt).entryList(QDir::Files);
