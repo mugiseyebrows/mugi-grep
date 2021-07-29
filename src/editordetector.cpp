@@ -169,9 +169,9 @@ QList<Editor> EditorDetector::detect()
         geany = geany1;
     }
 
-    QString qtCreator1 = existing({"C:\\Qt\\Tools\\QtCreator\\bin"}, executableName("qtcreator"));
-    if (!qtCreator1.isEmpty()) {
-        qtCreator = qtCreator1;
+    QString path = existing({"C:\\Qt\\Tools\\QtCreator\\bin"}, "qtcreator.exe");
+    if (!path.isEmpty()) {
+        qtCreator = path;
     }
 
     QStringList regKeys = {
