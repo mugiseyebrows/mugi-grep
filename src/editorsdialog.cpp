@@ -38,6 +38,16 @@ Editor EditorsDialog::editor() const
     return Editor();
 }
 
+void EditorsDialog::showAssociate(bool value)
+{
+    ui->associate->setVisible(value);
+}
+
+bool EditorsDialog::associate() const
+{
+    return ui->associate->isChecked();
+}
+
 void EditorsDialog::on_tableView_doubleClicked(const QModelIndex &index)
 {
     if (!index.isValid()) {

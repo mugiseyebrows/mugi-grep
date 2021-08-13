@@ -44,33 +44,32 @@ int EditorsModel::emptyRow() const {
     return -1;
 }
 
-int EditorsModel::append(const QString &path)
-{
 
+QStringList EditorsModel::extGroup(const QString& ext) {
     static QList<QStringList> groups = {
         {"cpp","hpp","h","cc","cxx"},
         {"js","ts","cjs"},
         {"htm","html"}
     };
+    QStringList result = {ext};
+    for(const QStringList& group: groups) {
+        if (group.contains(ext)) {
+            result = group;
+        }
+    }
+    return result;
+}
 
+int EditorsModel::append(const QString &path)
+{
     int row = emptyRow();
-
     if (path.isEmpty()) {
         setData(index(row,0),".*");
         return row;
     }
-
     QFileInfo info(path);
     QString ext = info.suffix();
-
-    QStringList group_ = {ext};
-
-    for(const QStringList& group: groups) {
-        if (group.contains(ext)) {
-            group_ = group;
-        }
-    }
-
-    setData(index(row,0),group_.join("|"));
+    QStringList group = extGroup(ext);
+    setData(index(row,0),group.join("|"));
     return row;
 }

@@ -16,6 +16,8 @@ public:
     int append(const QString& path);
 
     int emptyRow() const;
+
+    static QStringList extGroup(const QString &ext);
 signals:
     
 public slots:

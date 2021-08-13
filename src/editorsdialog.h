@@ -18,6 +18,10 @@ public:
 
     Editor editor() const;
 
+    void showAssociate(bool value);
+
+    bool associate() const;
+
 private slots:
     void on_tableView_doubleClicked(const QModelIndex &index);
 

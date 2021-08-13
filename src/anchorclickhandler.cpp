@@ -14,6 +14,8 @@
 #include <QScrollBar>
 #include <QClipboard>
 #include <QDir>
+#include "editorsdialog.h"
+#include "regexppath.h"
 
 namespace  {
 
@@ -124,11 +126,15 @@ void AnchorClickHandler::onAnchorClicked(QUrl url) {
 
     QString editor = mSettings->editor(path);
     if (editor.isEmpty()) {
-        onSetEditor(path);
-        editor = mSettings->editor(path);
-        if (!editor.isEmpty()) {
-            onAnchorClicked(url);
-            return;
+        EditorsDialog dialog;
+        if (dialog.exec() == QDialog::Accepted) {
+            Editor editor = dialog.editor();
+            if (!editor.isNull()) {
+                bool permanent = dialog.associate();
+                mSettings->associate(path, editor, permanent);
+                onAnchorClicked(url);
+                return;
+            }
         }
     } else {
         QPair<QString,QStringList> appArgs = toAppArgs(editor,path,line);

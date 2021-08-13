@@ -43,10 +43,15 @@ public:
 
     void setViewOptions(const QJsonObject &value);
     QJsonObject viewOptions() const;
+
+    void associate(const QString &path, const Editor &editor, bool permanent);
+
 protected:
 
     QList<Editor> mEditors;
     QString mError;
+
+    QMap<QString, Editor> mTemporaryEditors;
 
     QJsonArray mSessions;
     QJsonObject mPatterns;

@@ -10,6 +10,7 @@
 #include <QMessageBox>
 #include "jsonhelper.h"
 #include "regexppath.h"
+#include "editorsmodel.h"
 
 #define IS_DEBUG false
 
@@ -126,6 +127,19 @@ void Settings::save()
     qDebug() << "saved to" << path;
 }
 
+void Settings::associate(const QString& path, const Editor& editor, bool permanent) {
+    QFileInfo info(path);
+    QString ext = info.suffix();
+    if (permanent && !ext.isNull()) {
+        QStringList group = EditorsModel::extGroup(ext);
+        Editor editor_ = editor;
+        editor_.setExts(group.join("|"));
+        mEditors.append(editor_);
+    } else {
+        mTemporaryEditors[path] = editor;
+    }
+}
+
 QString Settings::editor(const QString &path) const
 {
 
@@ -140,6 +154,11 @@ QString Settings::editor(const QString &path) const
             return editor.app();
         }
     }
+
+    if (mTemporaryEditors.contains(path)) {
+        return mTemporaryEditors[path].app();
+    }
+
     return QString();
 }
 

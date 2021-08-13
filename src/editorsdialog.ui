@@ -68,6 +68,13 @@
     </widget>
    </item>
    <item>
+    <widget class="QCheckBox" name="associate">
+     <property name="text">
+      <string>associate with file type</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
