@@ -1,34 +1,5 @@
 {
- "bin": [
-  "release\\mugi-grep.exe"
- ],
- "version": "1.5.0",
- "app": "mugi-grep",
- "path": [
-  "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.27.29110\\bin\\HostX64\\x64",
-  "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.16299.0\\x64",
-  "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\x64",
-  "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\\\MSBuild\\Current\\Bin",
-  "C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319",
-  "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\Common7\\IDE\\",
-  "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\Common7\\Tools\\",
-  "C:\\Program Files\\Microsoft VS Code\\bin",
-  "C:\\Program Files\\Windows Kits\\10\\Debuggers\\x64",
-  "C:\\WPy64-3902\\n",
-  "C:\\Qwt-6.1.4\\lib",
-  "C:\\Strawberry\\c\\bin",
-  "C:\\WPy64-3902\\python-3.9.0.amd64\\Scripts",
-  "C:\\WPy64-3902\\python-3.9.0.amd64",
-  "C:\\WPy64-3902",
-  "C:\\MySQL\\lib",
-  "C:\\Qt\\5.15.1\\msvc2019_64\\bin",
-  "C:\\Qt\\Tools\\QtCreator\\bin",
-  "C:\\OpenSSL-Win64\\bin",
-  "C:\\Qt\\Tools\\Ninja",
-  "C:\\Qt\\Tools\\CMake_64\\bin",
-  "C:\\Program Files\\Git\\cmd",
-  "C:\\windows\\system32",
-  "C:\\windows"
- ],
- "plugins_root": "C:\\Qt\\5.15.1\\msvc2019_64\\plugins"
+ "version": "1.6.0",
+ "version-header": "src\\version.h",
+ "app": "mugi-grep"
 }

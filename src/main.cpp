@@ -25,6 +25,8 @@
 #include "style.h"
 #include "linecontext.h"
 
+#define APP_NAME "mugi-grep"
+
 int main(int argc, char *argv[])
 {
     //QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
@@ -43,7 +45,7 @@ int main(int argc, char *argv[])
 
     QApplication a(argc, argv);
     a.setApplicationName(APP_NAME);
-    a.setApplicationVersion(APP_VERSION);
+    a.setApplicationVersion(VERSION);
 
     Settings settings;
 
