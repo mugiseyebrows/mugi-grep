@@ -1,0 +1,14 @@
+def main
+    github_checkout()
+    use(conda)
+    install(mugideploy)
+    install(aqt)
+    install(qt, 5.15.2, win64_mingw81)
+    install(mingw, 8.1.0)
+    qmake
+    mingw32-make release -j4
+    mugideploy collect --app mugi-query --git-version --bin release\mugi-query.exe --plugins odbc mysql sqlite psql --zip
+    github_upload(mugi-query-*-win64, :name=mugi-query-win64)
+    github_release(mugi-query-*-win64.zip)
+
+github-workflow 1
