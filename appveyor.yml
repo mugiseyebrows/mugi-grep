@@ -1,0 +1,28 @@
+version: 1.6.1
+
+artifacts:
+- path: mugi-grep-*.zip
+  name: dist
+- path: vc_redist.x64.exe
+  name: vc_redist
+
+build_script: |
+  echo ==================== set env ==================== 
+  set VERSION=1.6.1
+  call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
+  set PATH=C:\Qt\5.14.2\msvc2017_64\bin;C:\Qt\Tools\QtCreator\bin\jom;C:\Python39-x64;C:\Python39-x64\Scripts;%PATH%
+  python -m pip install mugideploy
+  echo ==================== build mugi-grep ==================== 
+  qmake
+  jom release
+  mugideploy collect --app mugi-grep --version %VERSION% --bin release\mugi-grep.exe --no-vcredist
+  7z a mugi-grep-%VERSION%-win64.zip mugi-grep-%VERSION%-win64
+  curl -L -o vc_redist.x64.exe https://aka.ms/vs/16/release/vc_redist.x64.exe
+
+deploy:
+  description: 'mugi-grep'
+  provider: GitHub
+  auth_token:
+    secure: jBN4dQaXdrv9SsDZGZXuGQJ9LlP+jPRXFq++Sbt+qo1dTFGiTIGemBMEazWuPAxc
+  on:
+    branch: master
