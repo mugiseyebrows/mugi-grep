@@ -128,6 +128,16 @@ void RXCollector::load(RXReplaceInput *input) {
         //}
 }
 
+QStringList filterExistingPaths(const QStringList& paths) {
+    QStringList res;
+    for(const QString& path: qAsConst(paths)) {
+        if (QDir(path).exists()) {
+            res.append(path);
+        }
+    }
+    return res;
+}
+
 void RXCollector::load(QLineEdit *edit)
 {
     /*if (mPaths.isEmpty()) {
@@ -137,7 +147,8 @@ void RXCollector::load(QLineEdit *edit)
     if (completer) {
         completer->deleteLater();
     }
-    QStandardItemModel* model = CompleterHelper::filesToModel(mPaths, edit);
+    mPaths = filterExistingPaths(mPaths);
+    QStandardItemModel* model = CompleterHelper::pathsToModel(mPaths, edit);
     completer = CompleterHelper::modelToCompleter(model, 1, edit);
     CompleterHelper::completerTreeViewPopup(completer, edit);
     edit->setCompleter(completer);
@@ -212,6 +223,7 @@ void RXCollector::deserializePaths(const QJsonArray& arr) {
     foreach (const QJsonValue& v, arr) {
         mPaths << v.toString();
     }
+    mPaths = filterExistingPaths(mPaths);
 }
 
 void RXCollector::deserializePatterns(const QJsonObject &j)
