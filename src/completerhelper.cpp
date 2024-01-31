@@ -6,7 +6,7 @@
 #include <QHeaderView>
 #include "fileio.h"
 
-QStandardItemModel* CompleterHelper::filesToModel(const QStringList& files, QObject* parent) {
+QStandardItemModel* CompleterHelper::pathsToModel(const QStringList& files, QObject* parent) {
     QStandardItemModel* model = new QStandardItemModel(files.size(), 2, parent);
     for(int r=0;r<model->rowCount();r++) {
         model->setData(model->index(r,0), FileIO::nameFromPath(files[r]));

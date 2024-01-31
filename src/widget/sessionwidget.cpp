@@ -752,7 +752,7 @@ void SessionWidget::onListing(QString path, QStringList files) {
         completer->deleteLater();
     }
 
-    QStandardItemModel* model = CompleterHelper::filesToModel(files, open);
+    QStandardItemModel* model = CompleterHelper::pathsToModel(files, open);
     completer = CompleterHelper::modelToCompleter(model, 0, open);
     CompleterHelper::completerTreeViewPopup(completer, open);
 

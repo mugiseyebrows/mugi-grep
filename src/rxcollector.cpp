@@ -15,10 +15,7 @@
 #include <QCompleter>
 #include <QLineEdit>
 #include <QDir>
-
-//#define log(msg)  qDebug() << msg
-
-#define log(msg)
+#include <algorithm>
 
 RXCollector *RXCollector::mInstance = nullptr;
 
@@ -36,18 +33,18 @@ RXCollector *RXCollector::instance()
 
 void RXCollector::collect(const RegExpPath &exp)
 {
-    log("collect filter");
+    //qDebug() << "collect filter";
     mPathPatterns = prependModels(mPathPatterns, exp.patterns());
 }
 
 void RXCollector::collect(const RegExp &exp)
 {
-    log("collect pattern");
+    //qDebug() << "collect pattern";
     mPatterns = prependModels(mPatterns, exp.exps());
 }
 
 void RXCollector::collectReplacement(const QString& exp) {
-    qDebug() << "collect replacement";
+    //qDebug() << "collect replacement";
     QStringList exps;
     exps << exp;
     mReplacements = prependModels(mReplacements, exps);
@@ -65,7 +62,7 @@ void RXCollector::collectPath(const QString& path) {
         return;
     }
     mPaths << path_;
-    qSort(mPaths.begin(),mPaths.end());
+    std::sort(mPaths.begin(),mPaths.end());
 }
 
 QList<QStringListModel *> RXCollector::prependModels(const QList<QStringListModel *> &models, const QStringList &exps) {
@@ -93,7 +90,7 @@ QList<QStringListModel *> RXCollector::prependModels(const QList<QStringListMode
 
 void RXCollector::load(RXPathInput *input)
 {
-    log("load path patterns");
+    //qDebug() << "load path patterns";
     for(int i=0;i<mPathPatterns.size();i++) {
         QComboBox* combo = input->input(i);
         QStringListModel* model = mPathPatterns[i];
@@ -105,7 +102,7 @@ void RXCollector::load(RXPathInput *input)
 }
 
 void RXCollector::load(RXInput *input) {
-    log("load patterns");
+    //qDebug() << "load patterns";
     for(int i=0;i<mPatterns.size();i++) {
         QComboBox* combo = input->input(i);
         QStringListModel* model = mPatterns[i];
@@ -117,7 +114,7 @@ void RXCollector::load(RXInput *input) {
 }
 
 void RXCollector::load(RXReplaceInput *input) {
-    log("load replacements");
+    //qDebug() << "load replacements";
     //for(int i=0;i<mReplacements.size();i++) {
         QComboBox* combo = input->input(0);
         QStringListModel* model = mReplacements[0];
@@ -180,7 +177,6 @@ QList<QStringList> modelsLists_(const QList<QStringListModel *> &models) {
 
 QJsonObject RXCollector::serializePatterns()
 {
-
     QJsonObject j;
     j["path"] = arrayOfArrays(modelsLists_(mPathPatterns));
     j["pattern"] = arrayOfArrays(modelsLists_(mPatterns));
@@ -221,7 +217,7 @@ void RXCollector::deserializePaths(const QJsonArray& arr) {
     }
     mPaths.clear();
     foreach (const QJsonValue& v, arr) {
-        mPaths << v.toString();
+        mPaths.append(v.toString());
     }
     mPaths = filterExistingPaths(mPaths);
 }
@@ -236,17 +232,18 @@ void RXCollector::deserializePatterns(const QJsonObject &j)
 QList<QStringListModel *> RXCollector::models()
 {
     QList<QStringListModel *> result;
-    result << mPathPatterns << mPatterns;
+    result.append(mPathPatterns);
+    result.append(mPatterns);
     return result;
 }
 
 RXCollector::RXCollector()
 {
     for(int i=0;i<4;i++) {
-        mPathPatterns << new QStringListModel();
+        mPathPatterns.append(new QStringListModel());
     }
     for(int i=0;i<2;i++) {
-        mPatterns << new QStringListModel();
+        mPatterns.append(new QStringListModel());
     }
-    mReplacements << new QStringListModel();
+    mReplacements.append(new QStringListModel());
 }
