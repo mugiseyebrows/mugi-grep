@@ -16,14 +16,14 @@ jobs:
         if not exist "C:\Qt\Tools\mingw810_64\bin\gcc.exe" aqt install-tool windows desktop tools_mingw qt.tools.win64_mingw810 -O C:\Qt
         qmake
         mingw32-make release -j4
-        mugideploy collect --app mugi-query --git-version --bin release\mugi-query.exe --plugins odbc mysql sqlite psql --zip
+        mugideploy collect --app mugi-grep --git-version --bin release\mugi-grep.exe --zip
     - name: upload
       uses: actions/upload-artifact@v3
       with:
-        name: mugi-query-win64
-        path: mugi-query-*-win64
+        name: mugi-grep-win64
+        path: mugi-grep-*-win64
     - name: release
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
       with:
-        files: mugi-query-*-win64.zip
+        files: mugi-grep-*-win64.zip
