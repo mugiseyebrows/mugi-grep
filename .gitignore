@@ -20,3 +20,7 @@ node_modules/
 *.h-*
 mugi-grep-1.5.0-win32/
 msvc_make.bat
+build/
+mugi-grep-*-win64/
+Release-msys2/
+CMakeLists.txt.user

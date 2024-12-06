@@ -2,6 +2,7 @@
 #define PARSEPYTHON_H
 
 #include "linecontext.h"
+#include <QMap>
 
 class PythonSymbol {
 public:

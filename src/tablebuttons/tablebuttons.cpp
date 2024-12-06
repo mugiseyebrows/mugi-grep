@@ -9,6 +9,7 @@
 #include <QMouseEvent>
 #include <QSignalMapper>
 #include <QScrollBar>
+#include "toset.h"
 
 TableButtons::TableButtons(QObject *parent) : QObject(parent), mView(nullptr), mVisible(true)
 {
@@ -22,7 +23,7 @@ TableButtons::~TableButtons()
 
 int TableButtons::nextId()
 {
-    QSet<int> keys = mButtons.keys().toSet();
+    QSet<int> keys = toSet(mButtons.keys());
     int i = 0;
     while (keys.contains(i)) {
         i++;

@@ -4,7 +4,6 @@
 #include <QDirIterator>
 #include <QDebug>
 #include <QFileDialog>
-#include <QTextCodec>
 #include <QProgressDialog>
 #include <QThread>
 #include <QDesktopServices>
@@ -23,7 +22,6 @@
 #include <QHeaderView>
 #include <QTreeView>
 
-#include "widget/searchbrowser.h"
 #include "mode.h"
 #include "worker.h"
 #include "searchid.h"

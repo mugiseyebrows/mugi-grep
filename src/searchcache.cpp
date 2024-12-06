@@ -1,16 +1,12 @@
 #include "searchcache.h"
 
 #include <QSet>
-#include <QTextCodec>
 #include <QDebug>
 
 #include "html.h"
 #include "fileio.h"
 
-#include "worker.h"
 #include "utils.h"
-#include "coloredline.h"
-#include "hunk.h"
 
 #include <QStandardPaths>
 #include <QCryptographicHash>
@@ -104,9 +100,8 @@ void searchLines(const QStringList& lines, const QString& path, const QString& r
 
 void searchLines(const QByteArray& bytes, const QString& path, const QString& relativePath,
                         const SearchParams& params, SearchHits& hits, int* lineCount) {
-
-    QTextCodec* codec = QTextCodec::codecForName("UTF-8");
-    QStringList lines = codec->toUnicode(bytes).split(QRegularExpression("\\r?\\n"));
+    QString text = QString::fromUtf8(bytes);
+    QStringList lines = text.split(QRegularExpression("\\r?\\n"));
     *lineCount = lines.size();
     return searchLines(lines, path, relativePath, params, hits);
 }
@@ -152,9 +147,8 @@ QPair<int,int> SearchCache::countMatchedFiles(QString path, RegExpPath filter) {
 
 QString SearchCache::getCachedListingPath(const QString& path) {
     QString appData = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    QTextCodec* codec = QTextCodec::codecForName("UTF-8");
     QCryptographicHash hash(QCryptographicHash::Sha1);
-    hash.addData(codec->fromUnicode(path));
+    hash.addData(path.toUtf8());
     QString name = QString("%1-%2.txt").arg(FileIO::nameFromPath(path)).arg(QString::fromLatin1(hash.result().toHex(0)));
     return QDir(appData).filePath(name);
 }

@@ -22,7 +22,7 @@ RegExpBaseInput::RegExpBaseInput(int inputs, const QStringList& labels, QCheckBo
     } else {
         mCase = new QCheckBox("case");
         QHBoxLayout* layout = new QHBoxLayout();
-        layout->setMargin(0);
+        layout->setContentsMargins(0, 0, 0, 0);
         this->setLayout(layout);
     }
 

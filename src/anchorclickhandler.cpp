@@ -156,11 +156,12 @@ void AnchorClickHandler::onCustomContextMenuRequested(QPoint point) {
         return;
     }
 
-    QPoint coordinateOffset(browser->horizontalScrollBar()->value(),
+    QPoint offset(browser->horizontalScrollBar()->value(),
            browser->verticalScrollBar()->value());
-    QMatrix matrix;
-    matrix.translate(coordinateOffset.x(), coordinateOffset.y());
-    QMenu* menu = browser->createStandardContextMenu(matrix.map(point));
+
+    QPoint adjustedPoint = point + offset;
+
+    QMenu* menu = browser->createStandardContextMenu(adjustedPoint);
 
     QString anchor = browser->anchorAt(point);
 

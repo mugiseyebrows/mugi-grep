@@ -1,7 +1,6 @@
 #include <QApplication>
 #include "widget/mainwindow.h"
 
-#include <QTextCodec>
 
 #include "regexp.h"
 #include "regexppath.h"

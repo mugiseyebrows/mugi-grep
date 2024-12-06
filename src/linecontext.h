@@ -2,6 +2,8 @@
 #define LINECONTEXT_H
 
 #include <QTextStream>
+#include <QString>
+#include <QList>
 
 class LineContextItem {
 public:

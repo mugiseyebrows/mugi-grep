@@ -1,10 +1,13 @@
 @echo off
 rem This file is generated from build.pbat, all edits will be lost
-set PATH=C:\Miniconda3;C:\Miniconda3\Scripts;%USERPROFILE%\Miniconda3;%USERPROFILE%\Miniconda3\Scripts;C:\Qt\5.15.2\mingw81_64\bin;C:\Qt\Tools\mingw810_64\bin;%PATH%
-where mugideploy || pip install mugideploy
-where aqt || pip install aqtinstall
-if not exist "C:\Qt\5.15.2\mingw81_64\bin\qmake.exe" aqt install-qt windows desktop 5.15.2 win64_mingw81 -O C:\Qt
-if not exist "C:\Qt\Tools\mingw810_64\bin\gcc.exe" aqt install-tool windows desktop tools_mingw qt.tools.win64_mingw810 -O C:\Qt
-qmake
-mingw32-make release -j4
-mugideploy collect --app mugi-grep --git-version --bin release\mugi-grep.exe --zip
+set PATH=C:\Program Files\CMake\bin;%LOCALAPPDATA%\Programs\Python\Python313;%LOCALAPPDATA%\Programs\Python\Python313\Scripts;C:\Python313;C:\Python313\Scripts;C:\mingw1120_64\bin;C:\Qt\6.7.3\mingw1120_64\bin;%PATH%
+set BUILD_TYPE=Release
+if /I "%1"=="debug" set BUILD_TYPE=Debug
+echo BUILD_TYPE %BUILD_TYPE%
+pushd %~dp0
+    if not exist "%BUILD_TYPE%" mkdir "%BUILD_TYPE%"
+    pushd %BUILD_TYPE%
+        cmake -G Ninja -D CMAKE_BUILD_TYPE=%BUILD_TYPE% ..
+        cmake --build .
+    popd
+popd

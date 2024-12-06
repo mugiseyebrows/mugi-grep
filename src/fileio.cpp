@@ -2,7 +2,6 @@
 
 #include <QIODevice>
 #include <QFile>
-#include <QTextCodec>
 #include <QFile>
 #include "utils.h"
 #include <QRegularExpression>
@@ -22,8 +21,8 @@ QStringList FileIO::readLines(const QString& path) {
         return QStringList();
     }
     QByteArray bytes = file.readAll();
-    QTextCodec* codec = QTextCodec::codecForName("UTF-8");
-    QStringList lines = codec->toUnicode(bytes).split(QRegularExpression("\\r?\\n"));
+    auto text = QString::fromUtf8(bytes);
+    QStringList lines = text.split(QRegularExpression("\\r?\\n"));
     return lines;
 
     /*bool binary, readOk, tooBig;
@@ -43,9 +42,7 @@ bool FileIO::writeLines(const QString& path, const QStringList& lines) {
     if (!file.open(QIODevice::WriteOnly)) {
         return false;
     }
-    QTextCodec* codec = QTextCodec::codecForName("UTF-8");
-    QByteArray data = codec->fromUnicode(lines.join("\n"));
-    file.write(data);
+    file.write(lines.join("\n").toUtf8());
     return true;
 }
 

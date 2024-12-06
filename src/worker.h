@@ -8,7 +8,6 @@
 
 #include "regexp.h"
 #include "regexppath.h"
-#include <QTextCodec>
 #include <QDateTime>
 
 #include <QDirIterator>

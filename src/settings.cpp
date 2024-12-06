@@ -12,15 +12,8 @@
 #include "regexppath.h"
 #include "editorsmodel.h"
 
-#define IS_DEBUG false
-
 void Settings::load()
 {
-
-    if (IS_DEBUG) {
-        return;
-    }
-
     QString path = this->settingsPath();
 
     if (!QFile(path).exists()) {
@@ -104,10 +97,6 @@ void Settings::setViewOptions(const QJsonObject &value) {
 
 void Settings::save()
 {
-    if (IS_DEBUG) {
-        return;
-    }
-
     QJsonObject settings;
 
     QJsonArray editors;

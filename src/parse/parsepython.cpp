@@ -2,7 +2,6 @@
 
 #include <QRegularExpression>
 #include <QFile>
-#include <QTextCodec>
 #include <QDebug>
 
 ParsePython::ParsePython()
@@ -19,7 +18,7 @@ QList<LineContextItem> ParsePython::parse(const QString& path)
     }
 
     QTextStream stream(&file);
-    stream.setCodec(QTextCodec::codecForName("UTF-8"));
+    stream.setEncoding(QStringConverter::Utf8);
 
     QRegularExpression class_("(\\s*)class\\s+([a-zA-Z_][a-zA-Z0-9_]*)", QRegularExpression::MultilineOption);
     QRegularExpression method("(\\s*)def\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s*[(](.*)[)]",

@@ -1,0 +1,35 @@
+name: main
+on:
+  release:
+    types:
+    - created
+jobs:
+  main:
+    runs-on: windows-latest
+    steps:
+    - name: checkout
+      uses: actions/checkout@v4
+    - name: setup-msys2
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: ucrt64
+        release: false
+        install: mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-qt6-base
+    - name: main
+      shell: cmd
+      run: |
+        set PATH=C:\msys64\ucrt64\bin;%LOCALAPPDATA%\Programs\Python\Python313;%LOCALAPPDATA%\Programs\Python\Python313\Scripts;C:\Python313;C:\Python313\Scripts;C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja;C:\Program Files (x86)\Android\android-sdk\cmake\3.22.1\bin;C:\Miniconda;C:\Miniconda\Scripts;%PATH%
+        where mugideploy > NUL 2>&1 || pip install mugideploy
+        where ninja > NUL 2>&1 || pip install ninja
+        call build-msys2
+        mugideploy collect --bin Release-msys2\mugi-grep.exe --zip
+    - name: upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: mugi-grep
+        path: mugi-grep-*-win64.zip
+    - name: release
+      uses: softprops/action-gh-release@v2
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: mugi-grep-*-win64.zip

@@ -1,0 +1,13 @@
+github_checkout()
+github_setup_msys2(mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-qt6-base, :m=ucrt64)
+include(env-msys2)
+use(python, 3.13)
+use(conda)
+install(mugideploy)
+install(ninja)
+call build-msys2
+mugideploy collect --bin Release-msys2\mugi-grep.exe --zip
+github_upload(mugi-grep-*-win64.zip, :n=mugi-grep)
+github_release(mugi-grep-*-win64.zip)
+github-workflow 1
+github-on release

@@ -1,0 +1,12 @@
+def main
+    include(env-msys2)
+    set BUILD_TYPE=Release
+    if /I "%1"=="debug" set BUILD_TYPE=Debug
+    echo BUILD_TYPE %BUILD_TYPE%
+    pushd_cd()
+        mkdir(%BUILD_TYPE%-msys2)
+        pushd %BUILD_TYPE%-msys2
+            cmake -G Ninja -D CMAKE_BUILD_TYPE=%BUILD_TYPE% -D CMAKE_PREFIX_PATH=C:/msys64/ucrt64;C:/msys64/ucrt64/include/qwt-qt6 ..
+            cmake --build .
+        popd
+    popd

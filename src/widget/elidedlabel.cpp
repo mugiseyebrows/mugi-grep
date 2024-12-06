@@ -37,7 +37,7 @@ QSize ElidedLabel::minimumSizeHint() const
 QSize ElidedLabel::sizeHint() const
 {
     const QFontMetrics& fontMetrics = this->fontMetrics();
-    QSize size = QSize(fontMetrics.width(mText) ,fontMetrics.lineSpacing());
+    QSize size = QSize(fontMetrics.horizontalAdvance(mText) ,fontMetrics.lineSpacing());
     //qDebug() << "sizeHint" << size;
     return size;
 }

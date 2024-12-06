@@ -1,14 +1,12 @@
 def main
-    github_checkout()
-    use(conda)
-    install(mugideploy)
-    install(aqt)
-    install(qt, 5.15.2, win64_mingw81)
-    install(mingw, 8.1.0)
-    qmake
-    mingw32-make release -j4
-    mugideploy collect --app mugi-grep --git-version --bin release\mugi-grep.exe --zip
-    github_upload(mugi-grep-*-win64, :name=mugi-grep-win64)
-    github_release(mugi-grep-*-win64.zip)
-
-github-workflow 1
+    include(env)
+    set BUILD_TYPE=Release
+    if /I "%1"=="debug" set BUILD_TYPE=Debug
+    echo BUILD_TYPE %BUILD_TYPE%
+    pushd_cd()
+        mkdir(%BUILD_TYPE%)
+        pushd %BUILD_TYPE%
+            cmake -G Ninja -D CMAKE_BUILD_TYPE=%BUILD_TYPE% ..
+            cmake --build .
+        popd
+    popd

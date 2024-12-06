@@ -127,7 +127,7 @@ void RXCollector::load(RXReplaceInput *input) {
 
 QStringList filterExistingPaths(const QStringList& paths) {
     QStringList res;
-    for(const QString& path: qAsConst(paths)) {
+    for(const QString& path: std::as_const(paths)) {
         if (QDir(path).exists()) {
             res.append(path);
         }

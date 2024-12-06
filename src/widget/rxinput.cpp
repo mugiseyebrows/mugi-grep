@@ -1,7 +1,6 @@
 #include "widget/rxinput.h"
 #include "ui_rxinput.h"
 #include <QLineEdit>
-#include <QDesktopWidget>
 #include <QScreen>
 #include <QDebug>
 

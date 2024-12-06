@@ -1,8 +1,5 @@
 #ifndef SEARCHBROWSER_H
 #define SEARCHBROWSER_H
-#include "regexp.h"
-#include "regexppath.h"
-#include "searchparams.h"
 #include <QDate>
 #include <QDateTime>
 #include <QString>

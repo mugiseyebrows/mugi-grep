@@ -1,0 +1,6 @@
+# mingw-w64-ucrt-x86_64-qt6-base
+# mingw-w64-ucrt-x86_64-gcc
+add_path(C:\msys64\ucrt64\bin)
+use(cmake)
+use(python, 3.13)
+use(ninja)

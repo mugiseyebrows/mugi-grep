@@ -20,9 +20,6 @@
 #include <QJsonArray>
 #include "anchorclickhandler.h"
 #include "completermodelmanager.h"
-#include "editordetector.h"
-
-#define IS_DEBUG false
 
 MainWindow::MainWindow(Settings *settings, QWidget *parent) :
     QMainWindow(parent),
@@ -39,19 +36,7 @@ MainWindow::MainWindow(Settings *settings, QWidget *parent) :
 
     setWindowTitle(QString("%1 %2").arg(qApp->applicationName()).arg(qApp->applicationVersion()));
 
-    if (IS_DEBUG) {
-        QJsonObject obj;
-        QString path = "D:\\w\\untitled1";
-        //path = "C:\\Qt\\5.15.1\\Src\\qtbase";
-        obj["path"] = path;
-        addSession(obj);
-
-        path = "D:\\dev\\cpp-compile-on-save";
-        obj["path"] = path;
-        addSession(obj);
-
-        /*QList<Editor> editors = EditorDetector::detect();
-        qDebug() << "1";*/
+    if (0) {
 
     } else {
 
@@ -97,7 +82,7 @@ void MainWindow::closeEvent(QCloseEvent * e)
         }
     }
 
-    if (IS_DEBUG) {
+    if (0) {
 
     } else {
         mSettings->setSessions(serializeSessions());
@@ -549,9 +534,7 @@ void dumpPalette(const QString& fileName) {
                                         QPalette::NoRole,
                                         QPalette::ToolTipBase,
                                         QPalette::ToolTipText,
-#ifdef HAS_PLACEHOLDER_TEXT
                                         QPalette::PlaceholderText
-#endif
                                        };
 
     QStringList roles_ = {
@@ -575,9 +558,7 @@ void dumpPalette(const QString& fileName) {
         "QPalette::NoRole",
         "QPalette::ToolTipBase",
         "QPalette::ToolTipText",
-#ifdef HAS_PLACEHOLDER_TEXT
         "QPalette::PlaceholderText"
-#endif
     };
 
     QPalette palette = qApp->palette();
