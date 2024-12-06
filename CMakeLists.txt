@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(mugi-grep VERSION 1.6.1 LANGUAGES CXX)
+project(mugi-grep VERSION 1.6.2 LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
