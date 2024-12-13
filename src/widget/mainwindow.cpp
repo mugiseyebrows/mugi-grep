@@ -306,11 +306,14 @@ void MainWindow::on_tabs_currentChanged(int index)
 {
     SessionWidget* session = tab(index);
     if (!session) {
-        qDebug() << "not SessionWidget at index" << index << ui->tabs->widget(index);
         return;
     }
     session->loadCollected();
     QTimer::singleShot(0,[=](){
+        SessionWidget* session = tab(index);
+        if (!session) {
+            return;
+        }
         session->options()->fixLayout();
     });
     session->setViewOptions(mViewOptions);
