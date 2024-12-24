@@ -1,5 +1,6 @@
 def main
     include(env)
+    install(ninja)
     set BUILD_TYPE=Release
     if /I "%1"=="debug" set BUILD_TYPE=Debug
     echo BUILD_TYPE %BUILD_TYPE%
