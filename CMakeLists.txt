@@ -90,6 +90,7 @@ qt_add_executable(mugi-grep WIN32 MACOSX_BUNDLE
     src/widget/settingsdialog.cpp src/widget/settingsdialog.h src/widget/settingsdialog.ui
     src/worker.cpp src/worker.h
     src/toset.h src/toset.cpp
+    src/mugi-grep.rc
 )
 target_include_directories(mugi-grep PUBLIC
     src
