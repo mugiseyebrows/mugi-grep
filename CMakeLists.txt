@@ -103,3 +103,4 @@ target_link_libraries(mugi-grep PUBLIC
     Qt::Gui
     Qt::Widgets
 )
+install(TARGETS mugi-grep)
