@@ -10,56 +10,62 @@ Interactive and visual `grep` and `sed` tool.
 
 # Build
 
-## Windows MSVC (Visual Studio)
+## Windows Visual Studio
 
-### a) Build in shell
-
-1) Install qt5 from [www.qt.io](https://www.qt.io/download) 
-2) Clone sources with `Git Bash`  `(Start menu: Git -> Git Bash)`
+1) Install qt6
+2) Clone sources
 
 ```bash
 git clone git@github.com:mugiseyebrows/mugi-grep.git
 ```
 
 3) Open `x64 Native Tools Command Prompt`
-4) Run `C:\qt\5.15.1\msvc2019_64\bin\qtenv2.bat`
-5) Navigate to sources `cd %USERPROFILE%\mugi-grep`
-6) Build 
+5) Navigate to sources `cd "%USERPROFILE%\mugi-grep"`
+6) Create `build` directory and build
 
 ```bash
-qmake && make release
+mkdir build
+cd build
+cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
+cmake --build .
 ```
 
-### b) Build in qtcreator
+## Windows MinGW
 
-1) Install qt5 from [www.qt.io](https://www.qt.io/download) 
-2) Clone sources with `Git Bash`  `(Start menu: Git -> Git Bash)`
+1) Install qt6
+2) Clone sources
 
 ```bash
 git clone git@github.com:mugiseyebrows/mugi-grep.git
 ```
 
-3) Open QtCreator `(Start menu: Qt -> QtCreator)`
-4) Configure kits `(Top menu: Tools -> Options -> Kits)`
-5) Open `mugi-grep.pro` file `(Top menu: File -> Open File Or Project)`
-6) Build `(Top menu: Build -> Build All Projects)`
+3) Add gcc, cmake and ninja to `%PATH%`
+4) Create `build` directory and build
 
-
-
+```bash
+mkdir build
+cd build
+cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
+cmake --build .
+```
 
 ## Linux (Ubuntu) GCC 
 
 ```bash
 # install toolchain and qt
-sudo apt install build-essential qtbase5-dev git
+sudo apt update
+sudo apt install build-essential qt6-base-dev ninja-build cmake git
 # clone sources
 git clone git@github.com:mugiseyebrows/mugi-grep.git
 cd mugi-grep
-qmake -qt=5
-make
-make clean
-sudo make install # installs to /usr/local/bin
-python desktop.py # copies icons, creates desktop file
+mkdir build
+cd build
+cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
+cmake --build .
+# installs to /usr/local/bin
+sudo cmake --install .
+# creates desktop file, copies icons
+python3 desktop.py 
 ```
 
 # Binaries
