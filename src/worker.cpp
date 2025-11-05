@@ -4,6 +4,7 @@
 #include "countfilesparams.h"
 
 #include <QTimer>
+#include <QThread>
 
 Worker::Worker(QObject *parent) :
     QObject(parent)
@@ -12,7 +13,9 @@ Worker::Worker(QObject *parent) :
 
 void Worker::onSearch(SearchParams params)
 {
-    mCache.add(params);
+    //qDebug() << "onSearch" << QThread::currentThreadId();
+
+    mCache.begin(params);
     SearchHits hits(params.pattern());
     SearchNameHits nameHits(params.pattern());
     emit found(params.id(), hits, nameHits);
@@ -55,7 +58,7 @@ void Worker::onSearchMore(int id)
     QPair<SearchHits,SearchNameHits> hits = mCache.search(id);
     emit found(id,hits.first, hits.second);
     if (mCache.isFinished(id)) {
-        mCache.finish(id);
+        mCache.end(id);
     }
 }
 

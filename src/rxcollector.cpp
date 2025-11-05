@@ -37,7 +37,7 @@ void RXCollector::collect(const RegExpPath &exp)
     mPathPatterns = prependModels(mPathPatterns, exp.patterns());
 }
 
-void RXCollector::collect(const RegExp &exp)
+void RXCollector::collect(const RegExpPair &exp)
 {
     //qDebug() << "collect pattern";
     mPatterns = prependModels(mPatterns, exp.exps());

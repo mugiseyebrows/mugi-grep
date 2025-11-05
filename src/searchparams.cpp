@@ -15,10 +15,10 @@ QString SearchParams::path() const {
 void SearchParams::setPath(const QString& value) {
     mPath = value;
 }
-RegExp SearchParams::pattern() const {
+RegExpPair SearchParams::pattern() const {
     return mPattern;
 }
-void SearchParams::setPattern(const RegExp& value) {
+void SearchParams::setPattern(const RegExpPair& value) {
     mPattern = value;
 }
 RegExpPath SearchParams::filter() const {

@@ -2,7 +2,7 @@
 #ifndef SEARCHNAMEHITS_H
 #define SEARCHNAMEHITS_H
 class QString;
-#include "regexp.h"
+#include "regexppair.h"
 #include <QMetaType>
 #include <QStringList>
 
@@ -10,17 +10,17 @@ class SearchNameHits {
 
 public:
     SearchNameHits();
-    SearchNameHits(const RegExp& pattern);
+    SearchNameHits(const RegExpPair& pattern);
     void append(const SearchNameHits& hits);
     void append(const QString& path);
     void clear();
-    RegExp pattern() const;
-    void setPattern(const RegExp& value);
+    RegExpPair pattern() const;
+    void setPattern(const RegExpPair& value);
     QStringList hits() const;
     void setHits(const QStringList& value);
 
 protected:
-    RegExp mPattern;
+    RegExpPair mPattern;
     QStringList mHits;
 };
 

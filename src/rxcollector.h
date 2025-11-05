@@ -2,7 +2,7 @@
 #define RXCOLLECTOR_H
 
 #include "regexppath.h"
-#include "regexp.h"
+#include "regexppair.h"
 
 class RXInput;
 class RXPathInput;
@@ -16,7 +16,7 @@ class RXCollector
 public:
     static RXCollector* instance();
     void collect(const RegExpPath& exp);
-    void collect(const RegExp& exp);
+    void collect(const RegExpPair& exp);
     void collectReplacement(const QString &exp);
     void collectPath(const QString &exp);
 

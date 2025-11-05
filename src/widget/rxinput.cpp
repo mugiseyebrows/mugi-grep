@@ -40,11 +40,14 @@ RXInput::~RXInput()
     delete ui;
 }
 
-RegExp RXInput::value() const {
-    return RegExp(exps(),ui->matchCase->isChecked());
+RegExpPair RXInput::value() const {
+    bool caseSensitive = ui->matchCase->isChecked();
+    bool multiline = ui->multiline->isChecked();
+    bool dotAll = multiline;
+    return RegExpPair(ui->include->currentText(), ui->exclude->currentText(), caseSensitive, dotAll, multiline);
 }
 
-void RXInput::setValue(const RegExp &value) {
+void RXInput::setValue(const RegExpPair &value) {
     setExps(value.exps());
     ui->matchCase->setChecked(value.case_());
 }

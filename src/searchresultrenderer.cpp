@@ -392,7 +392,7 @@ QString rtrimed(const QString& line) {
 
 
 void SearchResultRenderer::appendSearch(const SearchHits& hits) {
-    RegExp pattern = hits.pattern();
+    RegExpPair pattern = hits.pattern();
 
     DisplayOptions options = mTab->displayOptions();
 
@@ -624,7 +624,7 @@ void SearchResultRenderer::appendPreview(const SearchHits& hits) {
 
     QStringList res;
 
-    RegExp exp = hits.pattern();
+    RegExpPair exp = hits.pattern();
 
     RegExpReplacement replacement__ = mTab->params().replacement();
 
@@ -770,7 +770,7 @@ ReplaceParams SearchResultRenderer::replaceParams(bool rename)
 
     QVariantList replacement_ = tokenize(replacement);
 
-    RegExp exp = hits.pattern();
+    RegExpPair exp = hits.pattern();
 
     QRegularExpression rx = exp.includeExp();
 

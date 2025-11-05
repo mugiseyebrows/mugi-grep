@@ -30,6 +30,10 @@ public:
     LineContext context() const;
     void setContext(const LineContext& value);
 
+    bool isEmpty() const {
+        return mHits.isEmpty();
+    }
+
 protected:
     QString mPath;
     QString mRelativePath;

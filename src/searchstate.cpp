@@ -1,4 +1,4 @@
-#include "searchcache.h"
+#include "searchstate.h"
 
 #include <QSet>
 #include <QDebug>
@@ -7,6 +7,7 @@
 #include "fileio.h"
 
 #include "utils.h"
+#include "mugigrep.h"
 
 #include <QStandardPaths>
 #include <QCryptographicHash>
@@ -37,16 +38,7 @@ QStringList fileNameLineNumber(bool showFileName, bool showLineNumber, const QSt
     return cols;
 }
 
-QList<int> getMatched(const QStringList& lines, const RegExp& exp)
-{
-    QList<int> matched;
-    for(int i=0;i<lines.size();i++) {
-        if (exp.match(lines[i])) {
-            matched << i;
-        }
-    }
-    return matched;
-}
+
 
 QSet<int> getSiblings(const QList<int>& matched, int linesBefore, int linesAfter) {
     QSet<int> siblings;
@@ -89,7 +81,7 @@ QStringList searchBinary(const QStringList& lines, const QString& path, const QS
 void searchLines(const QStringList& lines, const QString& path, const QString& relativePath,
                         const SearchParams& params, SearchHits& hits) {
     QStringList res;
-    RegExp exp = params.pattern();
+    RegExpPair exp = params.pattern();
     QList<int> matched = getMatched(lines, exp);
     if (matched.isEmpty()) {
         return;
@@ -126,11 +118,11 @@ QStringList searchBinary(const QByteArray& bytes, const QString& path, const QSt
 }
 #endif
 
-SearchCache::SearchCache() {
+SearchState::SearchState() {
 
 }
 
-QPair<int,int> SearchCache::countMatchedFiles(QString path, RegExpPath filter) {
+QPair<int,int> SearchState::countMatchedFiles(QString path, RegExpPath filter) {
 
     QMutexLocker locked(&mMutex);
     //qDebug() << filter << notBinary;
@@ -145,7 +137,7 @@ QPair<int,int> SearchCache::countMatchedFiles(QString path, RegExpPath filter) {
     return QPair<int,int>(files.size(),allFiles.size());
 }
 
-QString SearchCache::getCachedListingPath(const QString& path) {
+QString SearchState::getCachedListingPath(const QString& path) {
     QString appData = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     QCryptographicHash hash(QCryptographicHash::Sha1);
     hash.addData(path.toUtf8());
@@ -153,7 +145,7 @@ QString SearchCache::getCachedListingPath(const QString& path) {
     return QDir(appData).filePath(name);
 }
 
-QStringList SearchCache::getListing(QString path, bool cacheFileList) {
+QStringList SearchState::getListing(QString path, bool cacheFileList) {
     // todo skip directory entirely if filter matches if not cacheFileList
     QString path_ = QDir(path).absolutePath();
     QStringList allFiles;
@@ -191,21 +183,21 @@ QStringList SearchCache::getListing(QString path, bool cacheFileList) {
     return allFiles;
 }
 
-QStringList SearchCache::filterFiles(const QStringList& allFiles, RegExpPath filter, int* filesFiltered, int* dirsFiltered) {
+QStringList SearchState::filterFiles(const QStringList& allFiles, RegExpPath filter, int* filesFiltered, int* dirsFiltered) {
 
     int filesFiltered_ = 0;
     int dirsFiltered_ = 0;
 
     QStringList files;
 
-    bool notBinary = filter.notBinary();
+    bool binary = filter.binary();
 
     foreach(const QString& path, allFiles) {
         if (path.contains("/.git/")) { // todo skip settings
             filesFiltered_++;
             continue;
         }
-        if (notBinary && Utils::isBinExt(path)) {
+        if (!binary && Utils::isBinExt(path)) {
             filesFiltered_++;
             continue;
         }
@@ -223,7 +215,7 @@ QStringList SearchCache::filterFiles(const QStringList& allFiles, RegExpPath fil
 }
 
 
-void SearchCache::add(SearchParams params) {
+void SearchState::begin(SearchParams params) {
 
     QMutexLocker locked(&mMutex);
 
@@ -245,7 +237,7 @@ void SearchCache::add(SearchParams params) {
     //mReplacements.insert(searchId,QList<Replacement>());
 }
 
-void SearchCache::finish(int searchId) {
+void SearchState::end(int searchId) {
 
     QMutexLocker locked(&mMutex);
     mSearchData.remove(searchId);
@@ -259,7 +251,7 @@ bool SearchCache::isPreview(int searchId) {
 }
 #endif
 
-bool SearchCache::isFinished(int searchId) {
+bool SearchState::isFinished(int searchId) {
     QMutexLocker locked(&mMutex);
     if (!mSearchData.contains(searchId) || !mSearchParams.contains(searchId)) {
         return true;
@@ -268,7 +260,10 @@ bool SearchCache::isFinished(int searchId) {
     return data.filesComplete() >= data.filesSize();
 }
 
-QPair<SearchHits,SearchNameHits> SearchCache::search(int searchId) {
+#define MEM_LIM 500000000ull
+#define CHUNK_SIZE 50000000ull
+
+QPair<SearchHits,SearchNameHits> SearchState::search(int searchId) {
     QMutexLocker locked(&mMutex);
 
     if (!mSearchParams.contains(searchId) || !mSearchData.contains(searchId)) {
@@ -280,27 +275,63 @@ QPair<SearchHits,SearchNameHits> SearchCache::search(int searchId) {
     SearchData& data = mSearchData[searchId];
     //QList<Replacement>& replacements = mReplacements[searchId];
 
-    bool notBinary = params.filter().notBinary();
+    bool binary = params.filter().binary();
 
     SearchHits hits(params.pattern());
     hits.setFiltered(data.filesFiltered());
 
     //int lim = qMin(sd.complete + 100, sd.files.size());
 
-    int lineCount = 0;
+    //int lineCount = 0;
     int fileCount = 0;
 
     SearchNameHits nameHits(params.pattern());
 
+    const qint64 memLim = 100000000ull; // 100 Mb
+    const qint64 bufSize = 10000000ull; // 10 Mb
+
+    qint64 bytesRead = 0;
+
     for (int i=data.filesComplete();i<data.filesSize();i++) {
+
         QString path = data.file(i);
 
-        QString name = FileIO::nameFromPath(path);
+        qDebug() << "grep" << i << "th file" << path;
 
+        QString name = QFileInfo(path).fileName();
+
+        QString relPath = Utils::relPath(path,params.path());
+
+        // do we need this?
         if (params.pattern().match(name)) {
             nameHits.append(path);
         }
 
+        qint64 bytesRead1 = 0;
+
+        SearchHit hit;
+        if (params.pattern().multiline()) {
+            hit = searchMultiline(path, relPath, params.pattern(), binary, memLim, bufSize, &bytesRead1);
+        } else {
+            hit = searchSingleline(path, relPath, params.pattern(), binary, memLim, bufSize, &bytesRead1);
+        }
+        if (!hit.isEmpty()) {
+            hits.append(hit);
+            qDebug() << hit.hits().size() << "lines matched";
+        }
+        bytesRead += bytesRead1;
+
+        qDebug() << "bytesRead" << bytesRead;
+
+        fileCount += 1;
+        data.setFilesComplete(i + 1);
+
+        if (fileCount > 10 || bytesRead > 1000000ull) {
+            hits.setLast(relPath);
+            break;
+        }
+
+#if 0
         bool binary;
         bool readOk;
         bool tooBig;
@@ -346,11 +377,12 @@ QPair<SearchHits,SearchNameHits> SearchCache::search(int searchId) {
             hits.setTotal(data.filesSize());
             return QPair<SearchHits,SearchNameHits>(hits, nameHits);
         }
+#endif
     }
 
     hits.setComplete(data.filesComplete());
     hits.setTotal(data.filesSize());
-    return QPair<SearchHits,SearchNameHits>(hits,nameHits);
+    return QPair<SearchHits,SearchNameHits>(hits, nameHits);
 }
 
 #if 0

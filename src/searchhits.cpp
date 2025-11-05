@@ -3,13 +3,13 @@
 
 SearchHits::SearchHits() : mTotal(-1), mComplete(-1), mFiltered(-1) {
 }
-SearchHits::SearchHits(const RegExp& pattern, const QList<SearchHit>& hits)
+SearchHits::SearchHits(const RegExpPair& pattern, const QList<SearchHit>& hits)
     : mPattern(pattern), mHits(hits), mTotal(-1), mComplete(-1), mFiltered(-1) {
 }
-RegExp SearchHits::pattern() const {
+RegExpPair SearchHits::pattern() const {
     return mPattern;
 }
-void SearchHits::setPattern(const RegExp& value) {
+void SearchHits::setPattern(const RegExpPair& value) {
     mPattern = value;
 }
 QList<SearchHit> SearchHits::hits() const {

@@ -2,7 +2,7 @@
 #define RXINPUT_H
 
 #include <QWidget>
-#include "regexp.h"
+#include "regexppair.h"
 
 namespace Ui {
 class RXInput;
@@ -19,8 +19,8 @@ public:
     explicit RXInput(QWidget *parent = 0);
     ~RXInput();
 
-    RegExp value() const;
-    void setValue(const RegExp &value);
+    RegExpPair value() const;
+    void setValue(const RegExpPair &value);
 
     QWidgetList widgets() const;
 
@@ -31,9 +31,9 @@ protected:
 
 signals:
     void returnPressed();
-    //void textChanged(RegExp);
+    //void textChanged(RegExpPair);
     //void caseClicked(bool);
-    void valueChanged(RegExp);
+    void valueChanged(RegExpPair);
 
 protected slots:
     void onClearValidation();

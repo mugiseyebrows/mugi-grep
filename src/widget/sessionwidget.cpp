@@ -56,13 +56,15 @@ SessionWidget::SessionWidget(Settings *settings, QWidget *parent) :
     mWorker = new Worker();
     mThread = new QThread();
 
+    qDebug() << "SessionWidget" << QThread::currentThreadId();
+
+    connect(this, &SessionWidget::search, mWorker, &Worker::onSearch);
+    connect(this, &SessionWidget::searchMore, mWorker, &Worker::onSearchMore);
+    connect(mWorker, &Worker::found, this, &SessionWidget::onFound);
+
     mWorker->moveToThread(mThread);
 
-    connect(this,SIGNAL(search(SearchParams)),mWorker,SLOT(onSearch(SearchParams)));
-    connect(this,SIGNAL(searchMore(int)),mWorker,SLOT(onSearchMore(int)));
-    connect(mWorker,SIGNAL(found(int,SearchHits,SearchNameHits)),this,SLOT(onFound(int,SearchHits,SearchNameHits)));
-
-    connect(ui->options,SIGNAL(patternChanged(RegExp)),this,SLOT(onPatternChanged(RegExp)));
+    connect(ui->options,SIGNAL(patternChanged(RegExpPair)),this,SLOT(onPatternChanged(RegExpPair)));
     connect(ui->options,SIGNAL(filterChanged(RegExpPath)),this,SLOT(onFilterChanged(RegExpPath)));
     connect(ui->options,SIGNAL(replacementChanged(RegExpReplacement)),this,SLOT(onReplacementChanged(RegExpReplacement)));
     connect(ui->options,SIGNAL(pathChanged(QString)),this,SLOT(onPathChanged(QString)));
@@ -230,7 +232,7 @@ void SessionWidget::copyToNewTab() {
 
 }
 
-void SessionWidget::onPatternChanged(RegExp value) {
+void SessionWidget::onPatternChanged(RegExpPair value) {
     if (!mListenOptions) {
         return;
     }

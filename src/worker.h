@@ -6,14 +6,14 @@
 #include <QMutexLocker>
 #include <QDebug>
 
-#include "regexp.h"
+#include "regexppair.h"
 #include "regexppath.h"
 #include <QDateTime>
 
 #include <QDirIterator>
 #include "searchparams.h"
 
-#include "searchcache.h"
+#include "searchstate.h"
 #include "searchhits.h"
 #include "countfilesparams.h"
 #include "getlistingparams.h"
@@ -38,7 +38,7 @@ public:
 
 protected:
 
-    SearchCache mCache;
+    SearchState mCache;
 
     void onMore(int id, int mode);
 

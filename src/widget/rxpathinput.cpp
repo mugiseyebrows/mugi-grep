@@ -28,7 +28,7 @@ RXPathInput::RXPathInput(QWidget *parent) :
     }
 
     connect(ui->matchCase,SIGNAL(clicked(bool)),this,SLOT(onValueChanged()));
-    connect(ui->notBinary,SIGNAL(clicked(bool)),this,SLOT(onValueChanged()));
+    connect(ui->binary,SIGNAL(clicked(bool)),this,SLOT(onValueChanged()));
 }
 
 RXPathInput::~RXPathInput()
@@ -37,21 +37,21 @@ RXPathInput::~RXPathInput()
 }
 
 QWidgetList RXPathInput::widgets() const {
-    return QWidgetList {ui->nameInclude, ui->extInclude, ui->nameExclude, ui->extExclude, ui->matchCase, ui->notBinary};
+    return QWidgetList {ui->nameInclude, ui->extInclude, ui->nameExclude, ui->extExclude, ui->matchCase, ui->binary};
 }
 
 RegExpPath RXPathInput::value() const {
-    return RegExpPath(exps(),ui->matchCase->isChecked(),ui->notBinary->isChecked());
+    return RegExpPath(exps(),ui->matchCase->isChecked(),ui->binary->isChecked());
 }
 
-QCheckBox* RXPathInput::notBinary() {
-    return ui->notBinary;
+QCheckBox* RXPathInput::binary() {
+    return ui->binary;
 }
 
 void RXPathInput::setValue(const RegExpPath &value) {
     setExps(value.patterns());
     ui->matchCase->setChecked(value.case_());
-    ui->notBinary->setChecked(value.notBinary());
+    ui->binary->setChecked(value.binary());
 }
 
 void RXPathInput::enableTextChanged(bool active)

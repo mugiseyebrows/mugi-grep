@@ -26,7 +26,7 @@ SearchOptionsWidget::SearchOptionsWidget(QWidget *parent) :
     ui->setupUi(this);
     ui->replace->setEnabled(false);
 
-    connect(ui->pattern,SIGNAL(valueChanged(RegExp)),this,SIGNAL(patternChanged(RegExp)));
+    connect(ui->pattern, &RXInput::valueChanged, this, &SearchOptionsWidget::patternChanged);
     connect(ui->filter,SIGNAL(valueChanged(RegExpPath)),this,SIGNAL(filterChanged(RegExpPath)));
     connect(ui->path,SIGNAL(textChanged(QString)),this,SIGNAL(pathChanged(QString)));
     connect(ui->replacement,SIGNAL(valueChanged(RegExpReplacement)),this,SIGNAL(replacementChanged(RegExpReplacement)));
@@ -71,10 +71,10 @@ SearchOptionsWidget::~SearchOptionsWidget()
 }
 
 void SearchOptionsWidget::fixLayout() {
-    QRect rect = ui->filter->matchCaseCheckBox()->geometry();
+    /*QRect rect = ui->filter->matchCaseCheckBox()->geometry();
     ui->path->checkBox()->setFixedWidth(rect.width());
-    QCheckBox* checkBox = ui->filter->notBinary();
-    ui->gridLayout->addWidget(checkBox, 1, 2);
+    QCheckBox* checkBox = ui->filter->binary();
+    ui->gridLayout->addWidget(checkBox, 1, 2);*/
 }
 
 #if 0
@@ -305,7 +305,7 @@ void SearchOptionsWidget::setViewOptions(const ViewOptions &options)
     mViewOptions = options;
     ui->pattern->setChildVisible(options.search(), options.search());
     ui->filter->setVisible(options.filter());
-    ui->filter->notBinary()->setVisible(options.filter());
+    ui->filter->binary()->setVisible(options.filter());
     ui->filterLabel->setVisible(options.filter());
     ui->path->checkBox()->setVisible(options.cache());
 }
@@ -483,7 +483,7 @@ bool SearchOptionsWidget::notBinary() const {
     return ui->notBinary->isChecked();
 }*/
 
-void SearchOptionsWidget::setPattern(const RegExp& value)
+void SearchOptionsWidget::setPattern(const RegExpPair& value)
 {
     ui->pattern->setValue(value);
 }

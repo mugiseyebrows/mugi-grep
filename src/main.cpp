@@ -2,11 +2,11 @@
 #include "widget/mainwindow.h"
 
 
-#include "regexp.h"
+#include "regexppair.h"
 #include "regexppath.h"
 #include "version.h"
 
-#include "searchcache.h"
+#include "searchstate.h"
 #include "searchparams.h"
 #include "searchhits.h"
 #include "regexpreplacement.h"
@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 {
     //QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
 
-    qRegisterMetaType<RegExp>();
+    qRegisterMetaType<RegExpPair>();
     qRegisterMetaType<RegExpPath>();
     qRegisterMetaType<RegExpReplacement>();
     qRegisterMetaType<SearchParams>();

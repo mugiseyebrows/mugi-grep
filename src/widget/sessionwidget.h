@@ -8,7 +8,7 @@
 #include <QMap>
 #include <QModelIndex>
 
-#include "regexp.h"
+#include "regexppair.h"
 #include "regexppath.h"
 #include "widget/regexpbaseinput.h"
 #include "worker.h"
@@ -155,7 +155,7 @@ protected slots:
     void onPreview();
     void onReplace();
     //void onReplaced(int, int, int, QStringList);
-    void onPatternChanged(RegExp);
+    void onPatternChanged(RegExpPair);
     void onFilterChanged(RegExpPath);
     void onReplacementChanged(RegExpReplacement value);
     void onReplaced(ReplacedParams);

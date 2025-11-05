@@ -1,13 +1,14 @@
 #include "regexppath.h"
 
 #include <QDebug>
+#include <QFileInfo>
 
 RegExpPath::RegExpPath()
 {
     init(QStringList(),false,true);
 }
 
-void RegExpPath::init(const QStringList &regExps, bool case_, bool notBinary)
+void RegExpPath::init(const QStringList &regExps, bool case_, bool binary)
 {
     QStringList regExps_ = regExps;
     while(regExps_.size() < 4) {
@@ -15,7 +16,7 @@ void RegExpPath::init(const QStringList &regExps, bool case_, bool notBinary)
     }
     mPatterns = regExps_;
     mCase = case_;
-    mNotBinary = notBinary;
+    mBinary = binary;
     for (int i=0;i<mPatterns.size();i++) {
         QRegularExpression::PatternOption opt = mCase ? QRegularExpression::NoPatternOption : QRegularExpression::CaseInsensitiveOption;
         if (i % 2 == 1) {
@@ -28,12 +29,12 @@ void RegExpPath::init(const QStringList &regExps, bool case_, bool notBinary)
 
 void RegExpPath::deserealize(const QVariantMap &data)
 {
-    init(data.value("pattern").toStringList(),data.value("case", false).toBool(), data.value("notBinary", true).toBool());
+    init(data.value("pattern").toStringList(),data.value("case", false).toBool(), data.value("binary", false).toBool());
 }
 
-RegExpPath::RegExpPath(const QStringList& regExps, bool case_, bool notBinary)
+RegExpPath::RegExpPath(const QStringList& regExps, bool case_, bool binary)
 {
-    init(regExps,case_,notBinary);
+    init(regExps,case_,binary);
 }
 
 RegExpPath::RegExpPath(const QVariantMap &data)
@@ -43,7 +44,7 @@ RegExpPath::RegExpPath(const QVariantMap &data)
 
 bool RegExpPath::operator ==(const RegExpPath &other) const
 {
-    return other.patterns() == patterns() && other.case_() == case_() && other.notBinary() == notBinary();
+    return other.patterns() == patterns() && other.case_() == case_() && other.binary() == binary();
 }
 
 bool RegExpPath::operator !=(const RegExpPath &other) const
@@ -64,7 +65,7 @@ QVariantMap RegExpPath::serialize() const
     QVariantMap res;
     res["pattern"] = mPatterns;
     res["case"] = mCase;
-    res["notBinary"] = mNotBinary;
+    res["notBinary"] = mBinary;
     return res;
 }
 
@@ -78,7 +79,10 @@ bool RegExpPath::match(const QString &path) const
             (mPatterns[ExtExclude].isEmpty() || !mPatterns_[ExtExclude].match(ext).hasMatch());
 }
 
+
+
 QString RegExpPath::getExt(const QString& path) {
+#if 0
     int p = path.lastIndexOf(".");
     int q = qMax(path.lastIndexOf("/"), path.lastIndexOf("\\"));
     if (p > -1) {
@@ -89,7 +93,8 @@ QString RegExpPath::getExt(const QString& path) {
         }
         return path.mid(p+1).toLower();
     }
-    return QString();
+#endif
+    return QFileInfo(path).suffix();
 }
 
 
@@ -103,14 +108,14 @@ bool RegExpPath::case_() const
     return mCase;
 }
 
-bool RegExpPath::notBinary() const
+bool RegExpPath::binary() const
 {
-    return mNotBinary;
+    return mBinary;
 }
 
-void RegExpPath::setNotBinary(bool value)
+void RegExpPath::setBinary(bool value)
 {
-    mNotBinary = value;
+    mBinary = value;
 }
 
 void RegExpPath::test(const QStringList& paths, const RegExpPath& exp, const QList<bool>& matched) {
@@ -136,6 +141,6 @@ void RegExpPath::test()
 
 QDebug operator <<(QDebug debug, const RegExpPath &path)
 {
-    debug.space() << "RegExpPath(" << path.patterns() << path.case_() << path.notBinary() << ")";
+    debug.space() << "RegExpPath(" << path.patterns() << path.case_() << path.binary() << ")";
     return debug.space();
 }

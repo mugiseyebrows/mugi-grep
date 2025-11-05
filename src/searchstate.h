@@ -1,7 +1,7 @@
-#ifndef SEARCHCACHE_H
-#define SEARCHCACHE_H
+#ifndef SEARCHSTATE_H
+#define SEARCHSTATE_H
 
-#include "regexp.h"
+#include "regexppair.h"
 #include "regexppath.h"
 
 #include <QDirIterator>
@@ -22,16 +22,16 @@ QStringList searchLines(const QByteArray& mLines, const QString& mPath, const QS
 QStringList fileLines(const QString& path, bool skipBinary, bool* binary = nullptr);
 
 
-class SearchCache {
+class SearchState {
 public:
 
-    SearchCache();
+    SearchState();
 
-    void add(SearchParams params);
+    void begin(SearchParams params);
 
     //void replace(int searchId, int* filesChanged, int* linesChanged, QStringList& notChanged);
 
-    void finish(int searchId);
+    void end(int searchId);
 
     QPair<SearchHits, SearchNameHits> search(int searchId);
 
@@ -62,4 +62,4 @@ protected:
 
 };
 
-#endif // SEARCHCACHE_H
+#endif // SEARCHSTATE_H

@@ -4,12 +4,12 @@
 
 SearchNameHits::SearchNameHits() {
 }
-SearchNameHits::SearchNameHits(const RegExp& pattern) : mPattern(pattern) {
+SearchNameHits::SearchNameHits(const RegExpPair& pattern) : mPattern(pattern) {
 }
-RegExp SearchNameHits::pattern() const {
+RegExpPair SearchNameHits::pattern() const {
     return mPattern;
 }
-void SearchNameHits::setPattern(const RegExp& value) {
+void SearchNameHits::setPattern(const RegExpPair& value) {
     mPattern = value;
 }
 QStringList SearchNameHits::hits() const {

@@ -16,7 +16,7 @@ public:
     };
 
     RegExpPath();
-    RegExpPath(const QStringList& regExps, bool case_, bool notBinary);
+    RegExpPath(const QStringList& regExps, bool case_, bool binary);
     RegExpPath(const QVariantMap& data);
 
     bool operator == (const RegExpPath& other) const;
@@ -30,23 +30,23 @@ public:
     QStringList patterns() const;
     bool case_() const;
 
-    bool notBinary() const;
+    bool binary() const;
 
-    void setNotBinary(bool value);
+    void setBinary(bool value);
 
     static void test();
     static void test(const QStringList &paths, const RegExpPath &exp, const QList<bool> &matched);
 
     QVariantMap serialize() const;
     void deserealize(const QVariantMap& data);
-    void init(const QStringList& regExps, bool case_, bool notBinary);
+    void init(const QStringList& regExps, bool case_, bool binary);
 
     static QString getExt(const QString &path);
 protected:
     QStringList mPatterns;
     QList<QRegularExpression> mPatterns_;
     bool mCase;
-    bool mNotBinary;
+    bool mBinary;
 };
 
 

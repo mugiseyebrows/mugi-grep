@@ -83,12 +83,12 @@
     </widget>
    </item>
    <item>
-    <widget class="QCheckBox" name="notBinary">
+    <widget class="QCheckBox" name="binary">
      <property name="text">
-      <string>not binary</string>
+      <string>binary files</string>
      </property>
      <property name="checked">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
     </widget>
    </item>

@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include "regexppath.h"
-#include "regexp.h"
+#include "regexppair.h"
 #include "regexpreplacement.h"
 #include "mode.h"
 #include "viewoptions.h"
@@ -42,7 +42,7 @@ public:
     RegExpPath filter() const;
 
     void setFiler(const RegExpPath &);
-    void setPattern(const RegExp &);
+    void setPattern(const RegExpPair &);
     void setReplacement(const RegExpReplacement &value);
 
     QLineEdit* pathEdit() const;
@@ -135,7 +135,7 @@ protected slots:
     //void on_doSearch_clicked();
 
 signals:
-    void patternChanged(RegExp);
+    void patternChanged(RegExpPair);
     void filterChanged(RegExpPath);
     void replacementChanged(RegExpReplacement);
     void pathChanged(QString);
