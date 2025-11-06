@@ -10,6 +10,7 @@ private slots:
     void initTestCase();
     void cleanupTestCase();
     void searchSingleline();
+    void searchMultiline();
 };
 #endif // TST_MUGIGREP
 

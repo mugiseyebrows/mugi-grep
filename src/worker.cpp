@@ -15,21 +15,21 @@ void Worker::onSearch(SearchParams params)
 {
     //qDebug() << "onSearch" << QThread::currentThreadId();
 
-    mCache.begin(params);
+    mState.begin(params);
     SearchHits hits(params.pattern());
     SearchNameHits nameHits(params.pattern());
     emit found(params.id(), hits, nameHits);
 }
 
 void Worker::onCountMatchedFiles(QString path, RegExpPath filter) {
-    QPair<int,int> fileCount = mCache.countMatchedFiles(path,filter);
+    QPair<int,int> fileCount = mState.countMatchedFiles(path,filter);
     emit count(fileCount.first, fileCount.second);
 }
 
 
 
 void Worker::onCountFiles(CountFilesParams params) {
-    QPair<int,int> count = mCache.countMatchedFiles(params.path(), params.filter());
+    QPair<int,int> count = mState.countMatchedFiles(params.path(), params.filter());
     params.setFiltered(count.first);
     params.setTotal(count.second);
     emit filesCounted(params);
@@ -38,27 +38,27 @@ void Worker::onCountFiles(CountFilesParams params) {
 void Worker::onGetAllFiles(QString path)
 {
     //qDebug() << "Worker::onGetAllFiles" << path;
-    QStringList files = mCache.getListing(path,true);
+    QStringList files = mState.getListing(path,true);
     emit allFiles(path,files);
 }
 
 void Worker::onGetListing(GetListingParams params)
 {
-    QStringList files = mCache.getListing(params.path(),params.cacheFileList());
+    QStringList files = mState.getListing(params.path(),params.cacheFileList());
     emit listing(params.path(),files);
 }
 
 void Worker::onSearchMore(int id)
 {
-    static int count = 0;
-    qDebug() << "search more" << id << count++;
-    if (mCache.isFinished(id)) {
+    //static int count = 0;
+    //qDebug() << "search more" << id << count++;
+    if (mState.isFinished(id)) {
         return;
     }
-    QPair<SearchHits,SearchNameHits> hits = mCache.search(id);
+    QPair<SearchHits,SearchNameHits> hits = mState.search(id);
     emit found(id,hits.first, hits.second);
-    if (mCache.isFinished(id)) {
-        mCache.end(id);
+    if (mState.isFinished(id)) {
+        mState.end(id);
     }
 }
 

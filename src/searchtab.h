@@ -9,7 +9,7 @@ class QTextBrowser;
 #include "displayoptionswidget.h"
 #include "html.h"
 #include "mode.h"
-#include "searchhits.h"
+#include "searchhitswithcontext.h"
 #include "searchnamehits.h"
 #include "searchparams.h"
 #include "searchresultrenderer.h"
@@ -25,7 +25,9 @@ public:
     void trigRerender();
     void setMode(Mode value);
     SearchParams& params();
-    SearchHits& hits();
+    SearchParams paramsCopy();
+
+    SearchHitsWithContext& hits();
     SearchNameHits& nameHits();
     DisplayOptions displayOptions() const;
     void setDisplayOptions(const DisplayOptions& value);
@@ -35,7 +37,9 @@ public:
     void setViewOptions(const ViewOptions& options);
     Mode mode() const;
     void setParams(const SearchParams& value);
-    void setHits(const SearchHits& value);
+
+    void setHits(const SearchHitsWithContext& hits);
+    void setHits(const SearchHits& value, int linesBefore, int linesAfter);
     void setNameHits(const SearchNameHits& value);
     QDateTime updated() const;
     void setUpdated(const QDateTime& value);
@@ -49,7 +53,7 @@ public:
 protected:
     Mode mMode;
     SearchParams mParams;
-    SearchHits mHits;
+    SearchHitsWithContext mHits;
     SearchNameHits mNameHits;
     QDateTime mUpdated;
     QTextBrowser* mTextBrowser;

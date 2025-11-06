@@ -27,7 +27,7 @@ SearchOptionsWidget::SearchOptionsWidget(QWidget *parent) :
     ui->replace->setEnabled(false);
 
     connect(ui->pattern, &RXInput::valueChanged, this, &SearchOptionsWidget::patternChanged);
-    connect(ui->filter,SIGNAL(valueChanged(RegExpPath)),this,SIGNAL(filterChanged(RegExpPath)));
+    connect(ui->filter, &RXPathInput::valueChanged, this, &SearchOptionsWidget::filterChanged);
     connect(ui->path,SIGNAL(textChanged(QString)),this,SIGNAL(pathChanged(QString)));
     connect(ui->replacement,SIGNAL(valueChanged(RegExpReplacement)),this,SIGNAL(replacementChanged(RegExpReplacement)));
 

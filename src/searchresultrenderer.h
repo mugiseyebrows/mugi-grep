@@ -5,7 +5,7 @@
 
 #include "displayoptionswidget.h"
 
-#include "searchhits.h"
+#include "searchhitswithcontext.h"
 #include "regexpreplacement.h"
 #include "replaceparams.h"
 
@@ -21,7 +21,7 @@ public:
 
     explicit SearchResultRenderer(QObject *parent = nullptr);
     void setTab(SearchTab* tab);
-    void append(const SearchHits &hits);
+    void append(const SearchHitsWithContext &hits);
 
     ReplaceParams replaceParams(bool rename);
 
@@ -35,9 +35,9 @@ protected:
 
     QStringList toHtmlSpans(const ColoredLine &coloredLine, const QStringList &backgroundColors);
     static QMap<int, bool> doZebra(int before, int after, const QList<int> &matched, bool *initial);
-    void appendSearch(const SearchHits &hits);
-    void appendPreview(const SearchHits &hits);
-    void appendReplace(const SearchHits &hits);
+    void appendSearch(const SearchHitsWithContext &hits);
+    void appendPreview(const SearchHitsWithContext &hits);
+    void appendReplace(const SearchHitsWithContext &hits);
     //QStringList fileNameLineNumber(const Colors &colors, bool showFileName, bool showLineNumber, const QString &relativePath, const QString &href, int lineNumber, const QString &separator);
     QStringList fileNameLineNumberContext(const Colors &colors, bool showFileName, bool showLineNumber, const QString &relativePath, const QString &href, int lineNumber, const QString &separator);
 signals:

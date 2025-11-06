@@ -198,16 +198,17 @@ SearchTab* SessionWidget::createTab() {
 void SessionWidget::copyToNewTab() {
     SearchTab* tab = this->currentTab();
     SearchTab* newTab = createTab();
-    newTab->setParams(tab->params());
+    DisplayOptions options = tab->displayOptions();
+    newTab->setParams(tab->paramsCopy());
     newTab->setHits(tab->hits());
     newTab->setNameHits(tab->nameHits());
     newTab->setMode(tab->mode());
-    newTab->setDisplayOptions(tab->displayOptions());
+    newTab->setDisplayOptions(options);
     newTab->trigRerender();
     QString title = ui->results->tabText(ui->results->currentIndex());
     ui->results->addTab(newTab, title);
     tab->params().setId(-1);
-    tab->setHits(SearchHits());
+    tab->setHits(SearchHitsWithContext());
     if (tab->mode() == Mode::Replace) {
         tab->setMode(Mode::Preview);
     }
@@ -374,29 +375,7 @@ void SessionWidget::select()
 
 
 void SessionWidget::searchOrReplace(Worker::Action action) {
-#if 0
-    SearchBrowser* browser = currentTab();
-    if (browser->exp().isEmpty()) {
-        return;
-    }
 
-    bool valid = ui->options->validate();
-    if (!valid) {
-        return;
-    }
-
-    mCancel = false;
-    emit collect();
-    int searchId = SearchId::instance()->next();
-    browser->setText(QString());
-    browser->setSearchId(searchId);
-    ui->options->emitTabTitle();
-
-    SearchParams params = browser->params(action, searchId, ui->options->path(), mCacheFileList->isChecked());
-
-    emit search(params);
-    ui->progress->started();
-#endif
 }
 
 void SessionWidget::onSearch() {
@@ -405,6 +384,8 @@ void SessionWidget::onSearch() {
     if (tab->params().pattern().isEmpty()) {
         return;
     }
+
+    qDebug() << "onSearch" << "multiline" << tab->params().pattern().multiline();
 
     bool valid = ui->options->validate();
     if (!valid) {

@@ -9,6 +9,10 @@ public:
     int background() const;
     int length() const;
 
+    void setStart(int pos) {
+        mStart = pos;
+    }
+
 protected:
     int mStart;
     int mEnd;

@@ -24,12 +24,12 @@ public:
     void setCacheFileList(bool value);
 
 protected:
-    int mId;
+    int mId = -1;
     QString mPath;
     RegExpPair mPattern;
     RegExpPath mFilter;
     RegExpReplacement mReplacement;
-    bool mCacheFileList;
+    bool mCacheFileList = false;
 };
 
 Q_DECLARE_METATYPE(SearchParams)

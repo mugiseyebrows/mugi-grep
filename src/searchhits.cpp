@@ -61,16 +61,14 @@ SearchHit SearchHits::hit(int index) const {
 SearchHits SearchHits::mid(int index) {
     return SearchHits(mPattern, mHits.mid(index));
 }
-void SearchHits::read(int before, int after) {
-    for (int i = 0; i < mHits.size(); i++) {
-        mHits[i].read(before, after);
-    }
-}
+#if 0
+
 void SearchHits::clearCache() {
     for (int i = 0; i < mHits.size(); i++) {
         mHits[i].clearCache();
     }
 }
+#endif
 void SearchHits::clear() {
     mHits.clear();
 }

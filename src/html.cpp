@@ -42,3 +42,8 @@ QString Html::spanZebra(const QStringList& text, const QString& color, const QSt
     }
     return result.join("");
 }
+
+QString Html::br()
+{
+    return "<br/>";
+}

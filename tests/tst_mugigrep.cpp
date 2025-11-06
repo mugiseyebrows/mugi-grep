@@ -41,17 +41,49 @@ void tst_MugiGrep::searchSingleline()
     RegExpPair pattern(inc, exc, false, false, false);
     qint64 bytesRead;
 
-    // read whole file into memory
-    qint64 memLim = 100000;
-    qint64 bufSize = 10000;
-    SearchHit hit1 = ::searchSingleline(path, relPath, pattern, searchBinary, memLim, bufSize, &bytesRead);
+    qint64 bufSize = 30000;
+    SearchHit hit1 = ::searchSingleline(path, relPath, pattern, searchBinary, bufSize, &bytesRead);
 
-    // read block by block
-    memLim = 10000;
-    for(bufSize=500;bufSize<5000;bufSize += 500) {
-        SearchHit hit2 = ::searchSingleline(path, relPath, pattern, searchBinary, memLim, bufSize, &bytesRead);
-        QCOMPARE(hit1.hits(), hit2.hits());
+    for(bufSize=1000;bufSize<10000;bufSize += 1000) {
+        SearchHit hit2 = ::searchSingleline(path, relPath, pattern, searchBinary, bufSize, &bytesRead);
+
+        /*QList<int> hits = hit2.hits();
+        hits.append(4);
+        hit2.setHits(hits);*/
+
+        QCOMPARE(hit1, hit2);
     }
+    QVERIFY(hit1.hits().contains(92-1));
     QCOMPARE(hit1.hits().size(), 37);
+}
+
+void tst_MugiGrep::searchMultiline() {
+
+    // todo rel path
+    // 27 kb
+    QString path = "D:/dev/mugi-grep/src/searchresultrenderer.cpp";
+    QString relPath;
+
+    bool searchBinary = false;
+
+    QString inc = "color.*?return";
+    QString exc = {};
+
+    RegExpPair pattern(inc, exc, false, true, true);
+    qint64 bytesRead;
+
+    qint64 bufSize = 30000;
+    SearchHit hit1 = ::searchMultiline(path, relPath, pattern, searchBinary, bufSize, &bytesRead);
+
+    for(bufSize=5000;bufSize<30000;bufSize += 5000) {
+        SearchHit hit2 = ::searchMultiline(path, relPath, pattern, searchBinary, bufSize, &bytesRead);
+
+        /*qDebug() << hit1.hits();
+        qDebug() << hit2.hits();*/
+
+        QCOMPARE(hit1, hit2);
+    }
+    QVERIFY(hit1.hits().contains(640));
+
 }
 

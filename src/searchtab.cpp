@@ -33,8 +33,14 @@ Mode SearchTab::mode() const {
 void SearchTab::setParams(const SearchParams& value) {
     mParams = value;
 }
-void SearchTab::setHits(const SearchHits& value) {
-    mHits = value;
+
+void SearchTab::setHits(const SearchHitsWithContext &hits)
+{
+    mHits = hits;
+}
+void SearchTab::setHits(const SearchHits& hits, int linesBefore, int linesAfter) {
+    mHits = SearchHitsWithContext();
+    mHits.append(hits, linesBefore, linesAfter);
 }
 void SearchTab::setNameHits(const SearchNameHits& value) {
     mNameHits = value;
@@ -68,10 +74,11 @@ void SearchTab::append(const SearchHits& hits, const SearchNameHits& nameHits) {
     if (hits.isEmpty()) {
         return;
     }
+    DisplayOptions options = mDisplayOptionsWidget->options();
     int size = mHits.size();
-    mHits.append(hits);
+    mHits.append(hits, options.linesBefore(), options.linesAfter());
     mNameHits.append(nameHits);
-    read();
+    //read();
     mRenderer->append(mHits.mid(size));
 }
 void SearchTab::read() {
@@ -91,7 +98,11 @@ void SearchTab::setMode(Mode value) {
 SearchParams& SearchTab::params() {
     return mParams;
 }
-SearchHits& SearchTab::hits() {
+
+SearchParams SearchTab::paramsCopy() {
+    return mParams;
+}
+SearchHitsWithContext& SearchTab::hits() {
     return mHits;
 }
 SearchNameHits& SearchTab::nameHits() {

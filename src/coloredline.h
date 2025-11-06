@@ -18,6 +18,8 @@ public:
     ColoredLine mid(int pos, int length = -1) const;
     QList<ColoredLineSpan> spans() const;
 
+    QList<QList<ColoredLineSpan>> spans2() const;
+
 protected:
     static void paint(int start, int end, int color, QList<int>& dest);
     QString mString;

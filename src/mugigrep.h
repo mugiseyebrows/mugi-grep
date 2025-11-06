@@ -12,7 +12,6 @@ SearchHit searchSingleline(const QString& path,
                                   const QString& relPath,
                                   const RegExpPair& pattern,
                                   bool searchBinary,
-                                  qint64 memLim,
                                   qint64 bufSize,
                                   qint64* bytesRead);
 
@@ -21,7 +20,6 @@ SearchHit searchMultiline(const QString& path,
                                  const QString& relPath,
                                  const RegExpPair& pattern,
                                  bool binary,
-                                 qint64 memLim,
                                  qint64 bufSize,
                                  qint64* bytesRead);
 

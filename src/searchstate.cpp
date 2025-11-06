@@ -77,6 +77,7 @@ QStringList searchBinary(const QStringList& lines, const QString& path, const QS
 }
 #endif
 
+#if 0
 
 void searchLines(const QStringList& lines, const QString& path, const QString& relativePath,
                         const SearchParams& params, SearchHits& hits) {
@@ -97,6 +98,8 @@ void searchLines(const QByteArray& bytes, const QString& path, const QString& re
     *lineCount = lines.size();
     return searchLines(lines, path, relativePath, params, hits);
 }
+
+#endif
 
 #if 0
 QStringList replacePreview(const QByteArray& bytes, const QString& path, const QString& relativePath,
@@ -260,9 +263,6 @@ bool SearchState::isFinished(int searchId) {
     return data.filesComplete() >= data.filesSize();
 }
 
-#define MEM_LIM 500000000ull
-#define CHUNK_SIZE 50000000ull
-
 QPair<SearchHits,SearchNameHits> SearchState::search(int searchId) {
     QMutexLocker locked(&mMutex);
 
@@ -287,7 +287,6 @@ QPair<SearchHits,SearchNameHits> SearchState::search(int searchId) {
 
     SearchNameHits nameHits(params.pattern());
 
-    const qint64 memLim = 100000000ull; // 100 Mb
     const qint64 bufSize = 10000000ull; // 10 Mb
 
     qint64 bytesRead = 0;
@@ -296,7 +295,7 @@ QPair<SearchHits,SearchNameHits> SearchState::search(int searchId) {
 
         QString path = data.file(i);
 
-        qDebug() << "grep" << i << "th file" << path;
+        //qDebug() << "grep" << i << "th file" << path;
 
         QString name = QFileInfo(path).fileName();
 
@@ -311,22 +310,22 @@ QPair<SearchHits,SearchNameHits> SearchState::search(int searchId) {
 
         SearchHit hit;
         if (params.pattern().multiline()) {
-            hit = searchMultiline(path, relPath, params.pattern(), binary, memLim, bufSize, &bytesRead1);
+            hit = searchMultiline(path, relPath, params.pattern(), binary, bufSize, &bytesRead1);
         } else {
-            hit = searchSingleline(path, relPath, params.pattern(), binary, memLim, bufSize, &bytesRead1);
+            hit = searchSingleline(path, relPath, params.pattern(), binary, bufSize, &bytesRead1);
         }
         if (!hit.isEmpty()) {
             hits.append(hit);
-            qDebug() << hit.hits().size() << "lines matched";
+            //qDebug() << hit.hits().size() << "lines matched";
         }
         bytesRead += bytesRead1;
 
-        qDebug() << "bytesRead" << bytesRead;
+        //qDebug() << "bytesRead" << bytesRead;
 
         fileCount += 1;
         data.setFilesComplete(i + 1);
 
-        if (fileCount > 10 || bytesRead > 1000000ull) {
+        if (fileCount > 5 || bytesRead > 1000000ull) {
             hits.setLast(relPath);
             break;
         }

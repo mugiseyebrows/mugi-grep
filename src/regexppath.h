@@ -46,7 +46,7 @@ protected:
     QStringList mPatterns;
     QList<QRegularExpression> mPatterns_;
     bool mCase;
-    bool mBinary;
+    bool mBinary = false;
 };
 
 

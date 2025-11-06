@@ -38,7 +38,7 @@ public:
 
 protected:
 
-    SearchState mCache;
+    SearchState mState;
 
     void onMore(int id, int mode);
 

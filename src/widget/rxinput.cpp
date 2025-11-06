@@ -21,7 +21,8 @@ RXInput::RXInput(QWidget *parent) :
         connect(input->lineEdit(),SIGNAL(textChanged(QString)),this,SLOT(onClearValidation()));
         input->setMaximumWidth(maximumWidth);
     }
-    connect(ui->matchCase,SIGNAL(clicked(bool)),this,SLOT(onValueChanged()));
+    connect(ui->matchCase, &QCheckBox::clicked, this, &RXInput::onValueChanged);
+    connect(ui->multiline, &QCheckBox::clicked, this, &RXInput::onValueChanged);
 }
 
 QWidgetList RXInput::widgets() const {
@@ -48,8 +49,11 @@ RegExpPair RXInput::value() const {
 }
 
 void RXInput::setValue(const RegExpPair &value) {
-    setExps(value.exps());
+    //setExps(value.exps());
+    ui->include->setCurrentText(value.include());
+    ui->exclude->setCurrentText(value.exclude());
     ui->matchCase->setChecked(value.case_());
+    ui->multiline->setChecked(value.multiline());
 }
 
 void RXInput::onClearValidation() {

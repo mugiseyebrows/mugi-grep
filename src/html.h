@@ -17,6 +17,8 @@ namespace Html
 
     QString span(const QString &text_, const HtmlStyle& style);
 
+    QString br();
+
 }
 
 #endif // HTML_H

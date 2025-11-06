@@ -9,7 +9,7 @@
 class RegExpPair {
 public:
     RegExpPair();
-    RegExpPair(const QString &inc, const QString &exc, bool caseSensitive = false, bool dotAll = false, bool multiline = false);
+    RegExpPair(const QString &inc, const QString &exc, bool caseSensitive, bool dotAll, bool multiline);
     /*RegExpPair(const QStringList& regExps, bool case_);*/
     RegExpPair(const QVariantMap& data);
 

@@ -91,6 +91,11 @@ qt_add_executable(mugi-grep WIN32
     toset.h toset.cpp
     application.rc
     mugigrep.h mugigrep.cpp
+    searchhitwithcontext.h searchhitwithcontext.cpp
+    searchhitswithcontext.h searchhitswithcontext.cpp
+    divhit.h divhit.cpp
+    divcontext.h divcontext.cpp
+    divs.h divs.cpp
 )
 
 target_include_directories(mugi-grep PUBLIC
