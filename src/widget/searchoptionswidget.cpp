@@ -1,7 +1,6 @@
 #include "searchoptionswidget.h"
 #include "ui_searchoptionswidget.h"
 
-#include "searchbrowser.h"
 #include "rxcollector.h"
 #include <QDebug>
 #include <QFileDialog>
@@ -120,59 +119,6 @@ bool SearchOptionsWidget::renameFiles() const
     return ui->replacement->value().renameFiles();
 }
 
-#if 0
-
-void SearchOptionsWidget::init(Worker *worker, AnchorClickHandler* clickHandler) {
-
-    connect(ui->filter,SIGNAL(returnPressed()),this,SIGNAL(search()));
-    connect(ui->exp,SIGNAL(returnPressed()),this,SIGNAL(search()));
-    connect(ui->filter,SIGNAL(textChanged()),this,SLOT(onFilterTextChanged()));
-    connect(ui->exp,SIGNAL(textChanged()),this,SLOT(onExpTextChanged()));
-    connect(ui->linesAfter,SIGNAL(valueChanged(int)),this,SLOT(onLinesAfterValueChanged()));
-    connect(ui->linesBefore,SIGNAL(valueChanged(int)),this,SLOT(onLinesBeforeValueChanged()));
-    connect(ui->notBinary,SIGNAL(clicked(bool)),this,SLOT(onNotBinaryClicked(bool)));
-    connect(ui->filter,SIGNAL(caseClicked(bool)),this,SLOT(onFilterTextChanged()));
-    connect(ui->exp,SIGNAL(caseClicked(bool)),this,SLOT(onExpTextChanged()));
-    connect(ui->linesBefore,SIGNAL(returnPressed()),this,SIGNAL(search()));
-    connect(ui->linesAfter,SIGNAL(returnPressed()),this,SIGNAL(search()));
-    connect(ui->replacement,SIGNAL(returnPressed()),this,SIGNAL(preview()));
-    connect(ui->replacement,SIGNAL(textChanged(QString)),this,SLOT(onReplacementTextChanged(QString)));
-    connect(ui->replacement,SIGNAL(preserveCaseClicked(bool)),this,SLOT(onPreserveCaseClicked(bool)));
-
-    mWorker = worker;
-    mClickHandler = clickHandler;
-    connect(this,SIGNAL(countMatchedFiles(QString,RegExpPath,bool)),
-            mWorker,SLOT(onCountMatchedFiles(QString,RegExpPath,bool)));
-    connect(mWorker,SIGNAL(count(int,int)),this,SLOT(onCountMatchedFiles(int,int)));
-
-    ui->fileCount->setText("? / ?");
-    setMode(mMode);
-
-}
-
-
-
-void SearchOptionsWidget::setBrowserValues()
-{
-    mBrowser->setFilter(ui->filter->value());
-    mBrowser->setExp(ui->exp->value());
-    mBrowser->setLinesBefore(ui->linesBefore->value());
-    mBrowser->setLinesAfter(ui->linesAfter->value());
-    mBrowser->setNotBinary(ui->notBinary->isChecked());
-    mBrowser->setReplacement(ui->replacement->value());
-    mBrowser->setPreserveCase(ui->replacement->preserveCase());
-    mBrowser->setShowFileName(ui->showFileName->isChecked());
-    mBrowser->setShowLineNumber(ui->showLineNumber->isChecked());
-    mBrowser->setOnlyMatched(ui->onlyMatched->isChecked());
-}
-
-
-void SearchOptionsWidget::setActive(bool active)
-{
-    mActive = active;
-}
-#endif
-
 void SearchOptionsWidget::on_select_clicked()
 {
     QString path = QFileDialog::getExistingDirectory(this, QString(), ui->path->text());
@@ -181,119 +127,6 @@ void SearchOptionsWidget::on_select_clicked()
     }
     ui->path->setText(QDir::toNativeSeparators(path));
 }
-
-#if 0
-void SearchOptionsWidget::on_search_clicked()
-{
-    emit search();
-}
-
-void SearchOptionsWidget::countMatchedFiles() {
-    // todo cache
-
-    if (!mCacheFileList) {
-        //qDebug() << "!mCacheFileList";
-        return;
-    }
-
-    if (!mCacheFileList->isChecked()) {
-        //ui->fileCount->setText(QString());
-        return;
-    }
-    ui->fileCount->setText("? / ?");
-    QString path = ui->path->text();
-    RegExpPath filter = ui->filter->value();
-    bool notBinary = ui->notBinary->isChecked();
-    emit countMatchedFiles(path,filter,notBinary);
-}
-
-void SearchOptionsWidget::setCanReplace(bool can)
-{
-    ui->replace->setEnabled(can);
-}
-
-
-void SearchOptionsWidget::onFilterTextChanged() {
-    if (!mActive || !mBrowser) {
-        return;
-    }
-    if (mBrowser->isExecuted()) {
-        emit clone();
-        return;
-    }
-    countMatchedFiles();
-    mBrowser->setFilter(ui->filter->value());
-}
-
-void SearchOptionsWidget::onExpTextChanged() {
-    ui->search->setEnabled(!ui->exp->value().isEmpty());
-    if (!mActive || !mBrowser) {
-        return;
-    }
-    if (mBrowser->isExecuted()) {
-        emit clone();
-        return;
-    }
-    mBrowser->setExp(ui->exp->value());
-    emitTabTitle();
-}
-
-
-
-void SearchOptionsWidget::emitTabTitle() {
-
-    QString include = ui->exp->value().include();
-    QString exclude = ui->exp->value().exclude();
-    QString title;
-    if (include.isEmpty() && exclude.isEmpty()) {
-        title = "";
-    } else if (!include.isEmpty()) {
-        title = include;
-    } else {
-        title = "~" + exclude;
-    }
-    emit tabTitle(title, mBrowser->isExecuted());
-}
-
-
-void SearchOptionsWidget::onLinesAfterValueChanged() {
-    /*if (!mActive || !mBrowser) {
-        return;
-    }
-    if (mBrowser->isExecuted()) {
-        emit clone();
-        return;
-    }*/
-    mBrowser->setLinesAfter(ui->linesAfter->value());
-}
-
-void SearchOptionsWidget::onLinesBeforeValueChanged() {
-    /*if (!mActive || !mBrowser) {
-        return;
-    }
-    if (mBrowser->isExecuted()) {
-        emit clone();
-        return;
-    }*/
-    mBrowser->setLinesBefore(ui->linesBefore->value());
-}
-
-
-void SearchOptionsWidget::select() {
-    QString path = ui->path->text();
-    SelectFilesDialog dialog(path, ui->filter->value(), mWorker, mClickHandler, this);
-    if (dialog.exec() == QDialog::Accepted) {
-        ui->filter->setValue(dialog.filter());
-    }
-}
-#endif
-
-#if 0
-void SearchOptionsWidget::setCacheFileList(QAction *action)
-{
-    ui->fileCount->setVisible(action->isChecked());
-}
-#endif
 
 void SearchOptionsWidget::setReplaceEnabled(bool enabled)
 {

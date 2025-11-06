@@ -1,5 +1,7 @@
 #include "coloredline.h"
 
+#include <QDebug>
+
 ColoredLine::ColoredLine(const QString& string, const QList<int>& foreground,
                          const QList<int>& background)
     : mString(string), mForeground(foreground), mBackground(background) {
@@ -61,7 +63,7 @@ QList<ColoredLineSpan> ColoredLine::spans() const {
     int prevForeground = mForeground[0];
     int prevBackground = mBackground[0];
     for (int i = 0; i < mForeground.size(); i++) {
-        if (prevForeground != mForeground[i] || prevBackground != mBackground[i] || mString[i] == '\n') {
+        if (prevForeground != mForeground[i] || prevBackground != mBackground[i] || (i > 0 && mString[i-1] == '\n')) {
             result.append(ColoredLineSpan(prevIndex, i, prevForeground, prevBackground));
             prevForeground = mForeground[i];
             prevBackground = mBackground[i];
@@ -79,17 +81,21 @@ QList<QList<ColoredLineSpan>> ColoredLine::spans2() const
     QList<ColoredLineSpan> item;
     for(int i=0;i<spans1.size();i++) {
         ColoredLineSpan span = spans1[i];
-        if (mString[span.start()] == '\n') {
-            span.setStart(span.start() + 1);
-            // flush
+        bool newLine = mString[span.end() - 1] == '\n';
+#if 0
+        if (newLine) {
+            span.setEnd(span.end() - 1);
+        }
+#endif
+        item.append(span);
+        if (newLine) {
             res.append(item);
-            item = {span};
-        } else {
-            item.append(span);
+            item = {};
         }
     }
-    // flush
-    res.append(item);
-    item = {};
+    //if (!item.isEmpty()) {
+        res.append(item);
+        item = {};
+    //}
     return res;
 }

@@ -57,7 +57,7 @@ QSet<int> SearchHitWithContext::siblings(int linesBefore, int linesAfter) const 
         int begin = std::max(0, rng.first - linesBefore);
         int end = mLineCount > -1 ? std::min(mLineCount - 1, rng.second + linesAfter) : rng.second + linesAfter;
         for (int i = begin; i <= end; i++) {
-            if (i < rng.first && i > rng.second) {
+            if (i < rng.first || i > rng.second) {
                 result.insert(i);
             }
         }

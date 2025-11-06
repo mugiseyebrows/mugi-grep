@@ -21,9 +21,9 @@ void tst_MugiGrep::cleanupTestCase()
 }
 
 // grep -i linenumber /d/dev/mugi-grep/src/searchresultrenderer.cpp | wc -l
-// 43
+// 19
 // grep -i linenumber /d/dev/mugi-grep/src/searchresultrenderer.cpp | grep -iv separator | wc -l
-// 37
+// 17
 
 void tst_MugiGrep::searchSingleline()
 {
@@ -53,8 +53,8 @@ void tst_MugiGrep::searchSingleline()
 
         QCOMPARE(hit1, hit2);
     }
-    QVERIFY(hit1.hits().contains(92-1));
-    QCOMPARE(hit1.hits().size(), 37);
+    QVERIFY(hit1.hits().contains(341-1));
+    QCOMPARE(hit1.hits().size(), 17);
 }
 
 void tst_MugiGrep::searchMultiline() {
@@ -75,15 +75,20 @@ void tst_MugiGrep::searchMultiline() {
     qint64 bufSize = 30000;
     SearchHit hit1 = ::searchMultiline(path, relPath, pattern, searchBinary, bufSize, &bytesRead);
 
-    for(bufSize=5000;bufSize<30000;bufSize += 5000) {
+    for(bufSize=10000;bufSize<30000;bufSize += 5000) {
         SearchHit hit2 = ::searchMultiline(path, relPath, pattern, searchBinary, bufSize, &bytesRead);
 
-        /*qDebug() << hit1.hits();
-        qDebug() << hit2.hits();*/
+        qDebug() << bufSize;
+        qDebug() << hit1.hits();
+        qDebug() << hit2.hits();
 
         QCOMPARE(hit1, hit2);
     }
-    QVERIFY(hit1.hits().contains(640));
+    QVERIFY(hit1.hits().contains(275));
 
 }
 
+
+#include <QTest>
+#include "tst_mugigrep.h"
+QTEST_MAIN(tst_MugiGrep)

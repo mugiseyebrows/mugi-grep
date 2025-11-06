@@ -44,8 +44,8 @@ public:
     static QString getExt(const QString &path);
 protected:
     QStringList mPatterns;
-    QList<QRegularExpression> mPatterns_;
-    bool mCase;
+    QList<QRegularExpression> mExprs;
+    bool mCase = false;
     bool mBinary = false;
 };
 

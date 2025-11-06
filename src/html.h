@@ -4,21 +4,22 @@
 #include <QStringList>
 class HtmlStyle;
 
-namespace Html
+class Html
 {
+public:
 
-    QString span(const QString &text_, const QString &color, bool bold = false);
+    static QString span(const QString &text_, const QString &color, bool bold = false);
 
-    QString span(const QString &text_, const QString &color, const QString &background);
+    static QString span(const QString &text_, const QString &color, const QString &background);
 
-    QString anchor(const QString &text, const QString& path, const QString& color);
+    static QString anchor(const QString &text, const QString& path, const QString& color);
 
-    QString spanZebra(const QStringList& text, const QString& color, const QString& background, const QString& altBackground);
+    static QString spanZebra(const QStringList& text, const QString& color, const QString& background, const QString& altBackground);
 
-    QString span(const QString &text_, const HtmlStyle& style);
+    static QString span(const QString &text_, const HtmlStyle& style);
 
-    QString br();
+    static QString br();
 
-}
+};
 
 #endif // HTML_H

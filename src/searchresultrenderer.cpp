@@ -16,7 +16,7 @@
 #include "htmlstyle.h"
 #include "divhit.h"
 #include "divs.h"
-
+#include "replaceparams.h"
 
 
 
@@ -28,7 +28,10 @@ SearchResultRenderer::SearchResultRenderer(QObject *parent) : QObject(parent), m
 void SearchResultRenderer::setTab(SearchTab *tab)
 {
     mTab = tab;
-    connect(tab->displayOptionsWidget(),SIGNAL(optionsChanged()),this,SLOT(onOptionsChanged()));
+    connect(tab->displayOptionsWidget(),
+            &DisplayOptionsWidget::optionsChanged,
+            this,
+            &SearchResultRenderer::onOptionsChanged);
 }
 
 QString sameCase(const QString& repl, const QString& orig) {
@@ -351,7 +354,7 @@ void SearchResultRenderer::appendSearch(const SearchHitsWithContext& hits) {
             }
 
             DivHit2 divHit(hit.path(), hit.relativePath());
-            divHit.backgroundColor = backgroundColor;
+            divHit.setBackgroundColor(backgroundColor);
 
             QStringList blockLines;
 
@@ -384,7 +387,7 @@ void SearchResultRenderer::appendSearch(const SearchHitsWithContext& hits) {
                 spans1.append(s);
             }
 
-            divHit.setSpans(spans1);
+            divHit.setData(block[0], spans1, matched);
 
 #if 0
 
@@ -727,9 +730,14 @@ void SearchResultRenderer::onOptionsChanged() {
         return;
     }
 
-    DisplayOptions options = mTab->displayOptions();
+    //DisplayOptions options = mTab->displayOptions();
     mTab->textBrowser()->clear();
-    mTab->hits().read(options.linesBefore(), options.linesAfter());
+    //mTab->hits().read(options.linesBefore(), options.linesAfter());
+
+    mTab->read();
+
+    //qDebug() << "linesBefore" << options.linesBefore() << options.linesAfter();
+
     append(mTab->hits());
 }
 

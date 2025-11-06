@@ -3,16 +3,12 @@
 
 #include <QObject>
 
-#include "displayoptionswidget.h"
-
-#include "searchhitswithcontext.h"
-#include "regexpreplacement.h"
-#include "replaceparams.h"
-
 class Colors;
 class ColoredLine;
 
 class SearchTab;
+class SearchHitsWithContext;
+class ReplaceParams;
 
 class SearchResultRenderer : public QObject
 {

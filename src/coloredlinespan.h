@@ -13,6 +13,10 @@ public:
         mStart = pos;
     }
 
+    void setEnd(int pos) {
+        mEnd = pos;
+    }
+
 protected:
     int mStart;
     int mEnd;

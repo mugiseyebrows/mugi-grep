@@ -5,31 +5,34 @@
 
 RegExpPath::RegExpPath()
 {
-    init(QStringList(),false,true);
+    init(QStringList(), false, false);
 }
 
-void RegExpPath::init(const QStringList &regExps, bool case_, bool binary)
+void RegExpPath::init(const QStringList &patterns, bool case_, bool binary)
 {
-    QStringList regExps_ = regExps;
-    while(regExps_.size() < 4) {
-        regExps_ << QString();
+    QStringList patterns1 = patterns;
+    while(patterns1.size() < 4) {
+        patterns1 << QString();
     }
-    mPatterns = regExps_;
+    mPatterns = patterns1;
     mCase = case_;
     mBinary = binary;
     for (int i=0;i<mPatterns.size();i++) {
         QRegularExpression::PatternOption opt = mCase ? QRegularExpression::NoPatternOption : QRegularExpression::CaseInsensitiveOption;
-        if (i % 2 == 1) {
-            mPatterns_ << QRegularExpression("^(" + mPatterns[i] + ")$", opt);
+        if (i % 2) {
+            mExprs.append(QRegularExpression("^(" + mPatterns[i] + ")$", opt));
         } else {
-            mPatterns_ << QRegularExpression(mPatterns[i], opt);
+            mExprs.append(QRegularExpression(mPatterns[i], opt));
         }
     }
+
 }
 
 void RegExpPath::deserealize(const QVariantMap &data)
 {
-    init(data.value("pattern").toStringList(),data.value("case", false).toBool(), data.value("binary", false).toBool());
+    init(data.value("pattern").toStringList(),
+         data.value("case", false).toBool(),
+         data.value("binary", false).toBool());
 }
 
 RegExpPath::RegExpPath(const QStringList& regExps, bool case_, bool binary)
@@ -65,7 +68,7 @@ QVariantMap RegExpPath::serialize() const
     QVariantMap res;
     res["pattern"] = mPatterns;
     res["case"] = mCase;
-    res["notBinary"] = mBinary;
+    res["binary"] = mBinary;
     return res;
 }
 
@@ -73,10 +76,10 @@ bool RegExpPath::match(const QString &path) const
 {
     QString ext = getExt(path);
 
-    return (mPatterns[PathInclude].isEmpty() || mPatterns_[PathInclude].match(path).hasMatch()) &&
-            (mPatterns[ExtInclude].isEmpty() || mPatterns_[ExtInclude].match(ext).hasMatch()) &&
-            (mPatterns[PathExclude].isEmpty() || !mPatterns_[PathExclude].match(path).hasMatch()) &&
-            (mPatterns[ExtExclude].isEmpty() || !mPatterns_[ExtExclude].match(ext).hasMatch());
+    return (mPatterns[PathInclude].isEmpty() || mExprs[PathInclude].match(path).hasMatch()) &&
+            (mPatterns[ExtInclude].isEmpty() || mExprs[ExtInclude].match(ext).hasMatch()) &&
+            (mPatterns[PathExclude].isEmpty() || !mExprs[PathExclude].match(path).hasMatch()) &&
+            (mPatterns[ExtExclude].isEmpty() || !mExprs[ExtExclude].match(ext).hasMatch());
 }
 
 

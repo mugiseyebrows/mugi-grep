@@ -5,12 +5,10 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Test Widgets)
 qt_add_executable(tst_mugigrep
-    tst_mugigrep_main.cpp
     tst_mugigrep.cpp tst_mugigrep.h
-    ../src/mugigrep.cpp ../src/mugigrep.h ../src/regexppair.cpp ../src/regexppair.h
+    ../src/mugigrep.cpp ../src/mugigrep.h
+    ../src/regexppair.cpp ../src/regexppair.h
     ../src/searchhit.cpp ../src/searchhit.h
-    ../src/linecontext.cpp ../src/linecontext.h
-    ../src/parse/parsecpp.cpp ../src/parse/parsecpp.h ../src/parse/parsepython.cpp ../src/parse/parsepython.h
 )
 target_include_directories(tst_mugigrep PRIVATE ../src)
 

@@ -26,17 +26,20 @@ QString DivHit::render(const Colors &colors, bool showFileName, bool showLineNum
     return QString("<div %1>%2</div>").arg(style_).arg(items.join(""));
 }
 
-QStringList fileNameLineNumber(const Colors &colors, bool showFileName, bool showLineNumber, const QString &relativePath, const QString &href, int lineNumber, const QString &separator) {
+QStringList fileNameLineNumber(const Colors &colors, bool showFileName, bool showLineNumber,
+                               const QString &relativePath, const QString &href,
+                               int lineNumber, const QString &separator) {
     QStringList cols;
     if (showFileName) {
-        cols << Html::anchor(relativePath, href, colors.anchorColor()) << Html::span(separator, colors.separatorColor());
+        cols.append(Html::anchor(relativePath, href, colors.anchorColor()));
+        cols.append(Html::span(separator, colors.separatorColor()));
     }
     if (showLineNumber) {
-        cols << Html::span(QString::number(lineNumber), colors.linenumberColor()) << Html::span(separator, colors.separatorColor());
+        cols.append(Html::span(QString::number(lineNumber), colors.linenumberColor()));
+        cols.append(Html::span(separator, colors.separatorColor()));
     }
     return cols;
 }
-
 
 
 QStringList fileNameLineNumberContext(const QString &color, bool showFileName, bool showLineNumber, const QString &relativePath, const QString &href, int lineNumber) {
@@ -59,13 +62,33 @@ QString fileHref(const QString &path, int lineNumber) {
 
 QString DivHit2::render(const Colors &colors, bool showFileName, bool showLineNumber) const {
 
-    QString style_ = "";
+    HtmlStyle style;
+    style.backgroundColor(mBackgroundColor).whiteSpace(HtmlStyle::WhiteSpace::PreWrap);
 
+    QString separator = ":";
     QStringList lines;
     for(int i=0;i<mSpans.size();i++) {
-        lines.append(QString("%1:%2").arg(i).arg(mSpans[i].join("")));
+        //lines.append(QString("%1:%2").arg(i).arg(mSpans[i].join("")));
+        int lineNumber = mLineNumber + i;
+        QString href = fileHref(mPath, lineNumber);
+
+        if (mMatched.contains(lineNumber)) {
+            separator = ":";
+        } else {
+            separator = "-";
+        }
+
+        QStringList line = fileNameLineNumber(colors, showFileName, showLineNumber, mRelativePath,
+                                              href, lineNumber + 1, separator);
+        line.append(mSpans[i].join(""));
+        lines.append(line.join(""));
     }
-    return QString("<div %1>%2</div>").arg(style_).arg(lines.join(Html::br()));
+    return QString("<div %1>%2</div>").arg(style.toString()).arg(lines.join(""));
+}
+
+void DivHit2::setBackgroundColor(const QString &value)
+{
+    mBackgroundColor = value;
 }
 
 /*

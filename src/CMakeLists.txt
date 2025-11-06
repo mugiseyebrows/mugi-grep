@@ -82,7 +82,6 @@ qt_add_executable(mugi-grep WIN32
     widget/rxinput.cpp widget/rxinput.h widget/rxinput.ui
     widget/rxpathinput.cpp widget/rxpathinput.h widget/rxpathinput.ui
     widget/rxreplaceinput.cpp widget/rxreplaceinput.h widget/rxreplaceinput.ui
-    widget/searchbrowser.cpp widget/searchbrowser.h
     widget/searchoptionswidget.cpp widget/searchoptionswidget.h widget/searchoptionswidget.ui
     widget/searchprogresswidget.cpp widget/searchprogresswidget.h widget/searchprogresswidget.ui
     widget/sessionwidget.cpp widget/sessionwidget.h widget/sessionwidget.ui

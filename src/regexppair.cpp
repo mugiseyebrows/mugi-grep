@@ -52,16 +52,16 @@ void RegExpPair::init(const QString& inc, const QString& exc, bool caseSensitive
     mInclude = inc;
     mExclude = exc;
 
-    QRegularExpression::PatternOptions opts;
+    QRegularExpression::PatternOptions opts = QRegularExpression::NoPatternOption;
     if (!caseSensitive) {
         opts = opts | QRegularExpression::CaseInsensitiveOption;
     }
     if (dotAll) {
         opts = opts | QRegularExpression::DotMatchesEverythingOption;
     }
-    if (multiline) {
+    //if (multiline) {
         opts = opts | QRegularExpression::MultilineOption;
-    }
+    //}
 
     mIncludeExp = QRegularExpression(inc, opts);
     mExcludeExp = QRegularExpression(exc, opts);

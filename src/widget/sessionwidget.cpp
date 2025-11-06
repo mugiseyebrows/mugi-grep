@@ -200,7 +200,7 @@ void SessionWidget::copyToNewTab() {
     SearchTab* newTab = createTab();
     DisplayOptions options = tab->displayOptions();
     newTab->setParams(tab->paramsCopy());
-    newTab->setHits(tab->hits());
+    newTab->setHits(tab->hitsCopy());
     newTab->setNameHits(tab->nameHits());
     newTab->setMode(tab->mode());
     newTab->setDisplayOptions(options);

@@ -55,14 +55,16 @@ public:
     QString render(const Colors& colors, bool showFileName, bool showLineNumber) const;
 };
 
+#include <QSet>
+
 class DivHit2 {
 public:
     DivHit2() {
 
     }
 
-    DivHit2(const QString absolutePath, const  QString relativePath)
-        : absolutePath(absolutePath), relativePath(relativePath) {
+    DivHit2(const QString path, const  QString relativePath)
+        : mPath(path), mRelativePath(relativePath) {
 
     }
 
@@ -70,18 +72,23 @@ public:
 
     //void setSpans(const QStringList& spans);
 
-    void setSpans(const QList<QStringList>& spans) {
+    void setData(int lineNumber, const QList<QStringList>& spans, const QSet<int>& matched) {
+        mLineNumber = lineNumber;
         mSpans = spans;
+        mMatched = matched;
     }
 
-    QString backgroundColor;
+    void setBackgroundColor(const QString &value);
 
 protected:
-    QString absolutePath;
-    QString relativePath;
+    QString mPath;
+    QString mRelativePath;
     //QStringList mSpans;
     //QList<QList<ColoredLineSpan>> mSpans;
     QList<QStringList> mSpans;
+    QSet<int> mMatched;
+    int mLineNumber;
+    QString mBackgroundColor;
 
 };
 
