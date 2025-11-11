@@ -9,18 +9,13 @@ def qt
     download(https://github.com/mugiseyebrows/build-qt/releases/download/6.10.0/Qt-6.10.0-mingw13.7z, :cache, :v)
     unzip(Qt-6.10.0-mingw13.7z, :o=C:\Qt\6.10.0)
 
-def zlib
-    if_exist_return(C:\zlib-1.3.1\bin\libzlib.dll)
-    download(https://github.com/mugiseyebrows/build-zlib/releases/download/1.3.1/zlib-1.3.1.zip, :cache, :v)
-    unzip(zlib-1.3.1.zip, :o=C:\)
-
 def build
     add_path(C:\Qt\6.10.0\mingw_64\bin)
     add_path(C:\mingw1310_64\bin)
     add_path(C:\zlib-1.3.1\bin)
     mkdir(Release)
     pushd Release
-    cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=C:\zlib-1.3.1 ..
+    cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
     ninja
     popd
 
@@ -35,7 +30,7 @@ def collect
     github_upload(mugi-grep*.zip, :n=mugi-grep)
     github_release(mugi-grep*.zip)
 
-def main depends on mingw qt zlib build collect
+def main depends on mingw qt build collect
     github_checkout()
 
 github-workflow 1

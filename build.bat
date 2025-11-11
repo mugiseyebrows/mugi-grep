@@ -16,16 +16,9 @@ if not exist Qt-6.10.0-mingw13.7z (
 )
 7z x -y -oC:\Qt\6.10.0 Qt-6.10.0-mingw13.7z
 :qt_end
-if exist C:\zlib-1.3.1\bin\libzlib.dll goto zlib_end
-if not exist zlib-1.3.1.zip (
-    echo downloading zlib-1.3.1.zip
-    curl -L -o zlib-1.3.1.zip https://github.com/mugiseyebrows/build-zlib/releases/download/1.3.1/zlib-1.3.1.zip
-)
-7z x -y -oC:\ zlib-1.3.1.zip
-:zlib_end
 if not exist Release mkdir Release
 pushd Release
-cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=C:\zlib-1.3.1 ..
+cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
 ninja
 popd
 where mugideploy > NUL 2>&1 || pip install mugideploy
