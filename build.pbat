@@ -12,7 +12,6 @@ def qt
 def build
     add_path(C:\Qt\6.10.0\mingw_64\bin)
     add_path(C:\mingw1310_64\bin)
-    add_path(C:\zlib-1.3.1\bin)
     mkdir(Release)
     pushd Release
     cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
@@ -22,7 +21,6 @@ def build
 def collect
     add_path(C:\Qt\6.10.0\mingw_64\bin)
     add_path(C:\mingw1310_64\bin)
-    add_path(C:\zlib-1.3.1\bin)
     use(conda)
     use(python, 313)
     install(mugideploy)

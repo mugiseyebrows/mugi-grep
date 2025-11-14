@@ -9,7 +9,7 @@ jobs:
     - name: mingw
       shell: cmd
       run: |
-        set PATH=C:\Windows\System32;C:\Program Files\7-Zip;%PATH%
+        set PATH=C:\Program Files\7-Zip;%PATH%
         if exist C:\mingw1310_64\bin\gcc.exe goto mingw_end
         if not exist winlibs-x86_64-posix-seh-gcc-13.1.0-mingw-w64ucrt-11.0.0-r5.7z (
             echo downloading winlibs-x86_64-posix-seh-gcc-13.1.0-mingw-w64ucrt-11.0.0-r5.7z
@@ -21,7 +21,7 @@ jobs:
     - name: qt
       shell: cmd
       run: |
-        set PATH=C:\Windows\System32;C:\Program Files\7-Zip;%PATH%
+        set PATH=C:\Program Files\7-Zip;%PATH%
         if exist C:\Qt\6.10.0\mingw_64\bin\qmake.exe goto qt_end
         if not exist Qt-6.10.0-mingw13.7z (
             echo downloading Qt-6.10.0-mingw13.7z
@@ -32,7 +32,7 @@ jobs:
     - name: build
       shell: cmd
       run: |
-        set PATH=C:\Qt\6.10.0\mingw_64\bin;C:\mingw1310_64\bin;C:\zlib-1.3.1\bin;%PATH%
+        set PATH=C:\Qt\6.10.0\mingw_64\bin;C:\mingw1310_64\bin;%PATH%
         if not exist Release mkdir Release
         pushd Release
         cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
@@ -41,7 +41,7 @@ jobs:
     - name: collect
       shell: cmd
       run: |
-        set PATH=C:\Qt\6.10.0\mingw_64\bin;C:\mingw1310_64\bin;C:\zlib-1.3.1\bin;C:\Miniconda;C:\Miniconda\Scripts;%LOCALAPPDATA%\Programs\Python\Python313;%LOCALAPPDATA%\Programs\Python\Python313\Scripts;C:\Python313;C:\Python313\Scripts;%PATH%
+        set PATH=C:\Qt\6.10.0\mingw_64\bin;C:\mingw1310_64\bin;C:\Miniconda;C:\Miniconda\Scripts;%LOCALAPPDATA%\Programs\Python\Python313;%LOCALAPPDATA%\Programs\Python\Python313\Scripts;C:\Python313;C:\Python313\Scripts;%PATH%
         where mugideploy > NUL 2>&1 || pip install mugideploy
         mugideploy collect --bin Release\src\mugi-grep.exe --zip
     - name: upload

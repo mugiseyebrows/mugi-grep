@@ -1,6 +1,6 @@
 @echo off
 rem This file is generated from build.pbat, all edits will be lost
-set PATH=C:\Windows\System32;C:\Program Files\7-Zip;C:\Qt\6.10.0\mingw_64\bin;C:\mingw1310_64\bin;C:\zlib-1.3.1\bin;C:\Miniconda3;C:\Miniconda3\Scripts;%USERPROFILE%\Miniconda3;%USERPROFILE%\Miniconda3\Scripts;%LOCALAPPDATA%\Programs\Python\Python313;%LOCALAPPDATA%\Programs\Python\Python313\Scripts;C:\Python313;C:\Python313\Scripts;%PATH%
+set PATH=C:\Windows\System32;C:\Program Files\7-Zip;C:\Qt\6.10.0\mingw_64\bin;C:\mingw1310_64\bin;C:\Miniconda3;C:\Miniconda3\Scripts;%USERPROFILE%\Miniconda3;%USERPROFILE%\Miniconda3\Scripts;%LOCALAPPDATA%\Programs\Python\Python313;%LOCALAPPDATA%\Programs\Python\Python313\Scripts;C:\Python313;C:\Python313\Scripts;%PATH%
 if exist C:\mingw1310_64\bin\gcc.exe goto mingw_end
 if not exist winlibs-x86_64-posix-seh-gcc-13.1.0-mingw-w64ucrt-11.0.0-r5.7z (
     echo downloading winlibs-x86_64-posix-seh-gcc-13.1.0-mingw-w64ucrt-11.0.0-r5.7z
