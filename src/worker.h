@@ -62,6 +62,8 @@ signals:
 
     //void previewed(int, SearchHits);
 
+    void statReady(QList<QPair<QString, qint64>>);
+
 public slots:
 
     void onCanReplace(int);
@@ -78,6 +80,8 @@ public slots:
     void onCountFiles(CountFilesParams params);
 
     void onGetListing(GetListingParams params);
+
+    void onStat(QString);
 };
 
 #endif // WORKER2_H

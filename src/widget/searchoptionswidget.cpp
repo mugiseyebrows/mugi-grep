@@ -37,6 +37,7 @@ SearchOptionsWidget::SearchOptionsWidget(QWidget *parent) :
     connect(ui->search,SIGNAL(clicked()),this,SIGNAL(search()));
     connect(ui->preview,SIGNAL(clicked()),this,SIGNAL(preview()));
     connect(ui->replace,SIGNAL(clicked()),this,SIGNAL(replace()));
+    connect(ui->stat, &QPushButton::clicked, this, &SearchOptionsWidget::stat);
 
     connect(ui->replacement,SIGNAL(returnPressed()),this,SIGNAL(preview()));
 

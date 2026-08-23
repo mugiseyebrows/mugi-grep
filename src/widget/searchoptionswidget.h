@@ -144,6 +144,7 @@ signals:
     void search();
     void preview();
     void replace();
+    void stat();
     //void select();
 
 protected:

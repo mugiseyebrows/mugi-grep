@@ -4,6 +4,8 @@
 #include "countfilesparams.h"
 
 #include <QTimer>
+#include <QThread>
+#include <QDebug>
 
 Worker::Worker(QObject *parent) :
     QObject(parent)
@@ -43,6 +45,38 @@ void Worker::onGetListing(GetListingParams params)
 {
     QStringList files = mCache.getListing(params.path(),params.cacheFileList());
     emit listing(params.path(),files);
+}
+
+
+
+void Worker::onStat(QString path)
+{
+    //qDebug() << "worker onStat threadId" << QThread::currentThreadId();
+
+    QDirIterator it(path, QDirIterator::Subdirectories);
+    QMap<QString, qint64> stat;
+    while(it.hasNext()) {
+        QFileInfo info = it.nextFileInfo();
+        if (!info.isFile()) {
+            continue;
+        }
+        QString suffix = info.suffix();
+        if (!stat.contains(suffix)) {
+            stat[suffix] = 0;
+        }
+        stat[suffix] += info.size();
+    }
+    QList<QPair<QString, qint64>> stat1;
+    QStringList keys = stat.keys();
+    for(const QString& key: keys) {
+        stat1.append({key, stat[key]});
+    }
+
+    std::sort(stat1.begin(), stat1.end(), [=](const QPair<QString, qint64>& v1, const QPair<QString, qint64>& v2){
+        return v1.second >= v2.second;
+    });
+
+    emit statReady(stat1);
 }
 
 void Worker::onSearchMore(int id)

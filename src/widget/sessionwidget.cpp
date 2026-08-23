@@ -21,6 +21,8 @@
 #include <QCompleter>
 #include <QHeaderView>
 #include <QTreeView>
+#include <QStandardItemModel>
+#include <QTableView>
 
 #include "mode.h"
 #include "worker.h"
@@ -62,11 +64,23 @@ SessionWidget::SessionWidget(Settings *settings, QWidget *parent) :
     connect(this,SIGNAL(searchMore(int)),mWorker,SLOT(onSearchMore(int)));
     connect(mWorker,SIGNAL(found(int,SearchHits,SearchNameHits)),this,SLOT(onFound(int,SearchHits,SearchNameHits)));
 
+    connect(this, &SessionWidget::stat, mWorker, &Worker::onStat);
+    connect(mWorker, &Worker::statReady, this, &SessionWidget::onStatReady);
+
     connect(ui->options,SIGNAL(patternChanged(RegExp)),this,SLOT(onPatternChanged(RegExp)));
     connect(ui->options,SIGNAL(filterChanged(RegExpPath)),this,SLOT(onFilterChanged(RegExpPath)));
     connect(ui->options,SIGNAL(replacementChanged(RegExpReplacement)),this,SLOT(onReplacementChanged(RegExpReplacement)));
     connect(ui->options,SIGNAL(pathChanged(QString)),this,SLOT(onPathChanged(QString)));
     connect(ui->options,SIGNAL(search()),this,SLOT(onSearch()));
+
+    connect(ui->options, &SearchOptionsWidget::stat, [=](){
+        QString path = ui->options->path();
+        QFileInfo info(path);
+        if (!info.exists()) {
+            return;
+        }
+        emit stat(path);
+    });
 
     //connect(this,SIGNAL(countFiles(CountFilesParams)),mWorker,SLOT(onCountFiles(CountFilesParams)));
     //connect(mWorker,SIGNAL(filesCounted(CountFilesParams)),this,SLOT(onFilesCounted(CountFilesParams)));
@@ -175,6 +189,8 @@ SessionWidget::SessionWidget(Settings *settings, QWidget *parent) :
         emit viewOptionsChanged(options);
 
     });
+
+    //qDebug() << "main threadId" << QThread::currentThreadId();
 
 }
 
@@ -396,6 +412,21 @@ void SessionWidget::searchOrReplace(Worker::Action action) {
     ui->progress->started();
 #endif
 }
+
+
+
+void SessionWidget::onStatReady(QList<QPair<QString, qint64>> stat) {
+    QStandardItemModel* model = new QStandardItemModel(stat.size(), 2);
+    for(int row = 0; row < stat.size(); row++) {
+        model->setData(model->index(row, 0), stat[row].first);
+        model->setData(model->index(row, 1), stat[row].second);
+    }
+    model->setHorizontalHeaderLabels({"Ext", "Size"});
+    QTableView* view = new QTableView();
+    view->setModel(model);
+    view->show();
+}
+
 
 void SessionWidget::onSearch() {
 

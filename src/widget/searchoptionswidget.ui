@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>436</width>
-    <height>154</height>
+    <width>470</width>
+    <height>163</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -34,6 +34,13 @@
      <item row="3" column="1">
       <widget class="RXInput" name="pattern" native="true"/>
      </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Path</string>
+       </property>
+      </widget>
+     </item>
      <item row="3" column="0">
       <widget class="QLabel" name="label_3">
        <property name="text">
@@ -41,10 +48,10 @@
        </property>
       </widget>
      </item>
-     <item row="4" column="0">
-      <widget class="QLabel" name="replaceLabel">
+     <item row="2" column="1">
+      <widget class="QLabel" name="fileCount">
        <property name="text">
-        <string>Replace</string>
+        <string>fileCount</string>
        </property>
       </widget>
      </item>
@@ -63,7 +70,7 @@
        <item>
         <widget class="QPushButton" name="preview">
          <property name="text">
-          <string>preview</string>
+          <string>Preview</string>
          </property>
          <property name="autoDefault">
           <bool>true</bool>
@@ -73,7 +80,7 @@
        <item>
         <widget class="QPushButton" name="replace">
          <property name="text">
-          <string>replace</string>
+          <string>Replace</string>
          </property>
          <property name="autoDefault">
           <bool>true</bool>
@@ -82,34 +89,10 @@
        </item>
       </layout>
      </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Path</string>
-       </property>
-      </widget>
-     </item>
      <item row="3" column="2">
       <widget class="QPushButton" name="search">
        <property name="text">
-        <string>search</string>
-       </property>
-       <property name="autoDefault">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QLabel" name="fileCount">
-       <property name="text">
-        <string>fileCount</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2">
-      <widget class="QPushButton" name="select">
-       <property name="text">
-        <string>select</string>
+        <string>Search</string>
        </property>
        <property name="autoDefault">
         <bool>true</bool>
@@ -118,6 +101,34 @@
      </item>
      <item row="0" column="1">
       <widget class="LineEditAndCheckbox" name="path" native="true"/>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="replaceLabel">
+       <property name="text">
+        <string>Replace</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QPushButton" name="select">
+         <property name="text">
+          <string>Select</string>
+         </property>
+         <property name="autoDefault">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="stat">
+         <property name="text">
+          <string>Stat</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>
@@ -153,7 +164,6 @@
   <tabstop>search</tabstop>
   <tabstop>preview</tabstop>
   <tabstop>replace</tabstop>
-  <tabstop>select</tabstop>
  </tabstops>
  <resources/>
  <connections/>

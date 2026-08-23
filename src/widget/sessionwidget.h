@@ -110,12 +110,15 @@ protected:
     int mQueedToRemove;
 
 
+    void onStatReady(QList<QPair<QString, qint64> > stat);
 signals:
 
     //void search(SearchParams);
     //void search(int action, int searchId, QString path, RegExpPath filter, bool notBinary, RegExp search, int linesBofore, int linesAfter, bool cacheFileList, QString);
 
     void search(SearchParams);
+
+    void stat(QString);
 
     void searchMore(int searchId);
 
@@ -139,6 +142,7 @@ public slots:
     void onFilesCounted();
     void onRenamed(int, int);
     void onTabClose(int index);
+
 protected slots:
 
     void onCompleterActivated(QModelIndex);
