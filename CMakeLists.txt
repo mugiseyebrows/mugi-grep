@@ -91,6 +91,7 @@ qt_add_executable(mugi-grep WIN32 MACOSX_BUNDLE
     src/worker.cpp src/worker.h
     src/toset.h src/toset.cpp
     src/mugi-grep.rc
+    src/widget/statwidget.h src/widget/statwidget.cpp src/widget/statwidget.ui
 )
 target_include_directories(mugi-grep PUBLIC
     src

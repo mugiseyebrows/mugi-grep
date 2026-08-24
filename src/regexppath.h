@@ -19,6 +19,10 @@ public:
     RegExpPath(const QStringList& regExps, bool case_, bool notBinary);
     RegExpPath(const QVariantMap& data);
 
+    void setIncludeExt(const QString& value);
+
+    void setExcludeExt(const QString& value);
+
     bool operator == (const RegExpPath& other) const;
 
     bool operator != (const RegExpPath& other) const;

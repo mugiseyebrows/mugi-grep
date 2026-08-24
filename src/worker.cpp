@@ -81,8 +81,8 @@ void Worker::onStat(QString path)
 
 void Worker::onSearchMore(int id)
 {
-    static int count = 0;
-    qDebug() << "search more" << id << count++;
+    //static int count = 0;
+    //qDebug() << "search more" << id << count++;
     if (mCache.isFinished(id)) {
         return;
     }

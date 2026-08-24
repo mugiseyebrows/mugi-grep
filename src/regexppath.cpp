@@ -41,6 +41,18 @@ RegExpPath::RegExpPath(const QVariantMap &data)
     deserealize(data);
 }
 
+void RegExpPath::setIncludeExt(const QString &value) {
+    QStringList patterns = mPatterns;
+    patterns[ExtInclude] = value;
+    init(patterns, mCase, mNotBinary);
+}
+
+void RegExpPath::setExcludeExt(const QString &value) {
+    QStringList patterns = mPatterns;
+    patterns[ExtExclude] = value;
+    init(patterns, mCase, mNotBinary);
+}
+
 bool RegExpPath::operator ==(const RegExpPath &other) const
 {
     return other.patterns() == patterns() && other.case_() == case_() && other.notBinary() == notBinary();

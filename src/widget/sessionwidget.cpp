@@ -413,20 +413,28 @@ void SessionWidget::searchOrReplace(Worker::Action action) {
 #endif
 }
 
-
+#include "widget/statwidget.h"
 
 void SessionWidget::onStatReady(QList<QPair<QString, qint64>> stat) {
-    QStandardItemModel* model = new QStandardItemModel(stat.size(), 2);
-    for(int row = 0; row < stat.size(); row++) {
-        model->setData(model->index(row, 0), stat[row].first);
-        model->setData(model->index(row, 1), stat[row].second);
-    }
-    model->setHorizontalHeaderLabels({"Ext", "Size"});
-    QTableView* view = new QTableView();
-    view->setModel(model);
-    view->show();
-}
 
+    StatWidget* widget = new StatWidget(stat);
+    widget->show();
+
+    widget->setWindowTitle(QFileInfo(ui->options->path()).fileName() + " stat");
+
+    connect(widget, &StatWidget::clicked, [=](int button, const QString& pattern){
+        RegExpPath path = ui->options->filter();
+        switch(button) {
+        case StatWidget::Include:
+            path.setIncludeExt(pattern);
+            break;
+        case StatWidget::Exclude:
+            path.setExcludeExt(pattern);
+            break;
+        }
+        ui->options->setFilter(path);
+    });
+}
 
 void SessionWidget::onSearch() {
 
@@ -649,7 +657,7 @@ void SessionWidget::on_results_currentChanged(int index) {
 
     mListenOptions = false;
     ui->options->setPattern(tab->params().pattern());
-    ui->options->setFiler(tab->params().filter());
+    ui->options->setFilter(tab->params().filter());
     ui->options->setReplacement(tab->params().replacement());
     ui->options->setMode(tab->mode());
 

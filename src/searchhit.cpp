@@ -74,7 +74,7 @@ void SearchHit::read(int before, int after) {
     if (keys.contains(hits) && keys.contains(siblings_)) {
         return;
     }
-    qDebug() << "read" << mPath;
+    //qDebug() << "read" << mPath;
     QFile file(mPath);
     if (!file.open(QIODevice::ReadOnly)) {
         qDebug() << "cannot open" << mPath;

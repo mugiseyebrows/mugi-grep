@@ -41,7 +41,7 @@ public:
 
     RegExpPath filter() const;
 
-    void setFiler(const RegExpPath &);
+    void setFilter(const RegExpPath &);
     void setPattern(const RegExp &);
     void setReplacement(const RegExpReplacement &value);
 

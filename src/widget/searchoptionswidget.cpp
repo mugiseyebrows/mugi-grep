@@ -474,7 +474,7 @@ RegExpPath SearchOptionsWidget::filter() const
     return ui->filter->value();
 }
 
-void SearchOptionsWidget::setFiler(const RegExpPath& value)
+void SearchOptionsWidget::setFilter(const RegExpPath& value)
 {
     ui->filter->setValue(value);
 }
