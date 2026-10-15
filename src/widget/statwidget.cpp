@@ -28,8 +28,8 @@ StatWidget::StatWidget(const QList<QPair<QString, qint64>>& stat, QWidget *paren
 
     ui->table->setModel(model);
 
-    connect(ui->include, &QPushButton::clicked, this, onInclude);
-    connect(ui->exclude, &QPushButton::clicked, this, onExclude);
+    connect(ui->include, &QPushButton::clicked, this, &StatWidget::onInclude);
+    connect(ui->exclude, &QPushButton::clicked, this, &StatWidget::onExclude);
 }
 
 void StatWidget::onInclude() {
