@@ -1,4 +1,9 @@
 #include <QApplication>
+#include <QCommandLineParser>
+#include <QFileInfo>
+#include <QJsonArray>
+#include <QJsonObject>
+#include <cstdio>
 #include "widget/mainwindow.h"
 
 
@@ -46,7 +51,24 @@ int main(int argc, char *argv[])
     a.setApplicationName(APP_NAME);
     a.setApplicationVersion(VERSION);
 
+    QCommandLineParser parser;
+    parser.addHelpOption();
+    parser.addVersionOption();
+    parser.addPositionalArgument("directory", "Folder to search", "[directory]");
+    parser.process(a);
+    const QStringList arguments = parser.positionalArguments();
+    if (arguments.size() > 1 ||
+        (!arguments.isEmpty() && !QFileInfo(arguments.first()).isDir())) {
+        std::fprintf(stderr, "Expected one existing directory.\n");
+        return 1;
+    }
+
     Settings settings;
+    if (!arguments.isEmpty()) {
+        settings.setSessions(QJsonArray{QJsonObject{
+            {"path", QFileInfo(arguments.first()).absoluteFilePath()}
+        }});
+    }
 
     QStringList keys = QStyleFactory::keys();
 
