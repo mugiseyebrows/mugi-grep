@@ -24,3 +24,4 @@ build/
 mugi-grep-*-win64/
 Release-msys2/
 CMakeLists.txt.user
+mugideploy.log
